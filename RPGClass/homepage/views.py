@@ -1,0 +1,29 @@
+from django.shortcuts import render
+
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.views import generic
+from django.utils import timezone
+
+from django.http import HttpResponse
+from django.shortcuts import render
+from .models import Option
+
+
+def homepage(request):
+
+    return render(request, 'homepage/menu.html')
+
+
+def mainquest(request):
+    return HttpResponse("Placeholder for the main quest page")
+
+
+def sidequest(request):
+    return HttpResponse("Placeholder for the profile page")
+
+
+def profile(request):
+    return HttpResponse("Placeholder for the profile page")
