@@ -7,4 +7,5 @@ urlpatterns = [
     path('mainquest/', views.mainquest, name='mainquest'),
     path('sidequest/', views.sidequest, name='sidequest'),
     path('profile/', views.profile, name='profile'),
+    path('bosses/', views.bosses, name='bosses'),
 ]

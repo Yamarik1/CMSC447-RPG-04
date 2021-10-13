@@ -13,16 +13,19 @@ from .models import Option
 
 
 def homepage(request):
-
     return render(request, 'homepage/menu.html')
 
 
 def mainquest(request):
-    return HttpResponse("Placeholder for the main quest page")
+    return HttpResponse("Placeholder for the Main Quest page")
 
 
 def sidequest(request):
-    return HttpResponse("Placeholder for the profile page")
+    return HttpResponse("Placeholder for the Side Quest page")
+
+
+def bosses(request):
+    return HttpResponse("Placeholder for the Bosses page")
 
 
 def profile(request):
