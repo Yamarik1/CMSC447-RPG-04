@@ -5,10 +5,37 @@ body {
 h1{
     color: black;
     text-align: center;
-    border: double 5px black
+    border: double 5px black;
 
 }
 
-li a {
-    color: green;
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333;
+
 }
+
+li {
+    display: inline;
+    float: left
+}
+
+li a.nav {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: black;
+}
+
+.active {
+  background-color: green;
+}
+
