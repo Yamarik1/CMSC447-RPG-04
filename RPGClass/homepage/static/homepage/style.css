@@ -22,7 +22,7 @@ li {
     display: inline;
     float: left
 }
-
+/*Creates the navigation bar qualities. */
 li a.nav {
   display: block;
   color: white;
