@@ -1,5 +1,6 @@
 Steps for running current iteration of the project:
 1. the requirements.txt file must be installed on the machine, which can be done with a virtual enviornment
+    NOTE: For the current interation, you can also just install django, those are the only dependencies for now.
 2. A Django project should be started named PRGCLass
 3. The current Release can be copied to the project, and all old files can be overwritten
 4. In the Settings.py file, add the following statement to INSTALLED_APPS
