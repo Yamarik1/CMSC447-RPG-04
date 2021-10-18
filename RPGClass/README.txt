@@ -7,6 +7,6 @@ Steps for running current iteration of the project:
     'homepage.apps.HomepageConfig',
     to the list.
 5. Change directory to 'RPGClass' in terminal.
-6. Use 'py manage.py runserver' in terminal, and then add 'homepage/' to the url.
+6. Use 'py manage.py runserver' in terminal, and then add '/homepage/' to the url.
 7. To run tests, use 'python manage.py test homepage' to see the tests run.
 
