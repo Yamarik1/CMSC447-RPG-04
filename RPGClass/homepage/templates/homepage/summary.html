@@ -1,0 +1,11 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+
+<p>Here is you summary for this Quest:</p><br>
+
+<h2>Quest number: {{ quest.id }}</h2>
+
+<h2>Quest name: {{ quest.getName }}</h2>
+
+<h2>Correct answers: {{ quest.getRight }}</h2>
