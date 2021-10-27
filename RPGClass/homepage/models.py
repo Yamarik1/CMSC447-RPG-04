@@ -29,6 +29,7 @@ class Quest(models.Model):
         self._Num_lives = num
         return "Changed successfully"
 
+    # Keeps track of the right answers for a quest
     def getRight(self):
         return self._Correct_answers
 
@@ -38,6 +39,14 @@ class Quest(models.Model):
     def setRight(self, numRight):
         self._Correct_answers = numRight
 
+    # A quest should not be shown to the player if it is defined as such by the admin
+    def getAvalible(self):
+        return self._Is_available
+
+    def setAvalible(self, available):
+        _Is_avalible = available
+        return "Availability has been changed"
+
     # Protected members
 
     # Private members
@@ -45,6 +54,7 @@ class Quest(models.Model):
     _Quest_description = models.CharField(max_length=200, default="N/A")
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
+    _Is_available = models.BooleanField(default=False)
 
     def __str__(self):
         msg = "This is Quest number:" + str(self.pk)
@@ -67,6 +77,10 @@ class Question(models.Model):
     # Private members
     _Question_text = models.CharField(max_length=200, default="N/A")
 
+    def __str__(self):
+        msg = str(self.pk) + " " + str(self.getQuestion())
+        return msg
+
 
 class Choice(models.Model):
     # Public members
@@ -86,5 +100,10 @@ class Choice(models.Model):
         self._isCorrectChoice = isAnswer
         return "Correct answer chosen"
 
+    # Private members
     _choice_text = models.CharField(max_length=200, default="N/A")
     _isCorrectChoice = models.BooleanField(default=False)
+
+    def __str__(self):
+        msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
+        return msg
