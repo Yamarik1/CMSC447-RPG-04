@@ -42,17 +42,45 @@ def CreateQuest(name, numQuestions, numChoices, rightList=[], testChoice=[]):
     return testQuest
 
 
+class TestQuestMethods(TestCase):
+
+    # Test getters and setters
+    def test_question_getters_and_setters(self):
+
+        # Create a test question using some basic values
+        quest = CreateQuest("Test", 1, 1, [1], [1])
+        isWorking = True
+
+        # Question name
+        quest.setName("Question 1")
+        if quest.getName() != "Question 1":
+            isWorking = False
+
+        # Question description
+        quest.setDesc("This is the first Question")
+        if quest.getDesc() != "This is the first Question":
+            isWorking = False
+
+        # Question Lives
+        quest.setLives(3)
+        if quest.getLives() != 3:
+            isWorking = False
+
+        self.assertIs(isWorking, True)
+
+
 class MainQuest(TestCase):
 
-    # Test that correct answers can be found by the models
-    def test_correct_1(self, quest=None):
-        # Create a test Quest
+    # Test that correct answers can be assigned and identified
+    def test_correct_choice(self):
+
+        # Counter keeps track of which pk should be used for choices
+        counter = 1
         testList = [0, 1, 2]
         testChoice = ["1", "2", "3"]
         answerArray = [False, False, False]
         counter = 1
         quest = CreateQuest("Test1", 3, 3, testList, testChoice)
-
         for i in range(1, 4):
 
             q = quest.question_set.get(pk=i)
@@ -62,8 +90,22 @@ class MainQuest(TestCase):
                 c = q.choice_set.get(pk=counter)
                 # Once a correct answer is found, the entry in the list changes to True
                 if c.getCorrect():
-                    answerArray[i-1] = True
+                    answerArray[i - 1] = True
                 counter += 1
         # Test fails if there is any false in the list, thus no correct answer is chosen
         self.assertIs(False in answerArray, False)
 
+
+# Test views
+class QuestViewTest(TestCase):
+
+    # Test that if the quest is specified to, it will not be available to the user
+    def test_no_quest(self):
+
+        quest = Quest.objects.create()
+        quest.setAvailable(False)
+
+        url = reverse('homepage:mQuestView', args=(quest.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This quest is not available")

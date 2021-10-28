@@ -40,14 +40,13 @@ class Quest(models.Model):
         self._Correct_answers = numRight
 
     # A quest should not be shown to the player if it is defined as such by the admin
-    def getAvalible(self):
+    def getAvailable(self):
         return self._Is_available
 
-    def setAvalible(self, available):
-        _Is_avalible = available
+    def setAvailable(self, available):
+        _Is_available = available
         return "Availability has been changed"
 
-    # Protected members
 
     # Private members
     _Quest_name = models.CharField(max_length=200, default="N/A")

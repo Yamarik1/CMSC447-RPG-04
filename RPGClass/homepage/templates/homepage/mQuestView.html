@@ -2,8 +2,12 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
 
-<p>Welcome to this Quest!</p><br>
-<p>Click here to Start of the quest!</p>
 
-<li><a href="{% url 'homepage:mQuest' quest.id 1 %}">work</a></li>
+{% if quest.getAvailable == False %}
+    <p>This quest is not available</p>
+{% else %}
+    <p>Welcome to this Quest!</p><br>
+    <p>Click here to Start of the quest!</p>
 
+    <li><a href="{% url 'homepage:mQuest' quest.id 1 %}">work</a></li>
+{% endif %}
