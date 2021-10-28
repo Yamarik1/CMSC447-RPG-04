@@ -109,3 +109,15 @@ class QuestViewTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This quest is not available")
+
+    # Test that if a quest should be available, it will be shown on the page
+    def test_quest_available(self):
+        # Make a quest with basic parameters
+        quest = Quest.objects.create()
+        quest.setName("Test Quest")
+        quest.setAvailable(True)
+        quest.save()
+        url = reverse('homepage:mQuestView', args=(quest.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, quest.getName())

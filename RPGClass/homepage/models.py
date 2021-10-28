@@ -44,7 +44,7 @@ class Quest(models.Model):
         return self._Is_available
 
     def setAvailable(self, available):
-        _Is_available = available
+        self._Is_available = available
         return "Availability has been changed"
 
 
