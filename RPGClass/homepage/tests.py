@@ -101,7 +101,6 @@ class QuestViewTest(TestCase):
 
     # Test that if the quest is specified to, it will not be available to the user
     def test_no_quest(self):
-
         quest = Quest.objects.create()
         quest.setAvailable(False)
 
@@ -118,6 +117,46 @@ class QuestViewTest(TestCase):
         quest.setAvailable(True)
         quest.save()
         url = reverse('homepage:mQuestView', args=(quest.id,))
+
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, quest.getName())
+
+
+def create_QuestionView_Quest(question="N/A", choice="N/A"):
+    quest = Quest.objects.create()
+
+    question = quest.question_set.create()
+    question.setQuestion(question)
+
+    if (choice != "N/A"):
+        choice = question.choice_set.create()
+        choice.setChoice(choice)
+
+    quest.save()
+    return quest
+
+
+class QuestionsViewTest(TestCase):
+
+    def test_question_with_no_choices(self):
+        # Test that a single question with no choices presents the proper page
+        quest = create_QuestionView_Quest("Test Question")
+        question = quest.question_set.get(pk=1)
+
+        url = reverse('homepage:mQuest', args=(quest.id, question.id))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This Question does not have any choices")
+
+    def test_1_question(self):
+        # Test that a single question produces its proper page
+        quest = create_QuestionView_Quest("Test Question", "Test Choice")
+        question = quest.question_set.get(pk=1)
+
+        url = reverse('homepage:mQuest', args=(quest.id, question.id))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, question.choice_set.get(pk=1).getChoice())

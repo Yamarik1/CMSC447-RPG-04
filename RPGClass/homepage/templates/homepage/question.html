@@ -6,16 +6,20 @@
 
 <h1>{{ quest.getName }}</h1>
 
-    {% for question in quest.question_set.all %}
-        <form action="{% url 'homepage:answer' quest.id forloop.counter %} " method="post">
+{% for question in quest.question_set.all %}
+    <form action="{% url 'homepage:answer' quest.id forloop.counter %} " method="post">
         {% csrf_token %}
         <fieldset>
-        <h2> {{ question.getQuestion }} </h2> <br>
-        {% for choice in question.choice_set.all %}
-            <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-            <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
-        {% endfor %}
-        </fieldset>
+            <h2> {{ question.getQuestion }} </h2> <br>
+            {% if question.choice_set.exists == False %}
+                <p>This Question does not have any choices</p>
+            {% else %}
+                {% for choice in question.choice_set.all %}
+                    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                    <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
+                {% endfor %}
+            {% endif %}
+            </fieldset>
         <input type="submit" value="Submit">
         </form>
     {% endfor %}
