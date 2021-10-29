@@ -2,7 +2,7 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
 
-
+<!-- Checks to see if the quest is available, as specified by the admin-->
 {% if quest.getAvailable == False %}
     <p>This quest is not available</p>
 {% else %}
@@ -10,5 +10,5 @@
     <p>Welcome to this Quest!</p><br>
     <p>Click here to Start of the quest!</p>
 
-    <li><a href="{% url 'homepage:mQuest' quest.id 1 %}">{{ quest.getName }}</a></li>
+    <li><a href="{% url 'homepage:mQuest' quest.id %}">{{ quest.getName }}</a></li>
 {% endif %}

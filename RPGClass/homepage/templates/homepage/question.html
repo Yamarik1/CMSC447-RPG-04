@@ -2,24 +2,39 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
-
-
 <h1>{{ quest.getName }}</h1>
 
 {% for question in quest.question_set.all %}
-    <form action="{% url 'homepage:answer' quest.id forloop.counter %} " method="post">
+
+    <form action="{% url 'homepage:answer' quest.id %} " method="post">
         {% csrf_token %}
         <fieldset>
             <h2> {{ question.getQuestion }} </h2> <br>
+
             {% if question.choice_set.exists == False %}
+
                 <p>This Question does not have any choices</p>
+
             {% else %}
+
                 {% for choice in question.choice_set.all %}
-                    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+
+                    <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
                     <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
+
                 {% endfor %}
+
             {% endif %}
+
             </fieldset>
-        <input type="submit" value="Submit">
-        </form>
-    {% endfor %}
+
+
+
+{% endfor %}
+<input type="submit" value="Submit">
+</form>
+
+
+
+
+

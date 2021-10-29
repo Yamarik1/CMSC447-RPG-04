@@ -160,3 +160,25 @@ class QuestionsViewTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, question.choice_set.get(pk=1).getChoice())
+
+    def test_2_questions(self):
+        quest = create_QuestionView_Quest("Test Question", "Test Choice")
+        question = quest.question_set.get(pk=1)
+
+        url = reverse('homepage:mQuest', args=(quest.id, question.id))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, question.choice_set.get(pk=1).getChoice())
+
+        question2 = quest.question_set.create()
+        question2.setQuestion("Test Question 2")
+
+        choice2 = question2.choice_set.create()
+        choice2.setChoice("Test Choice 2")
+
+        url = reverse('homepage:mQuest', args=(quest.id, question2.id))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, question2.choice_set.get(pk=2).getChoice())

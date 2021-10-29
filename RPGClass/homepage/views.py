@@ -21,26 +21,29 @@ class mainquestView(generic.DetailView):
 
 
 class mQuestSpecific(generic.DetailView):
+    queryset = Quest.objects.all()
     template_name = "homepage/question.html"
-    model = Quest
+
+    def get_context_data(self, **kwargs):
+        context = super(mQuestSpecific, self).get_context_data(**kwargs)
+        context['question'] = Question.objects.all()
+        return context
 
 
-def answer(request, quest_id, question_id):
+def answer(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
-    question = get_object_or_404(Question, pk=question_id)
-    try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])
-    except (KeyError, Choice.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'homepage/question.html', {
-            'question': question,
-            'error_message': "You didn't select a choice.",
-        })
+    quest.setRight(0)
+    quest.save()
+    questionSet = quest.question_set.all()
 
-    if selected_choice.getCorrect():
-        quest.rightAnsChosen()
-        quest.save()
-        selected_choice.save()
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            quest.rightAnsChosen()
+            quest.save()
+            selected_choice.save()
 
     return HttpResponseRedirect(reverse('homepage:summary', args=(quest.id,)))
 
