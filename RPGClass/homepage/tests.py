@@ -212,3 +212,20 @@ class QuestionsViewTest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, question2.choice_set.get(pk=2).getChoice())
+
+    # Test one question with choices, and one without
+    def test_mixed_questions(self):
+        quest = create_QuestionView_Quest("Test Question", "Test Choice")
+        question = quest.question_set.get(pk=1)
+
+        question2 = quest.question_set.create()
+        question2.setQuestion("Test Question 2")
+        question2.save()
+
+        url = reverse('homepage:mQuest', args=(quest.id,))
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Test Question")
+        self.assertContains(response, "This Question does not have any choices")
