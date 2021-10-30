@@ -16,8 +16,8 @@ def mainquest(request):
 
 
 class mainquestView(generic.DetailView):
-    template_name = 'homepage/mQuestView.html'
     model = Quest
+    template_name = 'homepage/mQuestView.html'
 
 
 class mQuestSpecific(generic.DetailView):
@@ -32,10 +32,11 @@ class mQuestSpecific(generic.DetailView):
 
 def answer(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
-    quest.setRight(0)
+    quest.setXP(0)
     quest.save()
     questionSet = quest.question_set.all()
 
+    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
     for question in questionSet:
 
         selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])

@@ -6,9 +6,16 @@
 {% if quest.getAvailable == False %}
     <p>This quest is not available</p>
 {% else %}
-    <h1>{{ quest.getName }}</h1>
-    <p>Welcome to this Quest!</p><br>
-    <p>Click here to Start of the quest!</p>
+    {% if quest.getType == 0 %}
+        <h1>{{ quest.getName }}</h1>
+        <p>Welcome to this Quest!</p><br>
+        <p>This quest doesn't have anymore work for you to do!</p>
+        <a href = "{% url 'homepage:summary' quest.id %}">Click here to see the results!</a>
+    {% elif quest.getType == 1 %}
+        <h1>{{ quest.getName }}</h1>
+        <p>Welcome to this Quest!</p><br>
+        <p>Click here to Start of the quest!</p>
 
-    <li><a href="{% url 'homepage:mQuest' quest.id %}">{{ quest.getName }}</a></li>
+        <li><a href="{% url 'homepage:mQuest' quest.id %}">{{ quest.getName }}</a></li>
+    {% endif %}
 {% endif %}
