@@ -16,6 +16,6 @@
         <p>Welcome to this Quest!</p><br>
         <p>Click here to Start of the quest!</p>
 
-        <li><a href="{% url 'homepage:mQuest' quest.id %}">{{ quest.getName }}</a></li>
+        <a href="{% url 'homepage:mQuest' quest.id %}">Start Quest</a>
     {% endif %}
 {% endif %}
