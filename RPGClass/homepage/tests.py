@@ -13,6 +13,13 @@ class TestClass(TestCase):
         response = self.client.get(reverse('homepage:menu'))
         self.assertEqual(response.status_code, 200)
 
+# Test for the main quest homepage
+class Quest_test_Class(TestCase):
+    # The url found at homepage/mainquest should exist, and will return 200 code
+    def test_url_correctness(self):
+        response = self.client.get('/homepage/mainquest')
+        self.assertEqual(response.status_code, 200)
+
 
 # Function to make a Quest with a number of questions, each with a number of Choices. The correct answer is decided
 # by a list of integers, this expects the length of the list to be the number of questions, and the integer values need
