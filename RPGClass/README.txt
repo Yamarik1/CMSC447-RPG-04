@@ -1,12 +1,13 @@
 Steps for running current iteration of the project:
-1. the requirements.txt file must be installed on the machine, which can be done with a virtual environment.
-    NOTE: For the current interation, you can also just install django, those are the only dependencies for now.
-2. A Django project should be started named RPGCLass.
-3. The current Release can be copied to the python (not django) project, and all old files can be overwritten
-4. In the Settings.py file, add the following statement to INSTALLED_APPS
-    'homepage.apps.HomepageConfig',
-    to the list.
-5. Change directory to 'RPGClass' in terminal.
-6. Use 'py manage.py runserver' in terminal, and then add '/homepage/' to the url.
-7. To run tests, use 'python manage.py test homepage' to see the tests run.
+1. Start a Python Project with the name 'CMSC447-RPG-04'
+
+2. Download the current release of the project, and cop the files into the Python project started
+
+3. Install the requirements file
+    'pip install -r requirements.txt'
+
+4. initialize the database with 'python manage.py makemigrations' and then 'python manage.py migrate' in terminal
+
+5. run the command 'python manage.py runserver' in terminal, and go to the local server
+
 
