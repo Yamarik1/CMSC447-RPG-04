@@ -6,11 +6,16 @@ Steps for running current iteration of the project:
 3. Install the requirements file
     'pip install -r requirements.txt'
 
-4. initialize the database with 'python manage.py makemigrations' and then 'python manage.py migrate' in terminal
+4. Add a file named '.env' to the 'RPGClass' folder (the same folder as manage.py)
 
-5. run the command 'python manage.py runserver' in terminal, and go to the local server
+5. In the .env file, add a line 'SECRET_KEY=' and then add anything after the '=' (Without quotation marks)
+    Note: This is done to keep the Secret key used in the production secret, so we don't commit it to GitHub
 
-6. add '/homepage/' to the end of the url
+6. initialize the database with 'python manage.py makemigrations' and then 'python manage.py migrate' in terminal
+
+7. run the command 'python manage.py runserver' in terminal, and go to the local server
+
+8. add '/homepage/' to the end of the url
 
 To allow for proper navigation of the site:
 
