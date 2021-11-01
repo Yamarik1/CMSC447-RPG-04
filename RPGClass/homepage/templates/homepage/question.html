@@ -1,16 +1,19 @@
 
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/questView.css' %}">
 <h1>{{ quest.getName }}</h1>
 
 {% for question in quest.question_set.all %}
 
+
     <form action="{% url 'homepage:answer' quest.id %} " method="post">
         {% csrf_token %}
-        <fieldset>
-            <h2> {{ question.getQuestion }} </h2> <br>
+        <fieldset class="question">
 
+            <h2 class="question"> {{question.id}}: {{ question.getQuestion }} </h2> <br>
+
+            <!-- checks to see if there are any questions in the quest -->
             {% if question.choice_set.exists == False %}
 
                 <p>This Question does not have any choices</p>
@@ -18,7 +21,7 @@
             {% else %}
 
                 {% for choice in question.choice_set.all %}
-
+                    <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
                     <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
                     <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
 
@@ -27,7 +30,7 @@
             {% endif %}
 
             </fieldset>
-
+        <br>
 
 
 {% endfor %}

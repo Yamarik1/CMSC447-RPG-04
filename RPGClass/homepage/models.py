@@ -5,6 +5,8 @@ from django.db import models
 # Note for classes, any member prefaced by '_' will be private.
 
 # Quest model: Defines the general information for a quest. This includes name, description, lives, etc.
+# Quests can be create directly on the app, and can also be carried over from other software, and can also
+# be individually created and updated for any avenues this app doesn't support.
 class Quest(models.Model):
     # Public Members
 
@@ -30,13 +32,13 @@ class Quest(models.Model):
         return "Changed successfully"
 
     # Keeps track of the right answers for a quest
-    def getRight(self):
+    def getXP(self):
         return self._Correct_answers
 
     def rightAnsChosen(self):
         self._Correct_answers += 1
 
-    def setRight(self, numRight):
+    def setXP(self, numRight):
         self._Correct_answers = numRight
 
     # A quest should not be shown to the player if it is defined as such by the admin
@@ -47,6 +49,20 @@ class Quest(models.Model):
         self._Is_available = available
         return "Availability has been changed"
 
+    # The quest type will determine how a quest will be handled by the app. The values are as follows:
+    # 0: Quest type of zero means the app does nothing special. It takes the Quest name, XP gained, level progress,
+    #    etc. Used when the quest is manually defined and updated by the admin.
+    # 1: Quest type 1 is a standard quest, which would include multiple choice, short answer, essays, etc.
+
+    # NOTE: Other types to be added in the future, such as imports from other software, file uploads, and anything
+    # we may decided important
+    def getType(self):
+        return self._Quest_type
+
+    def setType(self, questType):
+        self._Quest_type = questType
+        return "Type of quest updated"
+
 
     # Private members
     _Quest_name = models.CharField(max_length=200, default="N/A")
@@ -54,6 +70,7 @@ class Quest(models.Model):
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Quest_type = models.IntegerField(default=0)
 
     def __str__(self):
         msg = "This is Quest number:" + str(self.pk)

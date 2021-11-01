@@ -1,0 +1,34 @@
+body {
+    background: lightblue;
+}
+
+h1{
+    color: black;
+    text-align: center;
+    border: double 5px black;
+
+}
+
+h2.question {
+    color: black;
+    test-align: left;
+}
+
+fieldset.question {
+
+    border: groove 1px black;
+
+}
+
+input[value="Submit"]{
+    background-color: #6a5acd;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+
+}
+
+input[value="Submit"]:hover{
+    background-color: #553fcd;
+}
