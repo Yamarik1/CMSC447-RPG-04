@@ -10,3 +10,15 @@ Steps for running current iteration of the project:
 6. Use 'py manage.py runserver' in terminal, and then add '/homepage/' to the url.
 7. To run tests, use 'python manage.py test homepage' to see the tests run.
 
+things to add to project(login):
+    settings:
+        in templates in 'DIRS' array:- str(BASE_DIR.joinpath('login'))
+        add LOGIN_REDIRECT_URL = 'homepage/' at the very bottom of settings
+        add LOGOUT_REDIRECT_URL = '/' at the bottom of settings
+
+    urls.py:
+        in urlpatterns - path('accounts/', include('django.contrib.auth.urls'))
+
+    to run test:
+        1)
+
