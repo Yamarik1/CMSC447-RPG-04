@@ -10,4 +10,12 @@ Steps for running current iteration of the project:
 
 5. run the command 'python manage.py runserver' in terminal, and go to the local server
 
+6. add '/homepage/' to the end of the url
+
+To allow for proper navigation of the site:
+
+1: After the homepage has been reached, a button with 'initialize', should appear; click that button.
+    Note: This initializes the database to test values, which is easier than needing to go into the shell each time
+
+2: From there, you can navigate the parts of the page that are currently available.
 

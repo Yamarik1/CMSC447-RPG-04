@@ -6,6 +6,7 @@ app_name = "homepage"
 urlpatterns = [
     path('', views.homepage, name='menu'),
     path('mainquest/', views.mainquest, name='mainquest'),
+    path('mainquest/vTest', views.visualTest, name='test'),
     path('mainquest/<int:pk>/', views.mainquestView.as_view(), name='mQuestView'),
     path('mainquest/<int:pk>/quest/', views.mQuestSpecific.as_view(), name="mQuest"),
     path('mainquest/<int:quest_id>/answer/', views.answer, name="answer"),
