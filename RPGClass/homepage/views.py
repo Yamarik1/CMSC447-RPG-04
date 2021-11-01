@@ -12,8 +12,7 @@ def homepage(request):
 
 
 def mainquest(request):
-    return HttpResponse("Placeholder for the Main Quest page")
-
+    return render(request, "homepage/mainQuest.html")
 
 class mainquestView(generic.DetailView):
     template_name = 'homepage/mQuestView.html'

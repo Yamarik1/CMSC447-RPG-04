@@ -17,7 +17,7 @@ class TestClass(TestCase):
 class Quest_test_Class(TestCase):
     # The url found at homepage/mainquest should exist, and will return 200 code
     def test_url_correctness(self):
-        response = self.client.get('/homepage/mainquest')
+        response = self.client.get(reverse('homepage:mainquest'))
         self.assertEqual(response.status_code, 200)
 
 
