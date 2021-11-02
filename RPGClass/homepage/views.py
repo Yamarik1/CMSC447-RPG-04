@@ -29,4 +29,4 @@ def bosses(request):
 
 
 def profile(request):
-    return render(request, 'homepage/profile.html')
+    return HttpResponse("Placeholder for the profile page")
