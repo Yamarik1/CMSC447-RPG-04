@@ -1,4 +1,5 @@
 Steps for running current iteration of the project:
+
 1. Start a Python Project with the name 'CMSC447-RPG-04'
 
 2. Download the current release of the project, and cop the files into the Python project started
@@ -23,4 +24,5 @@ To allow for proper navigation of the site:
     Note: This initializes the database to test values, which is easier than needing to go into the shell each time
 
 2: From there, you can navigate the parts of the page that are currently available.
+
 
