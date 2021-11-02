@@ -1,0 +1,32 @@
+
+/*Defines font sizes */
+.sections > h2, p {
+  margin: 4px;
+  font-size: 90%;
+}
+
+.sections {
+  background: lightblue;
+}
+
+/* This section gives the button its color and centered text*/
+.button {
+        background-color: #1c87c9;
+        border: none;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 25px;
+        margin: 4px 2px;
+        cursor: pointer;
+}
+
+/*This section is for the black border that contains the button of the quest.*/
+.center {
+    margin: auto;
+    width: 30%;
+    border: 4px solid black;
+    padding: 14px;
+    text-align: center;
+}

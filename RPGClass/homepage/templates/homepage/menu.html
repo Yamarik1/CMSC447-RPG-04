@@ -21,6 +21,15 @@
 
 <br>
 <br>
+
+<p>For ease of production, this button will initialize the database to some test values</p>
+<form action="{% url 'homepage:test' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Initialize">
+
+
+</form>
 <!--These are the same links as above, restated with a desciption of each one -->
 <h2><a href="/homepage/mainquest/">Main Quests</a> </h2>
 <p>Make sure to prepare for these quests! Make sure to complete some side quests to increase your level! </p>
