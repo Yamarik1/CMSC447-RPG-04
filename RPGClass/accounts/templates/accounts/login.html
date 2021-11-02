@@ -6,13 +6,9 @@
 </head>
 <body>
     {% if user.is_authenticated %}
-        Hi {{ user.username }}!
-        <form class="logout-link" action='/accounts/logout/' method="post">
-            {%csrf_token%}
-            <button type="submit">Logout</button>
-        </form>
+        <meta http-equiv="Refresh" content="0; {% url 'homepage:menu' %}"/>
     {% else %}
-            <h2>Log In</h2>
+        <h2>Log In</h2>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}

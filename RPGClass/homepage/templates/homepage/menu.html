@@ -12,7 +12,7 @@
     <li><a class = "nav" href="/homepage/bosses/">Bosses</a> </li>
     <li><a class = "nav" href="/homepage/profile/">Profile</a> </li>
     <li>
-        <form class="logout-link" action='/accounts/logout/' method="post">
+        <form class="logout-link" action='/accounts/logout/' method="post" id="menu">
             {%csrf_token%}
             <button type="submit">Logout</button>
         </form>
