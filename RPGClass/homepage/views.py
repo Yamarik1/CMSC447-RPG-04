@@ -124,4 +124,5 @@ def bosses(request):
 
 
 def profile(request):
-    return HttpResponse("Placeholder for the profile page")
+    return render(request, 'homepage/profile.html')
+
