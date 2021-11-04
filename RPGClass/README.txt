@@ -23,9 +23,11 @@ To allow for proper navigation of the site:
 
 1: You will be brought to a page that will allow you to login, or create an account.
 
-2: When on the site, hit the 'Initialize' button on the homepage, which will set up the database to some test values used
+2: Create an account in order to view the site
 
-3: From there, you can see the features implemented, which for this iteration, are the main quests, account creation,
+3: When on the site, hit the 'Initialize' button on the homepage, which will set up the database to some test values used
+
+4: From there, you can see the features implemented, which for this iteration, are the main quests, account creation,
    and the skeleton for the profile page.
    Note: due to dependencies of certain parts of the project, some parts are still using some placeholders, and will
          be made generic in the future
