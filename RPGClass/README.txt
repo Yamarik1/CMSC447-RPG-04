@@ -30,5 +30,9 @@ To allow for proper navigation of the site:
    Note: due to dependencies of certain parts of the project, some parts are still using some placeholders, and will
          be made generic in the future
 
+For Testing:
+
+Run the command 'py manage.py test homepage.tests' and 'py manage.py test accounts.tests' to run the tests.
+
 
 
