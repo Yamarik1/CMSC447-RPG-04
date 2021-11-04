@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <meta http-equiv="Refresh" content="0; {% url 'homepage:menu' %}"/>
+    {% else %}
+        <h2>Log In</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Log In</button
+        </form>
+        <p><a href="{% url 'accounts:signup' %}">Not registered? click here</a></p>
+    {% endif %}
+
+</body>
+</html>
