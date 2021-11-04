@@ -1,5 +1,9 @@
-from django.test import TestCase
+from django.contrib.auth.models import User
 from django.urls import reverse
+from django.test import TestCase
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth import authenticate
+from django.test import Client
 
 from .models import Quest, Question, Choice
 
@@ -8,11 +12,23 @@ from .models import Quest, Question, Choice
 
 # Test for the skeleton homepage
 class TestHomepage(TestCase):
-    # The url found at homepage/menu.html should exist, and will return 200 code
+    # The homepage needs an account to reach, so here the account is made
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='test', password='12test12')
+        self.user.save()
+
+    def tearDown(self):
+        self.user.delete()
+
     def test_url_correctness(self):
+
+        self.client.login(username='test', password='12test12')
+
         response = self.client.get(reverse('homepage:menu'))
+
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Welcome to RPG Class!")
+
 
 # Test for the main quest homepage
 class Quest_test_Class(TestCase):

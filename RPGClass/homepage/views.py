@@ -6,17 +6,13 @@ from django.views import generic
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 
-
 from django.http import HttpResponse
-
-
-#prevents people from seeing page until they login in (generic and not assinged to a specific course)
-@login_required(login_url="/accounts/login/")
 
 from .models import Question, Quest, Choice
 
 
-
+# prevents people from seeing page until they login in (generic and not assinged to a specific course)
+@login_required(login_url="/accounts/login/")
 def homepage(request):
     return render(request, 'homepage/menu.html')
 
@@ -24,9 +20,11 @@ def homepage(request):
 def mainquest(request):
     return render(request, "homepage/mainQuest.html")
 
+
 class mainquestView(generic.DetailView):
     model = Quest
     template_name = 'homepage/mQuestView.html'
+
 
 # For the purposes of creating objects in the database easier
 def visualTest(request):
@@ -81,6 +79,7 @@ def visualTest(request):
 
     return HttpResponseRedirect(reverse('homepage:menu'))
 
+
 class mQuestSpecific(generic.DetailView):
     queryset = Quest.objects.all()
     template_name = "homepage/question.html"
@@ -125,4 +124,3 @@ def bosses(request):
 
 def profile(request):
     return render(request, 'homepage/profile.html')
-
