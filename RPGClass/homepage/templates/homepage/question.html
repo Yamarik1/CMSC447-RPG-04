@@ -7,7 +7,7 @@
 {% for question in quest.question_set.all %}
 
 
-    <form action="{% url 'homepage:answer' quest.id %} " method="post">
+    <form action="{% url 'homepage:answer' 1 quest.id %} " method="post">
         {% csrf_token %}
         <fieldset class="question">
 

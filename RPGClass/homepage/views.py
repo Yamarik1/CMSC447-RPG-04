@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Question, Quest, Choice
+from .models import Course, Question, Quest, Choice
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -17,7 +17,22 @@ def homepage(request):
     return render(request, 'homepage/menu.html')
 
 
-def mainquest(request):
+class course(generic.ListView):
+
+    template_name = 'homepage/course.html'
+    context_object_name = 'course_list'
+
+    def get_queryset(self):
+        return Course.objects.all()
+
+
+class courseSpecific(generic.DetailView):
+    template_name = 'homepage/courseS.html'
+    model = Course
+
+
+
+def mainquest(request, course_id):
     return render(request, "homepage/mainQuest.html")
 
 
@@ -29,12 +44,17 @@ class mainquestView(generic.DetailView):
 # For the purposes of creating objects in the database easier
 def visualTest(request):
     # Delete anything in the database
-    for quest in Quest.objects.all():
-        quest.delete()
+
+    for course in Course.objects.all():
+        course.delete()
+
+    C = Course.objects.create(pk=1)
+    C.setName("CMSC 313")
+    C.setSection(1)
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
-    Q = Quest.objects.create(pk=1)
+    Q = C.quest_set.create(pk=1)
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
     Q.setLives(3)
@@ -68,7 +88,7 @@ def visualTest(request):
     Q.save()
 
     # Test quest 2: A quest manually updated by the admin (Admin functionality not added yet)
-    Q = Quest.objects.create(pk=2)
+    Q = C.quest_set.create(pk=2)
     Q.setName("Test quest 2")
     Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
               "straight to the summary page")
@@ -77,6 +97,7 @@ def visualTest(request):
     Q.setAvailable(True)
     Q.save()
 
+    C.save()
     return HttpResponseRedirect(reverse('homepage:menu'))
 
 
@@ -90,7 +111,7 @@ class mQuestSpecific(generic.DetailView):
         return context
 
 
-def answer(request, quest_id):
+def answer(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     quest.setXP(0)
     quest.save()
@@ -106,10 +127,10 @@ def answer(request, quest_id):
             quest.save()
             selected_choice.save()
 
-    return HttpResponseRedirect(reverse('homepage:summary', args=(quest.id,)))
+    return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
 
 
-def summary(request, quest_id):
+def summary(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     return render(request, 'homepage/summary.html', {'quest': quest})
 

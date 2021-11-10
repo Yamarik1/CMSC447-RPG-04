@@ -3,12 +3,32 @@ from django.db import models
 
 # Create your models here.
 # Note for classes, any member prefaced by '_' will be private.
+class Course(models.Model):
+    # Public members
+    def getName(self):
+        return self._course_name
+
+    def setName(self, name):
+        self._course_name = name
+
+    def getSection(self):
+        return self._section_number
+
+    def setSection(self, num):
+        self._section_number = num
+
+
+    # Private members
+    _course_name = models.CharField(max_length=200)
+    _section_number = models.IntegerField(default=0)
+
 
 # Quest model: Defines the general information for a quest. This includes name, description, lives, etc.
 # Quests can be create directly on the app, and can also be carried over from other software, and can also
 # be individually created and updated for any avenues this app doesn't support.
 class Quest(models.Model):
     # Public Members
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     # Getters and setters
     def getName(self):
