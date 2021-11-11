@@ -17,7 +17,6 @@ class Course(models.Model):
     def setSection(self, num):
         self._section_number = num
 
-
     # Private members
     _course_name = models.CharField(max_length=200)
     _section_number = models.IntegerField(default=0)
@@ -82,7 +81,6 @@ class Quest(models.Model):
     def setType(self, questType):
         self._Quest_type = questType
         return "Type of quest updated"
-
 
     # Private members
     _Quest_name = models.CharField(max_length=200, default="N/A")

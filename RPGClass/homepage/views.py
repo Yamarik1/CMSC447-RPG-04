@@ -18,7 +18,6 @@ def homepage(request):
 
 
 class course(generic.ListView):
-
     template_name = 'homepage/course.html'
     context_object_name = 'course_list'
 
@@ -27,13 +26,17 @@ class course(generic.ListView):
 
 
 class courseSpecific(generic.DetailView):
-    template_name = 'homepage/courseS.html'
     model = Course
+    template_name = 'homepage/courseS.html'
 
 
+class mainquest(generic.DetailView):
+    model = Course
+    template_name = 'homepage/mainQuest.html'
 
-def mainquest(request, course_id):
-    return render(request, "homepage/mainQuest.html")
+
+# def mainquest(request, course_id):
+# return render(request, "homepage/mainQuest.html")
 
 
 class mainquestView(generic.DetailView):
@@ -45,16 +48,16 @@ class mainquestView(generic.DetailView):
 def visualTest(request):
     # Delete anything in the database
 
-    for course in Course.objects.all():
-        course.delete()
+    for newCourse in Course.objects.all():
+        newCourse.delete()
 
-    C = Course.objects.create(pk=1)
-    C.setName("CMSC 313")
-    C.setSection(1)
+    newCourse = Course.objects.create(pk=1)
+    newCourse.setName("CMSC 313")
+    newCourse.setSection(1)
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
-    Q = C.quest_set.create(pk=1)
+    Q = newCourse.quest_set.create(pk=1)
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
     Q.setLives(3)
@@ -87,8 +90,9 @@ def visualTest(request):
     question.save()
     Q.save()
 
+    newCourse.save()
     # Test quest 2: A quest manually updated by the admin (Admin functionality not added yet)
-    Q = C.quest_set.create(pk=2)
+    Q = newCourse.quest_set.create(pk=2)
     Q.setName("Test quest 2")
     Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
               "straight to the summary page")
@@ -97,6 +101,10 @@ def visualTest(request):
     Q.setAvailable(True)
     Q.save()
 
+    newCourse.save()
+
+    C = Course.objects.create(pk=2)
+    C.setName("New")
     C.save()
     return HttpResponseRedirect(reverse('homepage:menu'))
 

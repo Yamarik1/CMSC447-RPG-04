@@ -254,3 +254,28 @@ class QuestionsViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test Question")
         self.assertContains(response, "This Question does not have any choices")
+
+class courseTests(TestCase):
+
+    # function to make a test course
+    def makeClass(self):
+        C = Course.objects.create()
+        C.save()
+        return C
+
+    # Test that multiple quests can be seen on the class page
+    def test_class_list(self):
+        C1 = self.makeClass()
+        C1.setName("Course 1")
+        C1.save()
+
+        C2 = self.makeClass()
+        C2.setName("Course 2")
+        C2.save()
+
+        url = reverse('homepage:course')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, C1.getName())
+        self.assertContains(response, C2.getName())
