@@ -17,9 +17,59 @@ class Course(models.Model):
     def setSection(self, num):
         self._section_number = num
 
+    # Xp and levels for the current course, which will be separated by course
+    def getTotalXP(self):
+        return self._total_XP
+
+    def setTotalXP(self, xp):
+        self._total_XP = xp
+        return "Total XP updated"
+
+    def getCurrXP(self):
+        return self._curr_XP
+
+    # When a quest is completed, update the XP gained in the course
+    def updateXP(self, gainedXP):
+        self._curr_XP += gainedXP
+        tempXP = self._course_XP
+
+        # For every multiple of _max_xp that tempXP is greater than, the level should be increased by 1
+        while tempXP >= self.getMaxXP():
+            tempXP = tempXP - 10
+            self._course_level += 1
+
+    def setXP(self, xp):
+        self._course_XP = xp
+        return "XP updated"
+
+    def getMaxXP(self):
+        return self._max_XP
+
+    def setMaxXP(self, xp):
+        self._max_XP = xp
+        return "Max XP updated"
+
+    def getCourseLevel(self):
+        return self._course_level
+
+    def setCourseLevel(self, level):
+        self._course_level = level
+        return "Level updated"
+
+
     # Private members
     _course_name = models.CharField(max_length=200)
     _section_number = models.IntegerField(default=0)
+
+    # course_XP and total_XP are two separate values. Total XP is all the Xp gained in the course
+    # and course XP is the value of _max_XP - XP needed to get to the next level
+    _curr_XP = models.IntegerField(default=0)
+    _total_XP = models.IntegerField(default=0)
+
+    _course_level = models.IntegerField(default=1)
+
+    # _max_XP  is the xP needed to gain a level
+    _max_XP = models.IntegerField(default=0)
 
 
 # Quest model: Defines the general information for a quest. This includes name, description, lives, etc.

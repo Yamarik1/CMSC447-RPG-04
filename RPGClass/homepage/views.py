@@ -54,6 +54,8 @@ def visualTest(request):
     newCourse = Course.objects.create(pk=1)
     newCourse.setName("CMSC 313")
     newCourse.setSection(1)
+    newCourse.setMaxxp(5)
+
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
