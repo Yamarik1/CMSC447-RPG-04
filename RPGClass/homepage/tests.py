@@ -86,6 +86,36 @@ class TestQuestMethods(TestCase):
 
         self.assertIs(isWorking, True)
 
+# Test class to test the general view of the quest list
+class TestQuestList(TestCase):
+
+    # Test that if no quests exist in a course, the proper message is given
+    def test_no_quests(self):
+        C = Course.objects.create()
+
+        url = reverse('homepage:mainquest', args=(C.id, ))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "There are no quests available.")
+
+    # Test with 2 quests to test that they will both be listed
+    def test_with_quests(self):
+        C = Course.objects.create()
+        Q = C.quest_set.create()
+
+        Q.setName("Quest 1")
+        Q.save()
+
+        Q = C.quest_set.create()
+        Q.setName("Quest 2")
+        Q.save()
+
+        url = reverse('homepage:mainquest', args=(C.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Quest 1")
+        self.assertContains(response, "Quest 2")
+
 
 class TestQuest(TestCase):
 
