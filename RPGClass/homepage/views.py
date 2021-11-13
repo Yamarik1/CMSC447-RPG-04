@@ -43,6 +43,11 @@ class mainquestView(generic.DetailView):
     model = Quest
     template_name = 'homepage/mQuestView.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
 
 # For the purposes of creating objects in the database easier
 def visualTest(request):
@@ -54,8 +59,7 @@ def visualTest(request):
     newCourse = Course.objects.create(pk=1)
     newCourse.setName("CMSC 313")
     newCourse.setSection(1)
-    newCourse.setMaxxp(5)
-
+    newCourse.setMaxXP(5)
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
@@ -107,7 +111,42 @@ def visualTest(request):
 
     C = Course.objects.create(pk=2)
     C.setName("New")
+
+    Q = C.quest_set.create(pk=3)
+    Q.setName("Quest 1")
+    Q.setDesc("This is the first test quest")
+    Q.setLives(3)
+    Q.setAvailable(True)
+    Q.setType(1)
+
+    question = Q.question_set.create(pk=3)
+    question.setQuestion("What is 10 + 1?")
+
+    c = question.choice_set.create(pk=5)
+    c.setChoice("10")
+    c.save()
+    c = question.choice_set.create(pk=6)
+    c.setChoice("11")
+    c.setCorrect(True)
+    c.save()
+
+    question.save()
+    question = Q.question_set.create(pk=4)
+    question.setQuestion("What is 8 - 2?")
+
+    c = question.choice_set.create(pk=7)
+    c.setChoice("6")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create(pk=8)
+    c.setChoice("12")
+    c.save()
+
+    question.save()
+    Q.save()
+
     C.save()
+
     return HttpResponseRedirect(reverse('homepage:menu'))
 
 
@@ -116,8 +155,8 @@ class mQuestSpecific(generic.DetailView):
     template_name = "homepage/question.html"
 
     def get_context_data(self, **kwargs):
-        context = super(mQuestSpecific, self).get_context_data(**kwargs)
-        context['question'] = Question.objects.all()
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
         return context
 
 

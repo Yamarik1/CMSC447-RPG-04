@@ -28,6 +28,9 @@ class Course(models.Model):
     def getCurrXP(self):
         return self._curr_XP
 
+    def getNextLevel(self):
+        return self.getMaxXP() - self.getCurrXP()
+
     # When a quest is completed, update the XP gained in the course
     def updateXP(self, gainedXP):
         self._curr_XP += gainedXP
