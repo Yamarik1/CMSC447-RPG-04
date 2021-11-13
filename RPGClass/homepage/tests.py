@@ -86,6 +86,7 @@ class TestQuestMethods(TestCase):
 
         self.assertIs(isWorking, True)
 
+
 # Test class to test the general view of the quest list
 class TestQuestList(TestCase):
 
@@ -93,7 +94,7 @@ class TestQuestList(TestCase):
     def test_no_quests(self):
         C = Course.objects.create()
 
-        url = reverse('homepage:mainquest', args=(C.id, ))
+        url = reverse('homepage:mainquest', args=(C.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "There are no quests available.")
@@ -285,6 +286,7 @@ class QuestionsViewTest(TestCase):
         self.assertContains(response, "Test Question")
         self.assertContains(response, "This Question does not have any choices")
 
+
 class courseTests(TestCase):
 
     # function to make a test course
@@ -309,3 +311,50 @@ class courseTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, C1.getName())
         self.assertContains(response, C2.getName())
+
+    # Test that will make sure that levels are being found properly, and that it is being shown to the user correctly
+    def test_level_value(self):
+        C = self.makeClass()
+        # Set the value of needed XP to 5, and the current XP had is 7, so the level should increase by 1
+        C.setMaxXP(5)
+
+        C.updateXP(7)
+        C.save()
+        url = reverse('homepage:courseS', args=(1,))
+
+        response = self.client.get(url)
+        # At current Xp of 7, the level should be 2, Total should be 7, and xp to next level should be 3
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 2")
+        self.assertContains(response, "Total XP earned: 7")
+        self.assertContains(response, "Xp to next level: 3")
+
+    # Test to simulate multiple different quests still allow course to get correct level
+    def test_multiple_quests(self):
+        C = self.makeClass()
+
+        C.setMaxXP(5)
+
+
+        Q1 = C.quest_set.create()
+        Q1.setXP(5)
+        Q1.save()
+        C.updateXP(Q1.getXP())
+
+        Q2 = C.quest_set.create()
+        Q2.setXP(7)
+        Q2.save()
+        C.updateXP(Q2.getXP())
+
+        C.save()
+
+        url = reverse('homepage:courseS', args=(1,))
+
+        response = self.client.get(url)
+        # At current Xp of 12, the level should be 3, Total should be 12, and xp to next level should be 3
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 3")
+        self.assertContains(response, "Total XP earned: 12")
+        self.assertContains(response, "Xp to next level: 3")
+
+
