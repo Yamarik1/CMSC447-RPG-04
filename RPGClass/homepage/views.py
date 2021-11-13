@@ -57,7 +57,7 @@ def visualTest(request):
         newCourse.delete()
 
     newCourse = Course.objects.create(pk=1)
-    newCourse.setName("CMSC 313")
+    newCourse.setName("Fus Ro Dah")
     newCourse.setSection(1)
     newCourse.setMaxXP(5)
 
@@ -103,7 +103,7 @@ def visualTest(request):
     Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
               "straight to the summary page")
     Q.setType(0)
-    Q.setXP(10)
+    Q.setXP(1)
     Q.setAvailable(True)
     Q.save()
 
@@ -181,7 +181,21 @@ def answer(request, course_id, quest_id):
 
 def summary(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
-    return render(request, 'homepage/summary.html', {'quest': quest})
+    course = get_object_or_404(Course, pk=course_id)
+    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
+
+
+def accept(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = quest.getXP()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 
 def sidequest(request):

@@ -13,6 +13,7 @@ urlpatterns = [
     path('course/<int:course_id>/mainquest/<int:pk>/quest/', views.mQuestSpecific.as_view(), name="mQuest"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/answer/', views.answer, name="answer"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/summary/', views.summary, name="summary"),
+    path('course/<int:course_id>/mainquest/<int:quest_id>/accept/', views.accept, name='accept'),
     path('sidequest/', views.sidequest, name='sidequest'),
     path('profile/', views.profile, name='profile'),
     path('bosses/', views.bosses, name='bosses'),
