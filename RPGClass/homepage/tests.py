@@ -197,6 +197,20 @@ class QuestViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "XP gained: " + str(quest.getXP()))
 
+    # With the summary page being updated, this test makes sure the summary page appears with the new info
+    def test_summary_page(self):
+        C = Course.objects.create()
+        quest = C.quest_set.create()
+        quest.setAvailable(True)
+        quest.setType(0)
+        quest.setXP(10)
+        quest.save()
+
+        url = reverse('homepage:summary', args=(C.id, quest.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Click here to accept the quest results:")
+
 
 # Create a basic question for some unit tests.
 def create_QuestionView_Quest(question="N/A", choice="N/A"):
@@ -356,5 +370,37 @@ class courseTests(TestCase):
         self.assertContains(response, "Current Level: 3")
         self.assertContains(response, "Total XP earned: 12")
         self.assertContains(response, "Xp to next level: 3")
+
+    # Test the correctness of multiple courses being defined
+    def test_multiple_courses(self):
+        C1 = self.makeClass()
+        C1.setMaxXP(5)
+        C1.updateXP(7)
+        C1.save()
+
+        C2 = self.makeClass()
+        C2.setMaxXP(10)
+        C2.updateXP(29)
+        C2.save()
+
+        # Test the pages with the XP values on them
+        # The first set will be Level 2, Total Xp is 7, To next is 3
+        url = reverse('homepage:courseS', args=(1,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 2")
+        self.assertContains(response, "Total XP earned: 7")
+        self.assertContains(response, "Xp to next level: 3")
+
+        # Second set will pass in the args of 2, since it need to check the second quest
+        # Level will be 3, Total XP is 29, To next is 1
+        url = reverse('homepage:courseS', args=(2,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 3")
+        self.assertContains(response, "Total XP earned: 29")
+        self.assertContains(response, "Xp to next level: 1")
 
 
