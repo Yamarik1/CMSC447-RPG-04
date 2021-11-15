@@ -11,7 +11,7 @@
         {% csrf_token %}
         <fieldset class="question">
 
-            <h2 class="question"> {{question.id}}: {{ question.getQuestion }} </h2> <br>
+            <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
 
             <!-- checks to see if there are any questions in the quest -->
             {% if question.choice_set.exists == False %}
