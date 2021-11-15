@@ -103,14 +103,15 @@ def visualTest(request):
     Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
               "straight to the summary page")
     Q.setType(0)
-    Q.setXP(1)
+    Q.setXP(7)
     Q.setAvailable(True)
     Q.save()
 
     newCourse.save()
 
     C = Course.objects.create(pk=2)
-    C.setName("New")
+    C.setName("Course 2")
+    C.setMaxXP(10)
 
     Q = C.quest_set.create(pk=3)
     Q.setName("Quest 1")

@@ -349,7 +349,6 @@ class courseTests(TestCase):
 
         C.setMaxXP(5)
 
-
         Q1 = C.quest_set.create()
         Q1.setXP(5)
         Q1.save()
@@ -402,5 +401,3 @@ class courseTests(TestCase):
         self.assertContains(response, "Current Level: 3")
         self.assertContains(response, "Total XP earned: 29")
         self.assertContains(response, "Xp to next level: 1")
-
-
