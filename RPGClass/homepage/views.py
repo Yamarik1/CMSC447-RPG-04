@@ -138,11 +138,11 @@ def visualTest(request):
     question = Q.question_set.create(pk=4)
     question.setQuestion("What is 8 - 2?")
 
-    c = question.choice_set.create(pk=7)
+    c = question.choice_set.create()
     c.setChoice("6")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=8)
+    c = question.choice_set.create()
     c.setChoice("12")
     c.save()
 

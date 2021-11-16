@@ -337,10 +337,17 @@ class hearts_server(LiveServerTestCase):
         #quest.setLives(3)
 
         #hardcoded this from views since the create quest function couldn't reduce lives by 1
-        for quest in Quest.objects.all():
-            quest.delete()
+        for newCourse in Course.objects.all():
+            newCourse.delete()
 
-        Q = Quest.objects.create(pk=1)
+        newCourse = Course.objects.create(pk=1)
+        newCourse.setName("Kaer Morhen")
+        newCourse.setSection(1)
+        newCourse.setMaxXP(5)
+
+        # Create custom quests with some test values
+        # Test Quest 1: using type 1 to give the user questions to answer
+        Q = newCourse.quest_set.create(pk=1)
         Q.setName("Quest 1")
         Q.setDesc("This is the first test quest")
         Q.setLives(3)
@@ -348,23 +355,28 @@ class hearts_server(LiveServerTestCase):
         Q.setType(1)
 
         question = Q.question_set.create(pk=1)
-        question.setQuestion("What is 5 + 12?")
+        question.setQuestion("What is the meaning of life")
 
-        c = question.choice_set.create(pk=1)
-        c.setChoice("10")
+        c = question.choice_set.create()
+        c.setChoice("2B")
         c.save()
-        c = question.choice_set.create(pk=2)
-        c.setChoice("17")
+        c = question.choice_set.create()
+        c.setChoice("to Be")
+        c.save()
+        c = question.choice_set.create()
+        c.setChoice("to be dooby doo")
         c.setCorrect(True)
         c.save()
 
         question.save()
         Q.save()
 
+        newCourse.save()
+
         #to get past homepage
         self.client.login(username='test', password='12test12')
 
-        self.browser.get("%s%s" % (self.live_server_url, reverse('homepage:mQuest', args=(Q.id,))))
+        self.browser.get("%s%s" % (self.live_server_url, reverse('homepage:mQuest', args=(newCourse.id, Q.id,))))
         assert 'quest' in self.browser.title
 
         #finds the button when clicking on a multiple choice answer so we can click it
@@ -385,14 +397,15 @@ class hearts_server(LiveServerTestCase):
 class hearts(TestCase):
     #test if number displays correctly
     def test_correct_lives(self):
-        quest = Quest.objects.create()
+        C = Course.objects.create()
+        quest = C.quest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
         quest.setType(1)
         quest.setLives(3)
         quest.save()
 
-        url = reverse('homepage:mQuestView', args=(quest.id,))
+        url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
         #makes sure we are at the right page
         response = self.client.get(url)
@@ -403,14 +416,15 @@ class hearts(TestCase):
 
     #tests if having no hearts leads to the right page
     def test_no_hearts(self):
-        quest = Quest.objects.create()
+        C = Course.objects.create()
+        quest = C.quest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
         quest.setType(1)
         quest.setLives(0)
         quest.save()
 
-        url = reverse('homepage:mQuestView', args=(quest.id,))
+        url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
