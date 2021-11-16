@@ -31,6 +31,9 @@ class Quest(models.Model):
         self._Num_lives = num
         return "Changed successfully"
 
+    def subHeart(self):
+        self._Num_lives -= 1
+
     # Keeps track of the right answers for a quest
     def getXP(self):
         return self._Correct_answers

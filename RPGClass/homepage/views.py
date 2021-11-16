@@ -106,6 +106,9 @@ def answer(request, quest_id):
             quest.save()
             selected_choice.save()
 
+    quest.subHeart()
+    quest.save()
+
     return HttpResponseRedirect(reverse('homepage:summary', args=(quest.id,)))
 
 
