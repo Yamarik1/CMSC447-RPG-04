@@ -1,6 +1,8 @@
 
 {% load static %}
 
+<!--the title is for the test.py in hearts_server, can change it to anything as long as you change it in tests-->
+<title>quest</title>
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/questView.css' %}">
 <h1>{{ quest.getName }}</h1>
 
@@ -34,7 +36,7 @@
 
 
 {% endfor %}
-<input type="submit" value="Submit">
+<input type="submit" value="Submit" id="submit">
 </form>
 
 

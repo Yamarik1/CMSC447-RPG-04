@@ -5,6 +5,9 @@
 <!-- Checks to see if the quest is available, as specified by the admin-->
 {% if quest.getAvailable == False %}
     <p>This quest is not available</p>
+{% elif quest.getLives == 0 %}
+    <p>you are out of lives</p>
+    <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
 {% else %}
     {% if quest.getType == 0 %}
         <h1>{{ quest.getName }}</h1>
@@ -16,6 +19,10 @@
         <p>Welcome to this Quest!</p><br>
         <p>Click here to Start of the quest!</p>
 
+
+        <p>number of lives: {{ quest.getLives }}</p>        
+
         <a href="{% url 'homepage:mQuest' course_id quest.id %}">Start Quest</a>
+
     {% endif %}
 {% endif %}

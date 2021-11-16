@@ -35,6 +35,13 @@ To allow for proper navigation of the site:
 For Testing:
 
 Run the command 'py manage.py test homepage.tests' and 'py manage.py test accounts.tests' to run the tests.
+***might take a while due to selenium test
+
+before running tests in homepage:
+
+1:update the geck_path in tests.py file in homepage to your local path
+
+2:make sure you have firefox downloaded, haven't tried it on other browsers yet
 
 
 
