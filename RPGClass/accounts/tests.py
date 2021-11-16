@@ -210,3 +210,21 @@ class UpdateProfileTest(TestCase):
 
         # also makes sure that we actually created nickname
         self.assertEqual(self.user.student.getNickname(), 'John Doe')
+
+        response = self.client.post(reverse('accounts:update'), data={
+            'user_name': 'tert',
+            'password': '12test12',
+            'nickname': 'mark'
+        })
+        # should get new values for students
+        self.user.student.refresh_from_db()
+        # should go back to update page
+        self.assertEqual(response.status_code, 200)
+
+        #set the default value to John Doe when student created, when signup set's nickname to username
+        self.assertContains(response, "John Doe")
+        #makes sure the error pops up
+        self.assertContains(response, "credentials do not match!")
+
+        # also makes sure that we actually created nickname
+        self.assertEqual(self.user.student.getNickname(), 'John Doe')

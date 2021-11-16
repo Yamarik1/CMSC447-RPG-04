@@ -47,7 +47,8 @@ def logout_view(request):
         logout(request)
         return redirect('accounts:login')
 
-
+#as of right now, only updates nickname
+#also does not check other users have same nickname
 def update_profile(request):
     if request.method == 'POST':
         form = UpdateForm(request.POST)
