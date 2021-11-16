@@ -12,7 +12,7 @@ from .models import Course, Quest, Question, Choice
 
 # Create your tests here.
 
-geck_path: str ='/Users/matt/PycharmProjects/CMSC447-RPG-04/RPGClass/homepage/Gecko/geckodriver.exe'
+geck_path: str ='/Users/Adam Yamarik/PycharmProjects/CMSC447-RPG-04-2/RPGClass/homepage/Gecko/geckodriver.exe'
 
 # Test for the skeleton homepage
 class TestHomepage(TestCase):

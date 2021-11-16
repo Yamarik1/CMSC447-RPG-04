@@ -180,12 +180,10 @@ def answer(request, course_id, quest_id):
             quest.save()
             selected_choice.save()
 
-
     quest.subHeart()
     quest.save()
 
     return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
-
 
 
 def summary(request, course_id, quest_id):
@@ -207,8 +205,9 @@ def accept(request, course_id, quest_id):
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 
-def sidequest(request):
-    return HttpResponse("Placeholder for the Side Quest page")
+class sidequest(generic.DetailView):
+    model = Course
+    template_name = 'homepage/mainQuest.html'
 
 
 def bosses(request):
