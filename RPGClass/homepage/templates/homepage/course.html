@@ -1,0 +1,29 @@
+<style>
+   h1 {
+    color: black;
+    text-align: center;
+    border: double 5px black;
+
+}
+
+   li {
+    font-size: 20px
+
+   }
+
+   body{
+    background: lightblue
+   }
+</style>
+
+<h1>Course List</h1>
+
+{% if Course.objects.exists == False %}
+    <h2>There are no courses that are available to you</h2>
+{% else %}
+    <ul>
+    {% for course in course_list %}
+        <li><a href=" {% url 'homepage:courseS' course.id %}"> {{course.getName}}</a></li>
+    {% endfor %}
+    </ul>
+{% endif %}

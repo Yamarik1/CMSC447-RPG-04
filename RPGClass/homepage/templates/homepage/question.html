@@ -9,11 +9,11 @@
 {% for question in quest.question_set.all %}
 
 
-    <form action="{% url 'homepage:answer' quest.id %} " method="post">
+    <form action="{% url 'homepage:answer' course_id quest.id %} " method="post">
         {% csrf_token %}
         <fieldset class="question">
 
-            <h2 class="question"> {{question.id}}: {{ question.getQuestion }} </h2> <br>
+            <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
 
             <!-- checks to see if there are any questions in the quest -->
             {% if question.choice_set.exists == False %}

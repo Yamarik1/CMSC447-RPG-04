@@ -8,7 +8,7 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Quest, Question, Choice
+from .models import Course, Quest, Question, Choice
 
 # Create your tests here.
 
@@ -25,7 +25,6 @@ class TestHomepage(TestCase):
         self.user.delete()
 
     def test_url_correctness(self):
-
         self.client.login(username='test', password='12test12')
 
         response = self.client.get(reverse('homepage:menu'))
@@ -34,19 +33,13 @@ class TestHomepage(TestCase):
         self.assertContains(response, "Welcome to RPG Class!")
 
 
-# Test for the main quest homepage
-class Quest_test_Class(TestCase):
-    # The url found at homepage/mainquest should exist, and will return 200 code
-    def test_url_correctness(self):
-        response = self.client.get(reverse('homepage:mainquest'))
-        self.assertEqual(response.status_code, 200)
-
-
 # Function to make a Quest with a number of questions, each with a number of Choices. The correct answer is decided
 # by a list of integers, this expects the length of the list to be the number of questions, and the integer values need
 # to be within 0 and numChoices. Used for larger tests.
 def CreateQuest(name, numQuestions, numChoices, rightList=[], testChoice=[]):
-    testQuest = Quest.objects.create()
+    C = Course.objects.create()
+
+    testQuest = C.quest_set.create()
     testQuest.setName(name)
     testQuest.setType(1)
 
@@ -98,6 +91,37 @@ class TestQuestMethods(TestCase):
         self.assertIs(isWorking, True)
 
 
+# Test class to test the general view of the quest list
+class TestQuestList(TestCase):
+
+    # Test that if no quests exist in a course, the proper message is given
+    def test_no_quests(self):
+        C = Course.objects.create()
+
+        url = reverse('homepage:mainquest', args=(C.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "There are no quests available.")
+
+    # Test with 2 quests to test that they will both be listed
+    def test_with_quests(self):
+        C = Course.objects.create()
+        Q = C.quest_set.create()
+
+        Q.setName("Quest 1")
+        Q.save()
+
+        Q = C.quest_set.create()
+        Q.setName("Quest 2")
+        Q.save()
+
+        url = reverse('homepage:mainquest', args=(C.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Quest 1")
+        self.assertContains(response, "Quest 2")
+
+
 class TestQuest(TestCase):
 
     # Test that correct answers can be assigned and identified
@@ -130,10 +154,11 @@ class QuestViewTest(TestCase):
 
     # Test that if the quest is specified, it will not be available to the user
     def test_no_quest(self):
-        quest = Quest.objects.create()
+        C = Course.objects.create()
+        quest = C.quest_set.create()
         quest.setAvailable(False)
 
-        url = reverse('homepage:mQuestView', args=(quest.id,))
+        url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This quest is not available")
@@ -141,13 +166,14 @@ class QuestViewTest(TestCase):
     # Test that if a quest should be available, it will be shown on the page
     def test_quest_available(self):
         # Make a quest with basic parameters
-        quest = Quest.objects.create()
+        C = Course.objects.create()
+        quest = C.quest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
         quest.setType(1)
         quest.setLives(3)
         quest.save()
-        url = reverse('homepage:mQuestView', args=(quest.id,))
+        url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -155,14 +181,15 @@ class QuestViewTest(TestCase):
 
     # Checks to see if a quest with type zero will give the right pages
     def test_type_quest_0(self):
-        quest = Quest.objects.create()
+        C = Course.objects.create()
+        quest = C.quest_set.create()
         quest.setAvailable(True)
         quest.setType(0)
         quest.setXP(10)
         quest.setLives(3)
         quest.save()
 
-        url = reverse('homepage:mQuestView', args=(quest.id,))
+        url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
         # Test that the proper message is displayed and the specific quest screen
         response = self.client.get(url)
@@ -170,16 +197,31 @@ class QuestViewTest(TestCase):
         self.assertContains(response, "This quest doesn't have anymore work for you to do!")
 
         # Test that Type 0 quests will present a proper summary page with proper XP value
-        url = reverse('homepage:summary', args=(quest.id,))
+        url = reverse('homepage:summary', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "XP gained: " + str(quest.getXP()))
 
+    # With the summary page being updated, this test makes sure the summary page appears with the new info
+    def test_summary_page(self):
+        C = Course.objects.create()
+        quest = C.quest_set.create()
+        quest.setAvailable(True)
+        quest.setType(0)
+        quest.setXP(10)
+        quest.save()
+
+        url = reverse('homepage:summary', args=(C.id, quest.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Click here to accept the quest results:")
+
 
 # Create a basic question for some unit tests.
 def create_QuestionView_Quest(question="N/A", choice="N/A"):
-    quest = Quest.objects.create()
+    C = Course.objects.create()
+    quest = C.quest_set.create()
     quest.setType(1)
     quest.setAvailable(True)
     question = quest.question_set.create()
@@ -190,7 +232,8 @@ def create_QuestionView_Quest(question="N/A", choice="N/A"):
         choice.setChoice(choice)
 
     quest.save()
-    return quest
+    C.save()
+    return C
 
 
 class QuestionsViewTest(TestCase):
@@ -198,10 +241,11 @@ class QuestionsViewTest(TestCase):
     # Test to make sure a question with no choices presents the proper message on the page
     def test_question_with_no_choices(self):
         # Test that a single question with no choices presents the proper page
-        quest = create_QuestionView_Quest("Test Question")
+        C = create_QuestionView_Quest("TestQuestion")
+        quest = C.quest_set.get(pk=1)
         question = quest.question_set.get(pk=1)
 
-        url = reverse('homepage:mQuest', args=(quest.id,))
+        url = reverse('homepage:mQuest', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -210,10 +254,11 @@ class QuestionsViewTest(TestCase):
     # Test that one question can be properly be displayed on the page
     def test_1_question(self):
         # Test that a single question produces its proper page
-        quest = create_QuestionView_Quest("Test Question", "Test Choice")
+        C = create_QuestionView_Quest("Test Question", "Test Choice")
+        quest = C.quest_set.get(pk=1)
         question = quest.question_set.get(pk=1)
 
-        url = reverse('homepage:mQuest', args=(quest.id,))
+        url = reverse('homepage:mQuest', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -221,10 +266,11 @@ class QuestionsViewTest(TestCase):
 
     # Test the multiple questions can be presented on the page
     def test_2_questions(self):
-        quest = create_QuestionView_Quest("Test Question", "Test Choice")
+        C = create_QuestionView_Quest("Test Question", "Test Choice")
+        quest = C.quest_set.get(pk=1)
         question = quest.question_set.get(pk=1)
 
-        url = reverse('homepage:mQuest', args=(quest.id,))
+        url = reverse('homepage:mQuest', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -236,7 +282,7 @@ class QuestionsViewTest(TestCase):
         choice2 = question2.choice_set.create()
         choice2.setChoice("Test Choice 2")
 
-        url = reverse('homepage:mQuest', args=(quest.id,))
+        url = reverse('homepage:mQuest', args=(C.id, quest.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -244,20 +290,22 @@ class QuestionsViewTest(TestCase):
 
     # Test one question with choices, and one without
     def test_mixed_questions(self):
-        quest = create_QuestionView_Quest("Test Question", "Test Choice")
+        C = create_QuestionView_Quest("Test Question", "Test Choice")
+        quest = C.quest_set.get(pk=1)
         question = quest.question_set.get(pk=1)
 
         question2 = quest.question_set.create()
         question2.setQuestion("Test Question 2")
         question2.save()
 
-        url = reverse('homepage:mQuest', args=(quest.id,))
+        url = reverse('homepage:mQuest', args=(C.id, quest.id,))
 
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test Question")
         self.assertContains(response, "This Question does not have any choices")
+
 
 #hearts test but with a server
 class hearts_server(LiveServerTestCase):
@@ -369,3 +417,106 @@ class hearts(TestCase):
 
         #the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
+
+
+class courseTests(TestCase):
+
+    # function to make a test course
+    def makeClass(self):
+        C = Course.objects.create()
+        C.save()
+        return C
+
+    # Test that multiple quests can be seen on the class page
+    def test_class_list(self):
+        C1 = self.makeClass()
+        C1.setName("Course 1")
+        C1.save()
+
+        C2 = self.makeClass()
+        C2.setName("Course 2")
+        C2.save()
+
+        url = reverse('homepage:course')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, C1.getName())
+        self.assertContains(response, C2.getName())
+
+    # Test that will make sure that levels are being found properly, and that it is being shown to the user correctly
+    def test_level_value(self):
+        C = self.makeClass()
+        # Set the value of needed XP to 5, and the current XP had is 7, so the level should increase by 1
+        C.setMaxXP(5)
+
+        C.updateXP(7)
+        C.save()
+        url = reverse('homepage:courseS', args=(1,))
+
+        response = self.client.get(url)
+        # At current Xp of 7, the level should be 2, Total should be 7, and xp to next level should be 3
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 2")
+        self.assertContains(response, "Total XP earned: 7")
+        self.assertContains(response, "Xp to next level: 3")
+
+    # Test to simulate multiple different quests still allow course to get correct level
+    def test_multiple_quests(self):
+        C = self.makeClass()
+
+        C.setMaxXP(5)
+
+        Q1 = C.quest_set.create()
+        Q1.setXP(5)
+        Q1.save()
+        C.updateXP(Q1.getXP())
+
+        Q2 = C.quest_set.create()
+        Q2.setXP(7)
+        Q2.save()
+        C.updateXP(Q2.getXP())
+
+        C.save()
+
+        url = reverse('homepage:courseS', args=(1,))
+
+        response = self.client.get(url)
+        # At current Xp of 12, the level should be 3, Total should be 12, and xp to next level should be 3
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 3")
+        self.assertContains(response, "Total XP earned: 12")
+        self.assertContains(response, "Xp to next level: 3")
+
+    # Test the correctness of multiple courses being defined
+    def test_multiple_courses(self):
+        C1 = self.makeClass()
+        C1.setMaxXP(5)
+        C1.updateXP(7)
+        C1.save()
+
+        C2 = self.makeClass()
+        C2.setMaxXP(10)
+        C2.updateXP(29)
+        C2.save()
+
+        # Test the pages with the XP values on them
+        # The first set will be Level 2, Total Xp is 7, To next is 3
+        url = reverse('homepage:courseS', args=(1,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 2")
+        self.assertContains(response, "Total XP earned: 7")
+        self.assertContains(response, "Xp to next level: 3")
+
+        # Second set will pass in the args of 2, since it need to check the second quest
+        # Level will be 3, Total XP is 29, To next is 1
+        url = reverse('homepage:courseS', args=(2,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Current Level: 3")
+        self.assertContains(response, "Total XP earned: 29")
+        self.assertContains(response, "Xp to next level: 1")
+
