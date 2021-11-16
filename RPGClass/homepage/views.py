@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, Choice
+from .models import Course, Quest, SideQuest, Question, Choice
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -48,6 +48,88 @@ class mainquestView(generic.DetailView):
         context['course_id'] = self.kwargs['course_id']
         return context
 
+
+class mQuestSpecific(generic.DetailView):
+    queryset = Quest.objects.all()
+    template_name = "homepage/question.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+
+def answer(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    quest.setXP(0)
+    quest.save()
+    questionSet = quest.question_set.all()
+
+    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            quest.rightAnsChosen()
+            quest.save()
+            selected_choice.save()
+
+    quest.subHeart()
+    quest.save()
+
+    return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
+
+
+def summary(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
+
+
+def accept(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = quest.getXP()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+
+class sidequest(generic.DetailView):
+    model = Course
+    template_name = 'homepage/sideQuest.html'
+
+
+class sidequestView(generic.DetailView):
+    model = SideQuest
+    template_name = 'homepage/sQuestView.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+class sQuestSpecific(generic.DetailView):
+    queryset = SideQuest.objects.all()
+    template_name = "homepage/question.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+
+def bosses(request):
+    return HttpResponse("Placeholder for the Bosses page")
+
+
+def profile(request):
+    return render(request, 'homepage/profile.html')
 
 # For the purposes of creating objects in the database easier
 def visualTest(request):
@@ -153,66 +235,3 @@ def visualTest(request):
 
     return HttpResponseRedirect(reverse('homepage:menu'))
 
-
-class mQuestSpecific(generic.DetailView):
-    queryset = Quest.objects.all()
-    template_name = "homepage/question.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['course_id'] = self.kwargs['course_id']
-        return context
-
-
-def answer(request, course_id, quest_id):
-    quest = get_object_or_404(Quest, pk=quest_id)
-    quest.setXP(0)
-    quest.save()
-    questionSet = quest.question_set.all()
-
-    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
-    for question in questionSet:
-
-        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
-
-        if selected_choice.getCorrect():
-            quest.rightAnsChosen()
-            quest.save()
-            selected_choice.save()
-
-    quest.subHeart()
-    quest.save()
-
-    return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
-
-
-def summary(request, course_id, quest_id):
-    quest = get_object_or_404(Quest, pk=quest_id)
-    course = get_object_or_404(Course, pk=course_id)
-    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
-
-
-def accept(request, course_id, quest_id):
-    quest = get_object_or_404(Quest, pk=quest_id)
-    course = get_object_or_404(Course, pk=course_id)
-
-    gainedXP = quest.getXP()
-
-    course.updateXP(gainedXP)
-
-    course.save()
-
-    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
-
-
-class sidequest(generic.DetailView):
-    model = Course
-    template_name = 'homepage/mainQuest.html'
-
-
-def bosses(request):
-    return HttpResponse("Placeholder for the Bosses page")
-
-
-def profile(request):
-    return render(request, 'homepage/profile.html')

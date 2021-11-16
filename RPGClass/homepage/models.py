@@ -40,8 +40,6 @@ class Course(models.Model):
 
         self._curr_XP = tempXP
 
-
-
     def setCurrXP(self, xp):
         self._course_XP = xp
         return "XP updated"
@@ -62,7 +60,6 @@ class Course(models.Model):
     def setCourseLevel(self, level):
         self._course_level = level
         return "Level updated"
-
 
     # Private members
     _course_name = models.CharField(max_length=200)
@@ -158,7 +155,6 @@ class Quest(models.Model):
 class SideQuest(models.Model):
     course = models.ForeignKey(Quest, on_delete=models.CASCADE)
 
-
     # Getters and setters
     def getName(self):
         return self._Quest_name
@@ -227,11 +223,11 @@ class SideQuest(models.Model):
         msg = "This is Quest number:" + str(self.pk)
         return msg
 
+
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
-    sidequest = models.ForeignKey(SideQuest, on_delete=models.CASCADE)
 
     # Public members
     def getQuestion(self):

@@ -5,23 +5,23 @@
 
 
 
-<h1>Main Quests</h1>
+<h1>Side Quests</h1>
 
 <!--This defines the list of links used in the navigation bar -->
 <ul>
     <li><a class = "nav" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
-    <li><a class = "nav active" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
-    <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
+    <li><a class = "nav active" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
     <li><a class = "nav" href="{% url 'homepage:bosses'  %}">Bosses</a> </li>
 </ul>
-<h2> Available main quests are listed below: </h2>
+<h2> Available side quests are listed below: </h2>
 
 <!-- This contains the button and a link to a quest when clicked on -->
 <!-- The layout of the button in located in mQuestView.css -->
 
-{% if course.quest_set.exists %}
+{% if course.sidequest_set.exists %}
     {% for quest in course.quest_set.all %}
-        <div class = "center"> <a href="{% url 'homepage:mQuestView' course.id quest.id %}" class = "button"> {{quest.getName}}
+        <div class = "center"> <a href="{% url 'homepage:sQuestView' course.id sidequest.id %}" class = "button"> {{quest.getName}}
         <p><font size = "+1"> {{quest.getDesc}} </font></p>
         </a> </div>
     {% endfor %}

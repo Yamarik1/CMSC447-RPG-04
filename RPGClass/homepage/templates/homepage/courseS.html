@@ -8,7 +8,7 @@
 <ul>
     <li><a class = "nav active" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
     <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
-    <li><a class = "nav" href="{% url 'homepage:sidequest' %}">Side Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
     <li><a class = "nav" href="{% url 'homepage:bosses'  %}">Bosses</a> </li>
 
 
@@ -21,7 +21,7 @@
 <!--These are the same links as above, restated with a desciption of each one -->
 <h2><a href="{% url 'homepage:mainquest' course.id %}">Main Quests</a> </h2>
 <p>Make sure to prepare for these quests! Make sure to complete some side quests to increase your level! </p>
-<h2><a href="/homepage/sidequest/">Side Quests</a> </h2>
+<h2><a href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </h2>
 <p>Here you can get some extra practice with quests that will give you XP. Make sure to give these a try before trying the Main Quests and the Bosses!</p>
 <h2><a href="/homepage/bosses/">Bosses</a></h2>
 <p>Here you can take on some of the toughest challenges. Make sure to be prepared!</p>
