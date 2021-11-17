@@ -114,14 +114,56 @@ class sidequestView(generic.DetailView):
         context['course_id'] = self.kwargs['course_id']
         return context
 
+
 class sQuestSpecific(generic.DetailView):
     queryset = SideQuest.objects.all()
-    template_name = "homepage/question.html"
+    template_name = "homepage/sQuestQuestion.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
+
+
+def sAnswer(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    sidequest.setXP(0)
+    sidequest.save()
+    questionSet = sidequest.question_set.all()
+
+    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            sidequest.rightAnsChosen()
+            sidequest.save()
+            selected_choice.save()
+
+    sidequest.subHeart()
+    sidequest.save()
+
+    return HttpResponseRedirect(reverse('homepage:sQuestSummary', args=(course_id, sidequest.id,)))
+
+
+def sQuestSummary(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    course = get_object_or_404(Course, pk=course_id)
+    return render(request, 'homepage/sQuestSummary.html', {'sidequest': sidequest, 'course': course})
+
+
+def sAccept(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = sidequest.getXP()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 
 def bosses(request):
@@ -130,6 +172,7 @@ def bosses(request):
 
 def profile(request):
     return render(request, 'homepage/profile.html')
+
 
 # For the purposes of creating objects in the database easier
 def visualTest(request):
@@ -155,14 +198,14 @@ def visualTest(request):
     question = Q.question_set.create(pk=1)
     question.setQuestion("What is the answer to life, the universe, and everything")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=1)
     c.setChoice("Food")
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=2)
     c.setChoice("42")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=3)
     c.setChoice("...what?")
     c.save()
 
@@ -170,11 +213,11 @@ def visualTest(request):
     question = Q.question_set.create(pk=2)
     question.setQuestion("Pineapple on Pizza?")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=4)
     c.setChoice("No")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=5)
     c.setChoice("Yes")
     c.save()
 
@@ -194,6 +237,25 @@ def visualTest(request):
 
     newCourse.save()
 
+    squest = newCourse.sidequest_set.create(pk=1)
+    squest.setName("Side Quest 1")
+    squest.setType(1)
+    squest.setLives(5)
+    squest.setAvailable(True)
+
+    question = squest.question_set.create(pk=3)
+    question.setQuestion("test")
+    question.save()
+    c = question.choice_set.create(pk=6)
+    c.setChoice("Right")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create(pk=7)
+    c.setChoice("Wrong")
+    c.save()
+    squest.save()
+    newCourse.save()
+
     C = Course.objects.create(pk=2)
     C.setName("Course 2")
     C.setMaxXP(10)
@@ -205,26 +267,26 @@ def visualTest(request):
     Q.setAvailable(True)
     Q.setType(1)
 
-    question = Q.question_set.create(pk=3)
+    question = Q.question_set.create(pk=4)
     question.setQuestion("What is 10 + 1?")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=8)
     c.setChoice("10")
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=9)
     c.setChoice("11")
     c.setCorrect(True)
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=4)
+    question = Q.question_set.create(pk=5)
     question.setQuestion("What is 8 - 2?")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=10)
     c.setChoice("6")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=11)
     c.setChoice("12")
     c.save()
 
@@ -234,4 +296,3 @@ def visualTest(request):
     C.save()
 
     return HttpResponseRedirect(reverse('homepage:menu'))
-

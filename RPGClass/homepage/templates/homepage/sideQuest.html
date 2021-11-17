@@ -20,9 +20,9 @@
 <!-- The layout of the button in located in mQuestView.css -->
 
 {% if course.sidequest_set.exists %}
-    {% for quest in course.quest_set.all %}
-        <div class = "center"> <a href="{% url 'homepage:sQuestView' course.id sidequest.id %}" class = "button"> {{quest.getName}}
-        <p><font size = "+1"> {{quest.getDesc}} </font></p>
+    {% for sidequest in course.sidequest_set.all %}
+        <div class = "center"> <a href="{% url 'homepage:sQuestView' course.id sidequest.id %}" class = "button"> {{sidequest.getName}}
+        <p><font size = "+1"> {{sidequest.getDesc}} </font></p>
         </a> </div>
     {% endfor %}
 

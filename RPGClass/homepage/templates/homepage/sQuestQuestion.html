@@ -1,0 +1,39 @@
+{% load static %}
+
+<!--the title is for the test.py in hearts_server, can change it to anything as long as you change it in tests-->
+<title>quest</title>
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/questView.css' %}">
+<h1>{{ sidequest.getName }}</h1>
+
+{% for question in sidequest.question_set.all %}
+
+
+    <form action="{% url 'homepage:sAnswer' course_id sidequest.id %} " method="post">
+        {% csrf_token %}
+        <fieldset class="question">
+
+            <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
+
+            <!-- checks to see if there are any questions in the quest -->
+            {% if question.choice_set.exists == False %}
+
+                <p>This Question does not have any choices</p>
+
+            {% else %}
+
+                {% for choice in question.choice_set.all %}
+                    <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
+                    <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                    <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
+
+                {% endfor %}
+
+            {% endif %}
+
+            </fieldset>
+        <br>
+
+
+{% endfor %}
+<input type="submit" value="Submit" id="submit">
+</form>

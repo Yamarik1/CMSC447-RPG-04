@@ -153,7 +153,7 @@ class Quest(models.Model):
 
 
 class SideQuest(models.Model):
-    course = models.ForeignKey(Quest, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
     # Getters and setters
     def getName(self):
@@ -227,7 +227,8 @@ class SideQuest(models.Model):
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, blank=True, null=True)
+    sidequest = models.ForeignKey(SideQuest, on_delete=models.CASCADE, blank=True, null=True)
 
     # Public members
     def getQuestion(self):
