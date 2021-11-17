@@ -156,12 +156,24 @@ focus on the actual development of features
                 </div>
 
                 <!--Bottom Section-->
-                <div class="row justify-content-lg-center profile-inner" style="height: 300px">
+                <div class="row justify-content-lg-center profile-inner">
                     {% if course.quest_set.exists %}
                         {% for quest in course.quest_set.all %}
-                            <div class = "profile-questBlock">
-                                <h4>{{quest.getName}}</h4>
-                                <p>{{quest.getDesc}}</p>
+                            <div class = "profile-questBlock col-lg-8">
+                            <!--<a href="{% url 'homepage:mainquest' course.id %}" class = "button">-->
+                                <div>
+                                    <div class="col-md-4" style="border-style: inset;"><h4>{{quest.getName}}</h4></div>
+                                    <div class="col-md-4"></div><p>{{quest.getDesc}}</p>
+                                </div>
+                                <div>
+                                    <div class="col-sm-4" style="border-style: inset;"><h4>Lives:</h4></div>
+                                    <div class="col-sm-4" style="float: right;"><h4>{{quest.getLives}}</h4></div>
+                                </div>
+                                <div>
+                                    <div class="col-sm-4" style="border-style: inset;"><h4>XP:</h4></div>
+                                    <div class="col-sm-4" style="float: right;"><h4>{{quest.getXP}}</h4></div>
+                                </div>
+                            <!--</a>-->
                             </div>
                         {% endfor %}
                 
