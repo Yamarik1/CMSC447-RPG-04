@@ -476,6 +476,71 @@ class sideQuest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Side Quests")
 
+    # Makes sure the sidequest can appear on the sidequest page
+    def test_sidequest_list(self):
+        course = Course.objects.create()
+        course.save()
+
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 1")
+
+        sQuest.save()
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 2")
+
+        url = reverse('homepage:sidequest', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, course.sidequest_set.get(pk=1).getName())
+        self.assertContains(response, course.sidequest_set.get(pk=2).getName())
+
+    # Test the sidequest page to make sure a type 0 sidequest will give the proper message
+    def test_sidequest_specific_type_0(self):
+        course = Course.objects.create()
+        course.save()
+
+        sidequest = course.sidequest_set.create()
+        sidequest.setName("sidequest 1")
+        sidequest.setAvailable(True)
+        sidequest.setType(0)
+        sidequest.setLives(1)
+        sidequest.setXP(10)
+        sidequest.save()
+
+        url = reverse('homepage:sQuestView', args=(1, 1))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This quest doesn't have anymore work for you to do!")
+
+
+    # Test type 1 quest to make sure questions can be printed to the user
+    def test_sidequest_question(self):
+        course = Course.objects.create()
+        course.save()
+
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 1")
+        sQuest.setType(1)
+        sQuest.setLives(1)
+
+        question = sQuest.question_set.create()
+        question.setQuestion("question 1")
+
+        choice = question.choice_set.create()
+        choice.setChoice("choice 1")
+
+        choice.save()
+        question.save()
+        sQuest.save()
+        course.save()
+
+        url = reverse('homepage:sQuest', args=(1, 1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "question 1")
+        self.assertContains(response, "choice 1")
+
+
 
 
 
