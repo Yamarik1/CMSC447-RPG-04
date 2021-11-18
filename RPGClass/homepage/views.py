@@ -35,14 +35,11 @@ class mainquest(generic.DetailView):
     template_name = 'homepage/mainQuest.html'
 
 
-# def mainquest(request, course_id):
-# return render(request, "homepage/mainQuest.html")
-
-
 class mainquestView(generic.DetailView):
     model = Quest
     template_name = 'homepage/mQuestView.html'
 
+    # Pass the course_id in the url to the html file so that the urls can stay consistent
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
@@ -74,7 +71,7 @@ def answer(request, course_id, quest_id):
             quest.rightAnsChosen()
             quest.save()
             selected_choice.save()
-
+    # When the quest is finished, the number of lives is decreased by one
     quest.subHeart()
     quest.save()
 
@@ -87,12 +84,13 @@ def summary(request, course_id, quest_id):
     return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
 
 
+# Function added to allow the user to accept the result of the quest
 def accept(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = quest.getXP()
-
+    # XP for the course will get updated after the accept button is chosen.
     course.updateXP(gainedXP)
 
     course.save()
@@ -100,6 +98,7 @@ def accept(request, course_id, quest_id):
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 
+# Implementation of side quests is the same of main quests, just with a different table in the database
 class sidequest(generic.DetailView):
     model = Course
     template_name = 'homepage/sideQuest.html'

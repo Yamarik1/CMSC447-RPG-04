@@ -151,7 +151,10 @@ class Quest(models.Model):
         msg = "This is Quest number:" + str(self.pk)
         return msg
 
-
+# Side quest model has the same logic as the main quest model. We wanted to add it as a separate table in the database
+# So we can differentiate between the two. The idea is that while the logic of their implementation may be the same,
+# the actual content added to them will be different, so we wanted to give the admin the ability to more easily
+# differentiate between them.
 class SideQuest(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
@@ -227,6 +230,7 @@ class SideQuest(models.Model):
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
+    # A question can belong to either a main quest of a side quest, so there are two possible ForeignKeys in this model
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE, blank=True, null=True)
     sidequest = models.ForeignKey(SideQuest, on_delete=models.CASCADE, blank=True, null=True)
 
@@ -248,7 +252,7 @@ class Question(models.Model):
 
 class Choice(models.Model):
     # Public members
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
 
     def getChoice(self):
         return self._choice_text

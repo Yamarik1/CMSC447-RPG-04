@@ -359,6 +359,43 @@ class hearts(TestCase):
         #the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
 
+    # Test that the lives function works for sidequests
+    def test_sidequest_hearts(self):
+        C = Course.objects.create()
+        squest = C.sidequest_set.create()
+        squest.setName("Test Quest")
+        squest.setAvailable(True)
+        squest.setType(1)
+        squest.setLives(3)
+        squest.save()
+
+        url = reverse('homepage:sQuestView', args=(C.id, squest.id,))
+
+        #makes sure we are at the right page
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        #since we set lives to 3, should output 3
+        self.assertContains(response, "number of lives: 3")
+
+    def test_sidequest_no_lives(self):
+        C = Course.objects.create()
+        squest = C.sidequest_set.create()
+        squest.setName("Test Quest")
+        squest.setAvailable(True)
+        squest.setType(1)
+        squest.setLives(0)
+        squest.save()
+
+        url = reverse('homepage:sQuestView', args=(C.id, squest.id,))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        #the page should be different and tells you you cannot do quest
+        self.assertContains(response, "you are out of lives")
+
+
 
 class courseTests(TestCase):
 
@@ -540,6 +577,21 @@ class sideQuest(TestCase):
         self.assertContains(response, "question 1")
         self.assertContains(response, "choice 1")
 
+    # Tests that the summary page is correctly produced
+    def test_sidequest_summary(self):
+        C = Course.objects.create()
+        squest = C.sidequest_set.create()
+        squest.setName("sidequest 1")
+        squest.setType(0)
+        squest.setAvailable(True)
+        squest.setXP(10)
+
+        squest.save()
+        C.save()
+        url = reverse('homepage:sQuestSummary', args=(1, 1))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "XP gained: 10")
 
 
 
