@@ -20,8 +20,22 @@
 
     <input type="submit" value="Initialize">
 
-
 </form>
+
+<p>For ease of production, this button will initialize the database to some test bosses</p>
+<form action="{% url 'homepage:bossTest' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Initialize Boss">
+</form>
+
+<p>For ease of production, this button will initialize the database to some test recommendation </p>
+<form action="{% url 'homepage:recsTest' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Initialize Recs">
+</form>
+
 <!--These are the same links as above, restated with a desciption of each one -->
 <h2><a href="{% url 'homepage:course' %}">Courses</a></h2>
 <p>Click here for the list of courses</p>

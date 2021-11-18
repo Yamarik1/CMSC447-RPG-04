@@ -8,7 +8,9 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Course, Quest, Question, Choice
+from .models import Choice, Quest, Question, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
+
+
 
 # Create your tests here.
 
@@ -306,6 +308,138 @@ class QuestionsViewTest(TestCase):
         self.assertContains(response, "Test Question")
         self.assertContains(response, "This Question does not have any choices")
 
+
+# Function to test the creation of a boss with certain number of questions, choices and answers
+def CreateBoss(name, numQuestions, numChoices, rightList=[], testChoice=[]):
+    testBoss = Boss.objects.create()
+    testBoss.setName(name)
+    testBoss.setType(1)
+
+    for i in range(numQuestions):
+        q = testBoss.bossquestion_set.create()
+
+        for j in range(numChoices):
+            c = q.bosschoice_set.create()
+            if rightList[i] == j:
+                c.setCorrect(True)
+                c.setChoice(testChoice[j])
+                c.save()
+
+            else:
+                c.setCorrect(False)
+                c.setChoice(testChoice[j])
+                c.save()
+
+        q.save()
+    testBoss.save()
+
+    return testBoss
+
+# Tests the boss methods
+class TestBossMethods(TestCase):
+
+    # Test getters and setters
+    def test_boss_getters_and_setters(self):
+
+        # Create a test question using some basic values
+        boss = CreateBoss("Test", 1, 1, [1], [1])
+        isWorking = True
+
+        # Question name
+        boss.setName("Question 1")
+        if boss.getName() != "Question 1":
+            isWorking = False
+
+        # Question description
+        boss.setDesc("This is the first Question")
+        if boss.getDesc() != "This is the first Question":
+            isWorking = False
+
+        # Question Lives
+        boss.setLives(3)
+        if boss.getLives() != 3:
+            isWorking = False
+
+        self.assertIs(isWorking, True)
+
+# Test boss views
+class QuestViewTest(TestCase):
+
+    # Test that if the boss is specified, it will not be available to the user
+    def test_no_boss(self):
+        boss = Boss.objects.create()
+        boss.setAvailable(False)
+
+        url = reverse('homepage:bossView', args=(boss.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This boss is not available")
+
+    # Test that if a quest should be available, it will be shown on the page
+    def test_boss_available(self):
+        # Make a quest with basic parameters
+        boss = Boss.objects.create()
+        boss.setName("Test Boss")
+        boss.setAvailable(True)
+        boss.setType(1)
+        boss.save()
+        url = reverse('homepage:bossView', args=(boss.id,))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Click here to Start of the boss!")
+
+    # Checks to see if a boss with type zero will give the right pages
+    def test_type_quest_0(self):
+        boss = Boss.objects.create()
+        boss.setAvailable(True)
+        boss.setType(0)
+        boss.setXP(10)
+        boss.save()
+
+        url = reverse('homepage:bossView', args=(boss.id,))
+
+        # Test that the proper message is displayed and the specific quest screen
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This boss has already been completed")
+
+        # Test that Type 0 quests will present a proper summary page with proper XP value
+        url = reverse('homepage:bossSummary', args=(boss.id,))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "XP gained: " + str(boss.getXP()))
+
+
+# Create a basic question for bosses
+def create_QuestionView_Boss(question="N/A", choice="N/A"):
+    boss = Boss.objects.create()
+    boss.setType(1)
+    boss.setAvailable(True)
+    bossquestion = boss.bossquestion_set.create()
+    bossquestion.setQuestion(question)
+
+    if (choice != "N/A"):
+        bosschoice = boss.bosschoice_set.create()
+        bosschoice.setChoice(choice)
+
+    boss.save()
+    return boss
+
+# Tests the creation of topics and recommendations
+def recsTest(topics="yes"):
+    # Create custom recommendation with some test values
+    # Test recs 1 named recommended topics:
+    rec = Recs.objects.create()
+    rec.setAvailable(True)
+    topic = rec.topic_set.create()
+    topic.setTopic(topics)
+
+    rec.save()
+
+    return rec
+
 #testing number of lives
 class hearts(TestCase):
     #test if number displays correctly
@@ -445,4 +579,104 @@ class courseTests(TestCase):
         self.assertContains(response, "Current Level: 3")
         self.assertContains(response, "Total XP earned: 29")
         self.assertContains(response, "Xp to next level: 1")
+
+
+# Add additional tests for the side quests
+class sideQuest(TestCase):
+
+    # Makes sure the side quest page exists
+    def test_sidequest_page(self):
+        course = Course.objects.create()
+        course.save()
+
+        url = reverse('homepage:sidequest', args=(1,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Side Quests")
+
+    # Makes sure the sidequest can appear on the sidequest page
+    def test_sidequest_list(self):
+        course = Course.objects.create()
+        course.save()
+
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 1")
+
+        sQuest.save()
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 2")
+
+        url = reverse('homepage:sidequest', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, course.sidequest_set.get(pk=1).getName())
+        self.assertContains(response, course.sidequest_set.get(pk=2).getName())
+
+    # Test the sidequest page to make sure a type 0 sidequest will give the proper message
+    def test_sidequest_specific_type_0(self):
+        course = Course.objects.create()
+        course.save()
+
+        sidequest = course.sidequest_set.create()
+        sidequest.setName("sidequest 1")
+        sidequest.setAvailable(True)
+        sidequest.setType(0)
+        sidequest.setLives(1)
+        sidequest.setXP(10)
+        sidequest.save()
+
+        url = reverse('homepage:sQuestView', args=(1, 1))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This quest doesn't have anymore work for you to do!")
+
+
+    # Test type 1 quest to make sure questions can be printed to the user
+    def test_sidequest_question(self):
+        course = Course.objects.create()
+        course.save()
+
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 1")
+        sQuest.setType(1)
+        sQuest.setLives(1)
+
+        question = sQuest.question_set.create()
+        question.setQuestion("question 1")
+
+        choice = question.choice_set.create()
+        choice.setChoice("choice 1")
+
+        choice.save()
+        question.save()
+        sQuest.save()
+        course.save()
+
+        url = reverse('homepage:sQuest', args=(1, 1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "question 1")
+        self.assertContains(response, "choice 1")
+
+    # Tests that the summary page is correctly produced
+    def test_sidequest_summary(self):
+        C = Course.objects.create()
+        squest = C.sidequest_set.create()
+        squest.setName("sidequest 1")
+        squest.setType(0)
+        squest.setAvailable(True)
+        squest.setXP(10)
+
+        squest.save()
+        C.save()
+        url = reverse('homepage:sQuestSummary', args=(1, 1))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "XP gained: 10")
+
+
+
+
+
 

@@ -1,0 +1,39 @@
+
+{% load static %}
+<body></body>
+
+<link rel="stylesheet" type="text/css" href="{% static 'bosspage/bossButton.css' %}">
+<h1>{{ boss.getName }}</h1>
+
+{% for bossquestion in boss.bossquestion_set.all %}
+
+
+    <form action="{% url 'homepage:bossAnswer' course_id boss.id %} " method="post">
+        {% csrf_token %}
+        <fieldset class="bossquestion">
+
+            <h2 class="bossquestion"> {{bossquestion.id}}: {{ bossquestion.getQuestion }} </h2> <br>
+
+            <!-- checks to see if there are any questions in the boss -->
+            {% if bossquestion.bosschoice_set.exists == False %}
+
+                <p>This Question does not have any choices</p>
+
+            {% else %}
+                <!-- Outputs all questions and choices -->
+                {% for bosschoice in bossquestion.bosschoice_set.all %}
+                    <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
+                    <input type="radio" name="{{bossquestion.getQuestion}}" id="bosschoice{{ forloop.counter }}" value="{{ bosschoice.id }}">
+                    <label for="bosschoice{{ forloop.counter }}">{{ bosschoice.getChoice }}</label><br>
+
+                {% endfor %}
+
+            {% endif %}
+
+            </fieldset>
+        <br>
+
+
+{% endfor %}
+<input type="submit" value="Submit">
+</form>
