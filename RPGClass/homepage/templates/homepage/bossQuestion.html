@@ -8,7 +8,7 @@
 {% for bossquestion in boss.bossquestion_set.all %}
 
 
-    <form action="{% url 'homepage:bossAnswer' boss.id %} " method="post">
+    <form action="{% url 'homepage:bossAnswer' course_id boss.id %} " method="post">
         {% csrf_token %}
         <fieldset class="bossquestion">
 

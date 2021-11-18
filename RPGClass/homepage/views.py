@@ -30,6 +30,11 @@ class bossView(generic.DetailView):
     model = Boss
     template_name = 'homepage/bossView.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
 class recsView(generic.DetailView):
     model = Recs
     template_name = 'homepage/recs.html'
@@ -182,8 +187,8 @@ class bossSpecific(generic.DetailView):
     template_name = "homepage/bossQuestion.html"
 
     def get_context_data(self, **kwargs):
-        context = super(bossSpecific, self).get_context_data(**kwargs)
-        context['bossQuestion'] = bossQuestion.objects.all()
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
         return context
 
 def answer(request, quest_id):
@@ -204,7 +209,7 @@ def answer(request, quest_id):
 
     return HttpResponseRedirect(reverse('homepage:summary', args=(quest.id,)))
 
-def bossAnswer(request, boss_id):
+def bossAnswer(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     boss.setXP(0)
     boss.save()
@@ -227,7 +232,7 @@ def summary(request, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     return render(request, 'homepage/summary.html', {'quest': quest})
 
-def bossSummary(request, boss_id):
+def bossSummary(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     return render(request, 'homepage/bossSummary.html', {'boss': boss})
 
