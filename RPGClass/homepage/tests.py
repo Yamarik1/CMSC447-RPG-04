@@ -12,8 +12,6 @@ from .models import Course, Quest, Question, Choice
 
 # Create your tests here.
 
-geck_path: str ='/Users/Adam Yamarik/PycharmProjects/CMSC447-RPG-04-2/RPGClass/homepage/Gecko/geckodriver.exe'
-
 # Test for the skeleton homepage
 class TestHomepage(TestCase):
     # The homepage needs an account to reach, so here the account is made
