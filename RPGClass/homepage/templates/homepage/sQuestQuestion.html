@@ -1,15 +1,14 @@
-
 {% load static %}
 
 <!--the title is for the test.py in hearts_server, can change it to anything as long as you change it in tests-->
 <title>quest</title>
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/questView.css' %}">
-<h1>{{ quest.getName }}</h1>
+<h1>{{ sidequest.getName }}</h1>
 
-{% for question in quest.question_set.all %}
+{% for question in sidequest.question_set.all %}
 
 
-    <form action="{% url 'homepage:answer' course_id quest.id %} " method="post">
+    <form action="{% url 'homepage:sAnswer' course_id sidequest.id %} " method="post">
         {% csrf_token %}
         <fieldset class="question">
 
@@ -38,8 +37,3 @@
 {% endfor %}
 <input type="submit" value="Submit" id="submit">
 </form>
-
-
-
-
-
