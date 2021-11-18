@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -8,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, Choice
+from .models import Course, Question, Quest, Choice, Skill, Student_course
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -199,6 +200,10 @@ def accept(request, course_id, quest_id):
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = quest.getXP()
+    request.user.student.addXP(gainedXP)
+    request.user.student.save()
+    request.user.student.student_course.addXP(gainedXP)
+    request.user.student.save()
 
     course.updateXP(gainedXP)
 
@@ -217,3 +222,76 @@ def bosses(request):
 
 def profile(request):
     return render(request, 'homepage/profile.html')
+
+#def marketplace(request, course_id):
+#    return render(request, 'homepage/marketplace.html')
+
+class marketplace(generic.DetailView):
+    model = Course
+    template_name = 'homepage/marketplace.html'
+
+def create_course_student(request, course_id):
+    user = get_object_or_404(User, pk=request.user.id)
+    print(not user.student.student_course.DoesNotExist)
+    if (user.student.student_course.DoesNotExist):
+        user.student.student_course.delete()
+
+    Student_course.objects.create(student=request.user.student)
+    request.user.student.student_course.save()
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+def skillscreate(request, course_id):
+    # Delete anything in the database
+
+    course = get_object_or_404(Course, pk=course_id)
+
+    for newSkills in course.skill_set.all():
+        newSkills.delete()
+
+    print("this works")
+
+    S = course.skill_set.create(pk=1)
+    S.setName("Gain Hearts")
+    S.setDesc("You can get one heart")
+    S.setCost(200)
+    S.save()
+
+    S = course.skill_set.create(pk=2)
+    S.setName("Gain Extra time")
+    S.setDesc("Gain extra time on a timed quests")
+    S.setCost(300)
+    S.save()
+
+    S = course.skill_set.create(pk=3)
+    S.setName("Gain XP")
+    S.setDesc("Boost XP")
+    S.setCost(500)
+    S.save()
+
+    S = course.skill_set.create(pk=4)
+    S.setName("XP boost")
+    S.setDesc("gain extra xp on a certain amount of quests")
+    S.setCost(1000)
+    S.save()
+
+    S = course.skill_set.create(pk=5)
+    S.setName("bomb choice")
+    S.setDesc("during a multiple choice question, able to eliminate a random choice")
+    S.setCost(800)
+    S.save()
+
+    S = course.skill_set.create(pk=6)
+    S.setName("extra shot")
+    S.setDesc("if you get a question wrong, get another shot at it")
+    S.setCost(800)
+    S.save()
+
+    S = course.skill_set.create(pk=7)
+    S.setName("Automatic correct answer")
+    S.setDesc("gets an automatic correct answer")
+    S.setCost(500)
+    S.save()
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))

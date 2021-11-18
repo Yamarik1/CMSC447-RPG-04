@@ -1,0 +1,17 @@
+{% load static %}
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+<!--<link rel="stylesheet" type="text/css" href="{% static 'homepage/mQuestView.css' %}">-->
+
+<title> MarketPlace </title>
+
+<h1>skills/items</h1>
+
+{% for skill in course.skill_set.all %}
+
+<h1>skill name: {{ skill.getName }}</h1>
+<h2>skill description: {{ skill.getDesc }}</h2>
+<h2>cost: {{ skill.getCost }}</h2>
+
+{% endfor %}

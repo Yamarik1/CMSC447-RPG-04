@@ -3,6 +3,9 @@ from django.db import models
 
 # Create your models here.
 # Note for classes, any member prefaced by '_' will be private.
+#from RPGClass.accounts.models import Student
+from django.apps import apps
+
 class Course(models.Model):
     # Public members
     def getName(self):
@@ -201,3 +204,52 @@ class Choice(models.Model):
     def __str__(self):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
         return msg
+
+class Skill(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    def getName(self):
+        return self._name
+
+    def setName(self, name):
+        self._name = name
+        return "Changed successfully"
+
+    def getDesc(self):
+        return self._description
+
+    def setDesc(self, desc):
+        self._description = desc
+        return True
+
+    def getCost(self):
+        return self._cost
+
+    def setCost(self, cost):
+        self._cost = cost
+        return True
+
+    _name = models.CharField(max_length=200, default="N/A")
+    _description = models.CharField(max_length=200, default="N/A")
+    _cost = models.IntegerField(default=0)
+
+class Student_course(models.Model):
+
+    def setXP(self, xp):
+        self._curr_XP = xp
+
+    def getXP(self):
+        return self._curr_XP
+
+    def addXP(self, xp):
+        self._curr_XP += xp
+
+    def setCoins(self, coins):
+        self._coins = coins
+
+    def getCoins(self):
+        return self._coins
+
+    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE)
+    _curr_XP = models.IntegerField(default=0)
+    _coins = models.IntegerField(default=0)
