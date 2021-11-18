@@ -1,0 +1,28 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+
+<!-- Checks to see if the quest is available, as specified by the admin-->
+{% if sidequest.getAvailable == False %}
+    <p>This quest is not available</p>
+{% elif sidequest.getLives == 0 %}
+    <p>you are out of lives</p>
+    <a href = "{% url 'homepage:summary' course_id sidequest.id %}">Click here to see the results!</a>
+{% else %}
+    {% if sidequest.getType == 0 %}
+        <h1>{{ sidequest.getName }}</h1>
+        <p>Welcome to this Quest!</p><br>
+        <p>This quest doesn't have anymore work for you to do!</p>
+        <a href = "{% url 'homepage:summary' course_id sidequest.id %}">Click here to see the results!</a>
+    {% elif sidequest.getType == 1 %}
+        <h1>{{ sidequest.getName }}</h1>
+        <p>Welcome to this Quest!</p><br>
+        <p>Click here to Start of the quest!</p>
+
+
+        <p>number of lives: {{ sidequest.getLives }}</p>
+
+        <a href="{% url 'homepage:sQuest' course_id sidequest.id %}">Start Quest</a>
+
+    {% endif %}
+{% endif %}

@@ -40,8 +40,6 @@ class Course(models.Model):
 
         self._curr_XP = tempXP
 
-
-
     def setCurrXP(self, xp):
         self._course_XP = xp
         return "XP updated"
@@ -62,7 +60,6 @@ class Course(models.Model):
     def setCourseLevel(self, level):
         self._course_level = level
         return "Level updated"
-
 
     # Private members
     _course_name = models.CharField(max_length=200)
@@ -154,11 +151,88 @@ class Quest(models.Model):
         msg = "This is Quest number:" + str(self.pk)
         return msg
 
+# Side quest model has the same logic as the main quest model. We wanted to add it as a separate table in the database
+# So we can differentiate between the two. The idea is that while the logic of their implementation may be the same,
+# the actual content added to them will be different, so we wanted to give the admin the ability to more easily
+# differentiate between them.
+class SideQuest(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    # Getters and setters
+    def getName(self):
+        return self._Quest_name
+
+    def setName(self, name):
+        self._Quest_name = name
+        return "Name Changed successfully"
+
+    def getDesc(self):
+        return self._Quest_description
+
+    def setDesc(self, desc):
+        self._Quest_description = desc
+
+    def getLives(self):
+        return self._Num_lives
+
+    def setLives(self, num):
+        self._Num_lives = num
+        return "Changed successfully"
+
+    def subHeart(self):
+        self._Num_lives -= 1
+
+    # Keeps track of the right answers for a quest
+    def getXP(self):
+        return self._Correct_answers
+
+    def rightAnsChosen(self):
+        self._Correct_answers += 1
+
+    def setXP(self, numRight):
+        self._Correct_answers = numRight
+
+    # A quest should not be shown to the player if it is defined as such by the admin
+    def getAvailable(self):
+        return self._Is_available
+
+    def setAvailable(self, available):
+        self._Is_available = available
+        return "Availability has been changed"
+
+    # The quest type will determine how a quest will be handled by the app. The values are as follows:
+    # 0: Quest type of zero means the app does nothing special. It takes the Quest name, XP gained, level progress,
+    #    etc. Used when the quest is manually defined and updated by the admin.
+    # 1: Quest type 1 is a standard quest, which would include multiple choice, short answer, essays, etc.
+
+    # NOTE: Other types to be added in the future, such as imports from other software, file uploads, and anything
+    # we may decided important
+    def getType(self):
+        return self._Quest_type
+
+    def setType(self, questType):
+        self._Quest_type = questType
+        return "Type of quest updated"
+
+    # Private members
+    _Quest_name = models.CharField(max_length=200, default="N/A")
+    _Quest_description = models.CharField(max_length=200, default="N/A")
+    _Num_lives = models.IntegerField(default=0)
+    _Correct_answers = models.IntegerField(default=0)
+    _Is_available = models.BooleanField(default=False)
+    _Quest_type = models.IntegerField(default=0)
+
+    def __str__(self):
+        msg = "This is Quest number:" + str(self.pk)
+        return msg
+
 
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
+    # A question can belong to either a main quest of a side quest, so there are two possible ForeignKeys in this model
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, blank=True, null=True)
+    sidequest = models.ForeignKey(SideQuest, on_delete=models.CASCADE, blank=True, null=True)
 
     # Public members
     def getQuestion(self):
@@ -178,7 +252,7 @@ class Question(models.Model):
 
 class Choice(models.Model):
     # Public members
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
 
     def getChoice(self):
         return self._choice_text

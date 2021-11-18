@@ -4,20 +4,19 @@
 
 <p>Here is you summary for this Quest:</p><br>
 
-<h2>Quest name: {{ quest.getName }}</h2>
+<h2>Quest name: {{ sidequest.getName }}</h2>
 
-<h2>XP gained: {{ quest.getXP }}</h2>
+<h2>XP gained: {{ sidequest.getXP }}</h2>
 
 
-<p>number of lives: {{ quest.getLives }}</p>
+<p>number of lives: {{ sidequest.getLives }}</p>
 
-{% if quest.getLives == 0 %}
+{% if sidequest.getLives == 0 %}
         <a href = "{% url 'homepage:courseS' course.id %}">Click here to go back to the course page</a>
 {% else %}
         <h2>Click here to accept the quest results:</h2>
-        <form action="{% url 'homepage:accept' course.id quest.id %} " method="post">
+        <form action="{% url 'homepage:sAccept' course.id sidequest.id %} " method="post">
                 {% csrf_token %}
                 <input type="submit" value="Accept">
         </form>
 {% endif %}
-
