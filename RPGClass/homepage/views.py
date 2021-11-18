@@ -19,8 +19,9 @@ def homepage(request):
 def mainquest(request):
     return render(request, "homepage/mainQuest.html")
 
-def bosses(request):
-    return render(request, "homepage/bosses.html")
+class bosses(generic.DetailView):
+    model = Course
+    template_name = 'homepage/bosses.html'
 
 class mainquestView(generic.DetailView):
     model = Quest

@@ -23,6 +23,13 @@ h2 {
 <h2> Prepare to use your skills and challenge strong bosses! </h2>
 
 <!--Button for challenging Bosses. Hard coded at the moment but will change in the future -->
-<div class = "center"> <a href="/homepage/bosses/1" class = "button"> placeholder boss
-<p><font size = "+1"> Click here to challenge the boss and view its stats! </font></p>
-</div> </a>
+{% if course.boss_set.exists %}
+    {% for boss in course.boss_set.all %}
+        <div class = "center"> <a href="{% url 'homepage:bossView' course.id boss.id %}" class = "button"> {{boss.getName}}
+        <p><font size = "+1"> {{boss.getDesc}} </font></p>
+        </a> </div>
+    {% endfor %}
+
+{% else %}
+    <p>There are no bosses available.</p>
+{% endif %}
