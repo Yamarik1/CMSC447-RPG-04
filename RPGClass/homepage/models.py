@@ -212,7 +212,7 @@ class SideQuest(models.Model):
     def setType(self, questType):
         self._Quest_type = questType
         return "Type of quest updated"
-
+      
     # Private members
     _Quest_name = models.CharField(max_length=200, default="N/A")
     _Quest_description = models.CharField(max_length=200, default="N/A")

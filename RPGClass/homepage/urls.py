@@ -19,7 +19,6 @@ urlpatterns = [
     path('course/<int:course_id>/mainquest/<int:quest_id>/summary/', views.summary, name="summary"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/accept/', views.accept, name='accept'),
 
-
     # Url for recommendations
     path('course/<int:course_id>/recs/<int:pk>', views.recsView.as_view(), name='recs'),
 
@@ -30,7 +29,8 @@ urlpatterns = [
     path('course/<int:course_id>/bosses/<int:pk>/boss/', views.bossSpecific.as_view(), name="bosses"),
     path('course/<int:course_id>/bosses/<int:boss_id>/bossAnswer/', views.bossAnswer, name="bossAnswer"),
     path('course/<int:course_id>/bosses/<int:boss_id>/bossSummary/', views.bossSummary, name="bossSummary"),
-
+   
+   
     path('course/<int:pk>/sidequest/', views.sidequest.as_view(), name='sidequest'),
     path('course/<int:course_id>/sidequest/<int:pk>/', views.sidequestView.as_view(), name='sQuestView'),
     path('course/<int:course_id>/sidequest/<int:pk>/squest/', views.sQuestSpecific.as_view(), name="sQuest"),
@@ -38,7 +38,10 @@ urlpatterns = [
     path('course/<int:course_id>/sidequest/<int:sidequest_id>/summary/', views.sQuestSummary, name="sQuestSummary"),
     path('course/<int:course_id>/sidequest/<int:sidequest_id>/accept/', views.sAccept, name='sAccept'),
 
+    path('profile/', views.profile.as_view(), name='profile'),
+    path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
 
 
-    path('profile/', views.profile, name='profile'),
+    
+
 ]

@@ -5,6 +5,7 @@
     <title>update</title>
 </head>
 <body>
+
     <h2>{{ user.get_full_name }}</h2>
     <ul>
         <li>Current Nickname: {{ user.student.getNickname }}</li>
@@ -26,7 +27,6 @@
     </form>
     <form action="{% url 'homepage:profile' %}">
         <input type="submit" value="cancel">
-    </form>
 
 </body>
 </html>

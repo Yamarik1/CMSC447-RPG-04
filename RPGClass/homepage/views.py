@@ -9,7 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 
+
 from .models import Course, Question, Quest, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
+
+
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -25,7 +28,6 @@ class course(generic.ListView):
     def get_queryset(self):
         return Course.objects.all()
 
-
 class courseSpecific(generic.DetailView):
     model = Course
     template_name = 'homepage/courseS.html'
@@ -35,13 +37,16 @@ class mainquest(generic.DetailView):
     model = Course
     template_name = 'homepage/mainQuest.html'
 
+
 class bosses(generic.DetailView):
     model = Course
     template_name = 'homepage/bosses.html'
 
+
 class mainquestView(generic.DetailView):
     model = Quest
     template_name = 'homepage/mQuestView.html'
+
 
 class bossView(generic.DetailView):
     model = Boss
@@ -52,7 +57,6 @@ class bossView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
-
 
 class mQuestSpecific(generic.DetailView):
     queryset = Quest.objects.all()
@@ -185,7 +189,6 @@ def bosses(request):
 def profile(request):
     return render(request, 'homepage/profile.html')
 
-
 # For the purposes of creating objects in the database easier
 def visualTest(request):
     # Delete anything in the database
@@ -267,6 +270,7 @@ def visualTest(request):
     c.save()
     squest.save()
     newCourse.save()
+
 
     C = Course.objects.create(pk=2)
     C.setName("Course 2")
@@ -384,6 +388,7 @@ def visualTest(request):
     Q.save()
     
     return HttpResponseRedirect(reverse('homepage:menu'))
+
     
 class bossSpecific(generic.DetailView):
     queryset = Boss.objects.all()
@@ -424,4 +429,4 @@ def bossSummary(request, course_id, boss_id):
 
 
 
-   
+
