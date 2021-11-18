@@ -12,6 +12,8 @@ from .models import Course, Quest, Question, Choice
 
 # Create your tests here.
 
+geck_path: str ='/Users/matt/PycharmProjects/CMSC447-RPG-04/RPGClass/homepage/Gecko/geckodriver.exe'
+
 # Test for the skeleton homepage
 class TestHomepage(TestCase):
     # The homepage needs an account to reach, so here the account is made
@@ -213,20 +215,6 @@ class QuestViewTest(TestCase):
         url = reverse('homepage:summary', args=(C.id, quest.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Click here to go back to the course page")
-
-    def test_summary_page_type_1(self):
-        C = Course.objects.create()
-        quest = C.quest_set.create()
-        quest.setAvailable(True)
-        quest.setType(1)
-        quest.setLives(1)
-        quest.setXP(10)
-        quest.save()
-
-        url = reverse('homepage:summary', args=(C.id, quest.id,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Click here to accept the quest results:")
 
 
@@ -357,44 +345,6 @@ class hearts(TestCase):
         #the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
 
-    # Test that the lives function works for sidequests
-    def test_sidequest_hearts(self):
-        C = Course.objects.create()
-        squest = C.sidequest_set.create()
-        squest.setName("Test Quest")
-        squest.setAvailable(True)
-        squest.setType(1)
-        squest.setLives(3)
-        squest.save()
-
-        url = reverse('homepage:sQuestView', args=(C.id, squest.id,))
-
-        #makes sure we are at the right page
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-        #since we set lives to 3, should output 3
-        self.assertContains(response, "number of lives: 3")
-
-    def test_sidequest_no_lives(self):
-        C = Course.objects.create()
-        squest = C.sidequest_set.create()
-        squest.setName("Test Quest")
-        squest.setAvailable(True)
-        squest.setType(1)
-        squest.setLives(0)
-        squest.save()
-
-        url = reverse('homepage:sQuestView', args=(C.id, squest.id,))
-
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-
-        #the page should be different and tells you you cannot do quest
-        self.assertContains(response, "you are out of lives")
-
-
-
 class courseTests(TestCase):
 
     # function to make a test course
@@ -495,102 +445,4 @@ class courseTests(TestCase):
         self.assertContains(response, "Current Level: 3")
         self.assertContains(response, "Total XP earned: 29")
         self.assertContains(response, "Xp to next level: 1")
-
-
-# Add additional tests for the side quests
-class sideQuest(TestCase):
-
-    # Makes sure the side quest page exists
-    def test_sidequest_page(self):
-        course = Course.objects.create()
-        course.save()
-
-        url = reverse('homepage:sidequest', args=(1,))
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Side Quests")
-
-    # Makes sure the sidequest can appear on the sidequest page
-    def test_sidequest_list(self):
-        course = Course.objects.create()
-        course.save()
-
-        sQuest = course.sidequest_set.create()
-        sQuest.setName("Side Quest 1")
-
-        sQuest.save()
-        sQuest = course.sidequest_set.create()
-        sQuest.setName("Side Quest 2")
-
-        url = reverse('homepage:sidequest', args=(1,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, course.sidequest_set.get(pk=1).getName())
-        self.assertContains(response, course.sidequest_set.get(pk=2).getName())
-
-    # Test the sidequest page to make sure a type 0 sidequest will give the proper message
-    def test_sidequest_specific_type_0(self):
-        course = Course.objects.create()
-        course.save()
-
-        sidequest = course.sidequest_set.create()
-        sidequest.setName("sidequest 1")
-        sidequest.setAvailable(True)
-        sidequest.setType(0)
-        sidequest.setLives(1)
-        sidequest.setXP(10)
-        sidequest.save()
-
-        url = reverse('homepage:sQuestView', args=(1, 1))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "This quest doesn't have anymore work for you to do!")
-
-
-    # Test type 1 quest to make sure questions can be printed to the user
-    def test_sidequest_question(self):
-        course = Course.objects.create()
-        course.save()
-
-        sQuest = course.sidequest_set.create()
-        sQuest.setName("Side Quest 1")
-        sQuest.setType(1)
-        sQuest.setLives(1)
-
-        question = sQuest.question_set.create()
-        question.setQuestion("question 1")
-
-        choice = question.choice_set.create()
-        choice.setChoice("choice 1")
-
-        choice.save()
-        question.save()
-        sQuest.save()
-        course.save()
-
-        url = reverse('homepage:sQuest', args=(1, 1,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "question 1")
-        self.assertContains(response, "choice 1")
-
-    # Tests that the summary page is correctly produced
-    def test_sidequest_summary(self):
-        C = Course.objects.create()
-        squest = C.sidequest_set.create()
-        squest.setName("sidequest 1")
-        squest.setType(0)
-        squest.setAvailable(True)
-        squest.setXP(10)
-
-        squest.save()
-        C.save()
-        url = reverse('homepage:sQuestSummary', args=(1, 1))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "XP gained: 10")
-
-
-
 

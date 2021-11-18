@@ -8,7 +8,9 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
+
 from .models import Course, Quest, SideQuest, Question, Choice
+
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -24,7 +26,6 @@ class course(generic.ListView):
     def get_queryset(self):
         return Course.objects.all()
 
-
 class courseSpecific(generic.DetailView):
     model = Course
     template_name = 'homepage/courseS.html'
@@ -34,17 +35,16 @@ class mainquest(generic.DetailView):
     model = Course
     template_name = 'homepage/mainQuest.html'
 
-
 class mainquestView(generic.DetailView):
     model = Quest
     template_name = 'homepage/mQuestView.html'
+
 
     # Pass the course_id in the url to the html file so that the urls can stay consistent
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
-
 
 class mQuestSpecific(generic.DetailView):
     queryset = Quest.objects.all()
@@ -172,7 +172,6 @@ def bosses(request):
 def profile(request):
     return render(request, 'homepage/profile.html')
 
-
 # For the purposes of creating objects in the database easier
 def visualTest(request):
     # Delete anything in the database
@@ -255,6 +254,7 @@ def visualTest(request):
     squest.save()
     newCourse.save()
 
+
     C = Course.objects.create(pk=2)
     C.setName("Course 2")
     C.setMaxXP(10)
@@ -295,3 +295,4 @@ def visualTest(request):
     C.save()
 
     return HttpResponseRedirect(reverse('homepage:menu'))
+
