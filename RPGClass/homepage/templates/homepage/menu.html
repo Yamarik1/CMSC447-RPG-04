@@ -1,0 +1,29 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+
+<h1>Welcome to RPG Class!</h1>
+<!--This defines the list of links used in the navigation bar, which can be applied to the other pages as needed -->
+
+
+<form class="logout-link" action='/accounts/logout/' method="post" id="menu">
+    {%csrf_token%}
+    <button type="submit">Logout</button>
+</form>
+
+<br>
+<br>
+
+<p>For ease of production, this button will initialize the database to some test values</p>
+<form action="{% url 'homepage:test' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Initialize">
+
+
+</form>
+<!--These are the same links as above, restated with a desciption of each one -->
+<h2><a href="/homepage/course/">Courses</a></h2>
+<p>Click here for the list of courses</p>
+<h2><a href="/homepage/profile/">Profile</a> </h2>
+<p>Here you can check your level, XP, account details, and more.</p>
