@@ -1,0 +1,26 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'bosspage/bossButton.css' %}">
+
+<!-- Checks to see if the boss is available, as specified by the admin-->
+{% if boss.getAvailable == False %}
+    <p>This boss is not yet available</p>
+
+{% else %}
+
+    <!-- When a boss has been taken already -->
+    {% if boss.getType == 0 %}
+        <h1>{{ quest.getName }}</h1>
+        <p>Welcome to the Boss!</p><br>
+        <p>This boss has already been attacked!</p>
+        <a href = "{% url 'homepage:bossSummary' boss.id %}">Click here to see the results!</a>
+
+    <!-- When a boss has not been taken -->
+    {% elif boss.getType == 1 %}
+        <h1>{{ boss.getName }}</h1>
+        <p>Welcome to the Boss!</p><br>
+        <p>Click here to Start of the boss!</p>
+
+        <a href="{% url 'homepage:bosses' boss.id %}">Start Boss</a>
+    {% endif %}
+{% endif %}

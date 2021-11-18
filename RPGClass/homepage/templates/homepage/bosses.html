@@ -1,0 +1,28 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'bosspage/bossButton.css' %}">
+
+<style>
+h2 {
+    text-align: center;
+    }
+</style>
+
+<h1>Bosses</h1>
+
+<!--This defines the list of links used in the navigation bar -->
+<ul>
+    <li><a class = "nav" href="/homepage/">Homepage</a></li>
+    <li><a class = "nav" href="/homepage/mainquest/">Main Quests</a> </li>
+    <li><a class = "nav" href="/homepage/sidequest/">Side Quests</a> </li>
+    <li><a class = "nav active" href="/homepage/bosses/">Bosses</a> </li>
+    <li><a class = "nav" href="/homepage/profile/">Profile</a> </li>
+</ul>
+
+<h2> Prepare to use your skills and challenge strong bosses! </h2>
+
+<!--Button for challenging Bosses. Hard coded at the moment but will change in the future -->
+<div class = "center"> <a href="/homepage/bosses/1" class = "button"> placeholder boss
+<p><font size = "+1"> Click here to challenge the boss and view its stats! </font></p>
+</div> </a>

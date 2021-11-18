@@ -1,0 +1,12 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'bosspage/bossButton.css' %}">
+
+<!-- Summary Layout after completing a boss -->
+<p>Here is you summary for this Boss:</p><br>
+
+<h2>Boss number: {{ boss.id }}</h2>
+
+<h2>Boss name: {{ boss.getName }}</h2>
+
+<h2>XP gained: {{ boss.getXP }}</h2>
