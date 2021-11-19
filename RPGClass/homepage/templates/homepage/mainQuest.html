@@ -9,15 +9,14 @@
 <ul>
     <li><a class = "nav" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
     <li><a class = "nav active" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
-
     <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
-    <li><a class = "nav" href="{% url 'homepage:bosses'  %}">Bosses</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:bosses' course.id %}">Bosses</a> </li>
 </ul>
 
 
 <h2>Recommended Topics: </h2>
 
-<a href="{% url 'homepage:recs' course.id %]" class = "button"> click here to see recommendations </a>
+<a href="/homepage/course/1/recs/1" class = "button"> click here to see recommendations </a>
 
 
 
@@ -38,7 +37,6 @@
     <p>There are no quests available.</p>
 {% endif %}
 
--->
 
 <h2> Return to other sections: </h2>
 

@@ -4,7 +4,7 @@ Steps for running current iteration of the project:
 
 2. Download the current release of the project, and copy the files into the Python project started
 
-3. change directory to the django project, using 'cd PRGClass' in terminal
+3. change directory to the django project, using 'cd RPGClass' in terminal
 
 4. Install the requirements file
     'pip install -r requirements.txt'

@@ -230,6 +230,7 @@ class SideQuest(models.Model):
 # Bosses can be create directly on the app, and can also be carried over from other software, and can also
 # be individually created and updated for any avenues this app doesn't support.
 class Boss(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     # Public Members
 
     # Getters and setters
@@ -248,6 +249,9 @@ class Boss(models.Model):
 
     def getLives(self):
         return self._Num_lives
+
+    def subHeart(self):
+        self._Num_lives -= 1
 
     def setLives(self, num):
         self._Num_lives = num
@@ -301,7 +305,7 @@ class Boss(models.Model):
 # Rec model: Defines the name of the recommendation and if it is available
 class Recs(models.Model):
     # Public Members
-
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     # Getters and setters
     def getName(self):
         return self._Recs_name
