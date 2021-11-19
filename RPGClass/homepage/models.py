@@ -230,7 +230,7 @@ class SideQuest(models.Model):
 # Bosses can be create directly on the app, and can also be carried over from other software, and can also
 # be individually created and updated for any avenues this app doesn't support.
 class Boss(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
     # Public Members
 
     # Getters and setters
