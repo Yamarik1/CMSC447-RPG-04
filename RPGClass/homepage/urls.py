@@ -23,8 +23,7 @@ urlpatterns = [
     path('course/<int:course_id>/recs/<int:pk>', views.recsView.as_view(), name='recs'),
 
     # Urls for Bosses
-    path('course/<int:pk>/bosses/', views.bosses, name='bosses'),
-    path('course/bvTest', views.bossVisualTest, name='bossTest'),
+    path('course/<int:pk>/bosses/', views.bosses.as_view(), name='bosses'),
     path('course/<int:course_id>/bosses/<int:pk>/', views.bossView.as_view(), name='bossView'),
     path('course/<int:course_id>/bosses/<int:pk>/boss/', views.bossSpecific.as_view(), name="bosses"),
     path('course/<int:course_id>/bosses/<int:boss_id>/bossAnswer/', views.bossAnswer, name="bossAnswer"),
@@ -38,8 +37,8 @@ urlpatterns = [
     path('course/<int:course_id>/sidequest/<int:sidequest_id>/summary/', views.sQuestSummary, name="sQuestSummary"),
     path('course/<int:course_id>/sidequest/<int:sidequest_id>/accept/', views.sAccept, name='sAccept'),
 
-    path('profile/', views.profile.as_view(), name='profile'),
-    path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
+    path('profile/', views.profile, name='profile'),
+    # path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
 
 
     
