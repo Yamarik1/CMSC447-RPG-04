@@ -8,7 +8,7 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Choice, Quest, Question, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
+from .models import Course, Quest, Question, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
 
 
 
@@ -311,7 +311,8 @@ class QuestionsViewTest(TestCase):
 
 # Function to test the creation of a boss with certain number of questions, choices and answers
 def CreateBoss(name, numQuestions, numChoices, rightList=[], testChoice=[]):
-    testBoss = Boss.objects.create()
+    newcourse = Course.objects.create()
+    testBoss = newcourse.boss_set.create()
     testBoss.setName(name)
     testBoss.setType(1)
 
@@ -332,8 +333,8 @@ def CreateBoss(name, numQuestions, numChoices, rightList=[], testChoice=[]):
 
         q.save()
     testBoss.save()
-
-    return testBoss
+    newcourse.save()
+    return newcourse
 
 # Tests the boss methods
 class TestBossMethods(TestCase):
@@ -342,10 +343,12 @@ class TestBossMethods(TestCase):
     def test_boss_getters_and_setters(self):
 
         # Create a test question using some basic values
-        boss = CreateBoss("Test", 1, 1, [1], [1])
+
+        newcourse = CreateBoss("Test", 1, 1, [1], [1])
         isWorking = True
 
         # Question name
+        boss = newcourse.boss_set.get(pk=1)
         boss.setName("Question 1")
         if boss.getName() != "Question 1":
             isWorking = False
@@ -367,49 +370,48 @@ class QuestViewTest(TestCase):
 
     # Test that if the boss is specified, it will not be available to the user
     def test_no_boss(self):
-        boss = Boss.objects.create()
+        newcourse = Course.objects.create()
+        boss = newcourse.boss_set.create()
         boss.setAvailable(False)
-
-        url = reverse('homepage:bossView', args=(boss.id,))
+        boss.save()
+        newcourse.save()
+        url = reverse('homepage:bossView', args=(newcourse.id, boss.id,))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "This boss is not available")
+        self.assertContains(response, "This boss is not yet available")
 
     # Test that if a quest should be available, it will be shown on the page
     def test_boss_available(self):
         # Make a quest with basic parameters
-        boss = Boss.objects.create()
+        newcourse = Course.objects.create()
+        boss = newcourse.boss_set.create()
         boss.setName("Test Boss")
         boss.setAvailable(True)
         boss.setType(1)
         boss.save()
-        url = reverse('homepage:bossView', args=(boss.id,))
+        newcourse.save()
+
+        url = reverse('homepage:bossView', args=(newcourse.id, boss.id,))
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Click here to Start of the boss!")
+        self.assertContains(response, "Click here to Start the boss!")
 
     # Checks to see if a boss with type zero will give the right pages
     def test_type_quest_0(self):
-        boss = Boss.objects.create()
+        newcourse = Course.objects.create()
+        boss = newcourse.boss_set.create()
         boss.setAvailable(True)
         boss.setType(0)
         boss.setXP(10)
         boss.save()
-
-        url = reverse('homepage:bossView', args=(boss.id,))
+        newcourse.save()
+        url = reverse('homepage:bossView', args=(newcourse.id, boss.id,))
 
         # Test that the proper message is displayed and the specific quest screen
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "This boss has already been completed")
-
-        # Test that Type 0 quests will present a proper summary page with proper XP value
-        url = reverse('homepage:bossSummary', args=(boss.id,))
-
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "XP gained: " + str(boss.getXP()))
+        self.assertContains(response, "This boss has already been attacked!")
 
 
 # Create a basic question for bosses

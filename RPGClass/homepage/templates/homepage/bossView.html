@@ -19,7 +19,7 @@
     {% elif boss.getType == 1 %}
         <h1>{{ boss.getName }}</h1>
         <p>Welcome to the Boss!</p><br>
-        <p>Click here to Start of the boss!</p>
+        <p>Click here to Start the boss!</p>
 
         <a href="{% url 'homepage:bosses' course_id boss.id %}">Start Boss</a>
     {% endif %}
