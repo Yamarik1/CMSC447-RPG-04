@@ -1,0 +1,58 @@
+.container{
+    max-width: 1920px;
+    min-width: 600px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.profile-main{
+    background-color: rgba(150, 150, 150, 0.6);
+
+    margin: 3px;
+    border: 2px solid gray;
+
+    padding-left: 10px;
+    padding-right: 10px;
+
+    min-width: 480px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-quests{
+    background-color: rgba(150, 150, 150, 0.6);
+
+    margin: 3px;
+    border: 2px solid gray;
+
+    padding-left: 10px;
+    padding-right: 10px;
+
+    min-width: 480px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-inner{
+    background-color: rgba(150, 150, 150, 0.6);
+
+    margin: 3px;
+    border: 2px solid gray;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.test-style{
+    background-color: rgba(255, 255, 255, 0.616);
+
+    margin: 5px;
+    border: 3px solid gray;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    font-size: 20px;
+
+    display: block;
+}

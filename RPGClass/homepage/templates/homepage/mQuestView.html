@@ -5,17 +5,24 @@
 <!-- Checks to see if the quest is available, as specified by the admin-->
 {% if quest.getAvailable == False %}
     <p>This quest is not available</p>
+{% elif quest.getLives == 0 %}
+    <p>you are out of lives</p>
+    <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
 {% else %}
     {% if quest.getType == 0 %}
         <h1>{{ quest.getName }}</h1>
         <p>Welcome to this Quest!</p><br>
         <p>This quest doesn't have anymore work for you to do!</p>
-        <a href = "{% url 'homepage:summary' quest.id %}">Click here to see the results!</a>
+        <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
     {% elif quest.getType == 1 %}
         <h1>{{ quest.getName }}</h1>
         <p>Welcome to this Quest!</p><br>
-        <p>Click here to Start of the quest!</p>
+        <p>Click here to Start the quest!</p>
 
-        <a href="{% url 'homepage:mQuest' quest.id %}">Start Quest</a>
+
+        <p>number of lives: {{ quest.getLives }}</p>        
+
+        <a href="{% url 'homepage:mQuest' course_id quest.id %}">Start Quest</a>
+
     {% endif %}
 {% endif %}

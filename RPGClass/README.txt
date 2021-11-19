@@ -4,19 +4,21 @@ Steps for running current iteration of the project:
 
 2. Download the current release of the project, and copy the files into the Python project started
 
-3. Install the requirements file
+3. change directory to the django project, using 'cd RPGClass' in terminal
+
+4. Install the requirements file
     'pip install -r requirements.txt'
 
-4. Add a file named '.env' to the 'RPGClass' folder (the same folder as manage.py)
+5. Add a file named '.env' to the 'RPGClass' folder (the same folder as manage.py)
 
-5. In the .env file, add a line 'SECRET_KEY=' and then add anything after the '=' (Without quotation marks)
+6. In the .env file, add a line 'SECRET_KEY=' and then add anything after the '=' (Without quotation marks)
     Note: This is done to keep the Secret key used in the development secret, so we don't commit it to GitHub
 
-6. initialize the database with 'python manage.py makemigrations homepage' and then 'python manage.py migrate' in terminal
+7. initialize the database with 'python manage.py makemigrations homepage' and then 'python manage.py migrate' in terminal
 
-7. run the command 'python manage.py runserver' in terminal, and go to the local server
+8. run the command 'python manage.py runserver' in terminal, and go to the local server
 
-8. add '/homepage/' to the end of the url
+9. add '/homepage/' to the end of the url
 
 
 To allow for proper navigation of the site:
@@ -29,12 +31,21 @@ To allow for proper navigation of the site:
 
 4: From there, you can see the features implemented, which for this iteration, are the main quests, account creation,
    and the skeleton for the profile page.
-   Note: due to dependencies of certain parts of the project, some parts are still using some placeholders, and will
-         be made generic in the future
+
 
 For Testing:
 
 Run the command 'py manage.py test homepage.tests' and 'py manage.py test accounts.tests' to run the tests.
+
+to run the selenium test in accounts, run command 'py manage.py test homepage.tests_selenium'
+***created separate test because selenium takes a long time
+
+before running tests in homepage:
+
+
+1:update the geck_path in tests.py file in homepage to your local path of the geckodriver.exe
+
+2:make sure you have firefox downloaded, haven't tried it on other browsers yet
 
 
 

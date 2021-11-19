@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>update</title>
+</head>
+<body>
+
+    <h2>{{ user.get_full_name }}</h2>
+    <ul>
+        <li>Current Nickname: {{ user.student.getNickname }}</li>
+    </ul>
+    <form action="{% url 'accounts:update' %} " method="post">
+        {%csrf_token%}
+        {% for field in form %}
+            {% for error in field.errors %}
+                <p style="color: red">{{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+        <p>type in your username</p>
+        <input type="text" name="user_name">
+        <p>type in your password</p>
+        <input type="password" name="password">
+        <p>type in the nickname you want others to see</p>
+        <input type="text" name="nickname">
+        <input type="submit" value="Submit">
+    </form>
+    <form action="{% url 'homepage:profile' %}">
+        <input type="submit" value="cancel">
+
+</body>
+</html>
