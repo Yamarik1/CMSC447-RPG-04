@@ -419,3 +419,15 @@ def bossSummary(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
     return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
+
+def bAccept(request, course_id, boss_id):
+    boss = get_object_or_404(Boss, pk=boss_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = boss.getXP()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))

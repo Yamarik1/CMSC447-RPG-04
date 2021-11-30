@@ -11,4 +11,11 @@
 
 <h2>XP gained: {{ boss.getXP }}</h2>
 
-<h2><a href= "{% url 'homepage:courseS' course.id %}" >Homepage</a> </h2>
+<p>number of lives: {{ boss.getLives }}</p>
+
+
+<h2>Click here to accept the boss results:</h2>
+<form action="{% url 'homepage:bAccept' course.id boss.id %} " method="post">
+        {% csrf_token %}
+        <input type="submit" value="Accept">
+        </form>
