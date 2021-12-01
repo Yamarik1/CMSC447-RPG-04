@@ -8,13 +8,12 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Course, Quest, Question, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
-
-
+from .models import Course, Quest, Question, Choice, Boss, Recs, Topic
 
 # Create your tests here.
 
-geck_path: str ='/Users/matt/PycharmProjects/CMSC447-RPG-04/RPGClass/homepage/Gecko/geckodriver.exe'
+geck_path: str = '/Users/matt/PycharmProjects/CMSC447-RPG-04/RPGClass/homepage/Gecko/geckodriver.exe'
+
 
 # Test for the skeleton homepage
 class TestHomepage(TestCase):
@@ -211,6 +210,7 @@ class QuestViewTest(TestCase):
         quest = C.quest_set.create()
         quest.setAvailable(True)
         quest.setType(0)
+        quest.setLives(1)
         quest.setXP(10)
         quest.save()
 
@@ -317,10 +317,10 @@ def CreateBoss(name, numQuestions, numChoices, rightList=[], testChoice=[]):
     testBoss.setType(1)
 
     for i in range(numQuestions):
-        q = testBoss.bossquestion_set.create()
+        q = testBoss.question_set.create()
 
         for j in range(numChoices):
-            c = q.bosschoice_set.create()
+            c = q.choice_set.create()
             if rightList[i] == j:
                 c.setCorrect(True)
                 c.setChoice(testChoice[j])
@@ -335,6 +335,7 @@ def CreateBoss(name, numQuestions, numChoices, rightList=[], testChoice=[]):
     testBoss.save()
     newcourse.save()
     return newcourse
+
 
 # Tests the boss methods
 class TestBossMethods(TestCase):
@@ -365,8 +366,9 @@ class TestBossMethods(TestCase):
 
         self.assertIs(isWorking, True)
 
+
 # Test boss views
-class QuestViewTest(TestCase):
+class BossViewTest(TestCase):
 
     # Test that if the boss is specified, it will not be available to the user
     def test_no_boss(self):
@@ -388,6 +390,7 @@ class QuestViewTest(TestCase):
         boss.setName("Test Boss")
         boss.setAvailable(True)
         boss.setType(1)
+        boss.setLives(1)
         boss.save()
         newcourse.save()
 
@@ -403,6 +406,7 @@ class QuestViewTest(TestCase):
         boss = newcourse.boss_set.create()
         boss.setAvailable(True)
         boss.setType(0)
+        boss.setLives(1)
         boss.setXP(10)
         boss.save()
         newcourse.save()
@@ -419,15 +423,16 @@ def create_QuestionView_Boss(question="N/A", choice="N/A"):
     boss = Boss.objects.create()
     boss.setType(1)
     boss.setAvailable(True)
-    bossquestion = boss.bossquestion_set.create()
-    bossquestion.setQuestion(question)
+    question = boss.question_set.create()
+    question.setQuestion(question)
 
     if (choice != "N/A"):
-        bosschoice = boss.bosschoice_set.create()
-        bosschoice.setChoice(choice)
+        choice = boss.choice_set.create()
+        choice.setChoice(choice)
 
     boss.save()
     return boss
+
 
 # Tests the creation of topics and recommendations
 def recsTest(topics="yes"):
@@ -442,9 +447,10 @@ def recsTest(topics="yes"):
 
     return rec
 
-#testing number of lives
+
+# testing number of lives
 class hearts(TestCase):
-    #test if number displays correctly
+    # test if number displays correctly
     def test_correct_lives(self):
         C = Course.objects.create()
         quest = C.quest_set.create()
@@ -456,14 +462,14 @@ class hearts(TestCase):
 
         url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
-        #makes sure we are at the right page
+        # makes sure we are at the right page
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        #since we set lives to 3, should output 3
+        # since we set lives to 3, should output 3
         self.assertContains(response, "number of lives: 3")
 
-    #tests if having no hearts leads to the right page
+    # tests if having no hearts leads to the right page
     def test_no_hearts(self):
         C = Course.objects.create()
         quest = C.quest_set.create()
@@ -478,8 +484,9 @@ class hearts(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        #the page should be different and tells you you cannot do quest
+        # the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
+
 
 class courseTests(TestCase):
 
@@ -633,7 +640,6 @@ class sideQuest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This quest doesn't have anymore work for you to do!")
 
-
     # Test type 1 quest to make sure questions can be printed to the user
     def test_sidequest_question(self):
         course = Course.objects.create()
@@ -676,9 +682,3 @@ class sideQuest(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "XP gained: 10")
-
-
-
-
-
-
