@@ -384,6 +384,7 @@ class BossViewTest(TestCase):
 
     # Test that if a quest should be available, it will be shown on the page
     def test_boss_available(self):
+
         # Make a quest with basic parameters
         newcourse = Course.objects.create()
         boss = newcourse.boss_set.create()
