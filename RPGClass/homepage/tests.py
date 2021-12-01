@@ -417,6 +417,21 @@ class BossViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This boss has already been attacked!")
 
+    # Test to make sure the summary page shows the proper XP value
+    def test_boss_XP(self):
+        newcourse = Course.objects.create()
+        boss = newcourse.boss_set.create()
+        boss.setAvailable(True)
+        boss.setType(1)
+        boss.setLives(1)
+        boss.setXP(10)
+        boss.save()
+        newcourse.save()
+        url = reverse('homepage:bossSummary', args=(newcourse.id, boss.id,))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "XP gained: 10")
 
 # Create a basic question for bosses
 def create_QuestionView_Boss(question="N/A", choice="N/A"):
@@ -486,6 +501,42 @@ class hearts(TestCase):
 
         # the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
+
+    def test_sidequest_lives(self):
+        C = Course.objects.create()
+        quest = C.sidequest_set.create()
+        quest.setName("Test Quest")
+        quest.setAvailable(True)
+        quest.setType(1)
+        quest.setLives(3)
+        quest.save()
+
+        url = reverse('homepage:sQuestView', args=(C.id, quest.id,))
+
+        # makes sure we are at the right page
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        # since we set lives to 3, should output 3
+        self.assertContains(response, "number of lives: 3")
+
+    def test_boss_lives(self):
+        C = Course.objects.create()
+        quest = C.boss_set.create()
+        quest.setName("Test Quest")
+        quest.setAvailable(True)
+        quest.setType(1)
+        quest.setLives(3)
+        quest.save()
+
+        url = reverse('homepage:bossView', args=(C.id, quest.id,))
+
+        # makes sure we are at the right page
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        # since we set lives to 3, should output 3
+        self.assertContains(response, "Number of lives remaining: 3")
 
 
 class courseTests(TestCase):
