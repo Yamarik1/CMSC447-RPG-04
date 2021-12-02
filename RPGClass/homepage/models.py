@@ -29,7 +29,6 @@ class Course_General(models.Model):
         key = (((keyVal * a) + b) % p) % size
         return key
 
-
     # Private members
     _course_name = models.CharField(max_length=200)
     _section_number = models.IntegerField(default=0)
@@ -38,8 +37,8 @@ class Course_General(models.Model):
 
 
 class Student_course(models.Model):
-
-    course = models.ManyToManyField(Course_General)
+    course_general = models.ManyToManyField(Course_General)
+    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE)
 
     def setXP(self, xp):
         self._curr_XP = xp
@@ -56,7 +55,6 @@ class Student_course(models.Model):
     def getCoins(self):
         return self._coins
 
-    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE)
     _curr_XP = models.IntegerField(default=0)
     _coins = models.IntegerField(default=0)
 
@@ -64,6 +62,8 @@ class Student_course(models.Model):
 # Create your models here.
 # Note for classes, any member prefaced by '_' will be private.
 class Course(models.Model):
+
+    specific_student = models.ForeignKey(Student_course, on_delete=models.CASCADE)
     # Public members
     def getName(self):
         return self._course_name

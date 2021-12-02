@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('course/<int:pk>/mainquest/', views.mainquest.as_view(), name='mainquest'),
     path('course/vTest', views.visualTest, name='test'),
+    path('course/aTest', views.accountTest, name='aTest'),
     path('course/<int:course_id>/mainquest/<int:pk>/', views.mainquestView.as_view(), name='mQuestView'),
     path('course/<int:course_id>/mainquest/<int:pk>/quest/', views.mQuestSpecific.as_view(), name="mQuest"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/answer/', views.answer, name="answer"),

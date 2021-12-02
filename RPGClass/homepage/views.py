@@ -1,17 +1,16 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 
-from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-
-from django.http import HttpResponse
-
-from .models import Course, Question, Quest, SideQuest, Choice, Boss, Recs, Topic
-
+from .models import Course, Quest, SideQuest, Boss, Recs, Student_course
+from accounts.models import Student
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
+
 @login_required(login_url="/accounts/login/")
 def homepage(request):
     return render(request, 'homepage/menu.html')
@@ -22,7 +21,10 @@ class course(generic.ListView):
     context_object_name = 'course_list'
 
     def get_queryset(self):
-        return Course.objects.all()
+        currUser = self.request.user
+        currStudent = Student.objects.get(user=currUser)
+        currStudentC = Student_course.objects.get(student=currStudent)
+        return currStudentC.course_set.all()
 
 
 class courseSpecific(generic.DetailView):
@@ -187,51 +189,82 @@ def sAccept(request, course_id, sidequest_id):
 def profile(request):
     return render(request, 'homepage/profile.html')
 
+def accountTest(request):
+    # Delete anything in the database
+    for userd in User.objects.all():
+        userd.delete()
+
+    user1 = User.objects.create_user(username='MasterChief', password='12test12')
+    user1.save()
+
+    student = Student(pk=2, user=user1)
+    student.setStudentName('MasterChief')
+    student.save()
+
+    courseStu = Student_course(student=student)
+
+    courseStu.save()
+
+    user2 = User.objects.create_user(username='TacoCat', password='12test12')
+    user2.save()
+
+    student = Student(pk=3, user=user2)
+    student.setStudentName('TacoCat')
+    student.save()
+
+    courseStu = Student_course(student=student)
+    courseStu.save()
+
+    return HttpResponseRedirect(reverse('homepage:menu'))
 
 # For the purposes of creating objects in the database easier
 def visualTest(request):
-    # Delete anything in the database
 
-    for newCourse in Course.objects.all():
+    currUser = request.user
+    currStudent = Student.objects.get(user=currUser)
+    currStudentC = Student_course.objects.get(student=currStudent)
+
+
+    for newCourse in currStudentC.course_set.all():
         newCourse.delete()
 
-    newCourse = Course.objects.create(pk=1)
+    newCourse = currStudentC.course_set.create()
     newCourse.setName("Fus Ro Dah")
     newCourse.setSection(1)
     newCourse.setMaxXP(5)
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
-    Q = newCourse.quest_set.create(pk=1)
+    Q = newCourse.quest_set.create()
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
     Q.setLives(3)
     Q.setAvailable(True)
     Q.setType(1)
 
-    question = Q.question_set.create(pk=1)
+    question = Q.question_set.create()
     question.setQuestion("What is the answer to life, the universe, and everything")
 
-    c = question.choice_set.create(pk=1)
+    c = question.choice_set.create()
     c.setChoice("Food")
     c.save()
-    c = question.choice_set.create(pk=2)
+    c = question.choice_set.create()
     c.setChoice("42")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=3)
+    c = question.choice_set.create()
     c.setChoice("...what?")
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=2)
+    question = Q.question_set.create()
     question.setQuestion("Pineapple on Pizza?")
 
-    c = question.choice_set.create(pk=4)
+    c = question.choice_set.create()
     c.setChoice("No")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=5)
+    c = question.choice_set.create()
     c.setChoice("Yes")
     c.save()
 
@@ -240,7 +273,7 @@ def visualTest(request):
 
     newCourse.save()
     # Test quest 2: A quest manually updated by the admin (Admin functionality not added yet)
-    Q = newCourse.quest_set.create(pk=2)
+    Q = newCourse.quest_set.create()
     Q.setName("Test quest 2")
     Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
               "straight to the summary page")
@@ -254,7 +287,7 @@ def visualTest(request):
     # Create custom boss with some test values
     # Test Boss 1: using type 1 to give the user questions to answer
 
-    Q = newCourse.boss_set.create(pk=1)
+    Q = newCourse.boss_set.create()
     Q.setName("Boss 1")
     Q.setDesc("This is the first test Boss")
     Q.setLives(3)
@@ -262,39 +295,39 @@ def visualTest(request):
     Q.setType(1)
 
     # Creates Questions, choices and answers for the bosses
-    question = Q.question_set.create(pk=6)
+    question = Q.question_set.create()
     question.setQuestion("What is 1 + 1")
 
-    c = question.choice_set.create(pk=12)
+    c = question.choice_set.create()
     c.setChoice("2")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=13)
+    c = question.choice_set.create()
     c.setChoice("13")
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=7)
+    question = Q.question_set.create()
     question.setQuestion("What is 10 - 2?")
 
-    c = question.choice_set.create(pk=14)
+    c = question.choice_set.create()
     c.setChoice("8")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=15)
+    c = question.choice_set.create()
     c.setChoice("12")
     c.save()
 
     question.save()
 
-    question = Q.question_set.create(pk=8)
+    question = Q.question_set.create()
     question.setQuestion("What is the spelling for the word wrong?")
 
-    c = question.choice_set.create(pk=16)
+    c = question.choice_set.create()
     c.setChoice("wrong")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=17)
+    c = question.choice_set.create()
     c.setChoice("right")
     c.save()
     question.save()
@@ -307,15 +340,15 @@ def visualTest(request):
 
     # Create custom recommendation with some test values
     # Test recs 1 named recommended topics:
-    Q = newCourse.recs_set.create(pk=1)
+    Q = newCourse.recs_set.create()
     Q.setName("Recommended Topics")
 
     # Creates topics
-    topic = Q.topic_set.create(pk=1)
+    topic = Q.topic_set.create()
     topic.setTopic("Scoreboards")
     topic.save()
 
-    topic = Q.topic_set.create(pk=2)
+    topic = Q.topic_set.create()
     topic.setTopic("Circuts")
     topic.save()
 
@@ -323,56 +356,56 @@ def visualTest(request):
 
     newCourse.save()
 
-    squest = newCourse.sidequest_set.create(pk=1)
+    squest = newCourse.sidequest_set.create()
     squest.setName("Side Quest 1")
     squest.setType(1)
     squest.setLives(5)
     squest.setAvailable(True)
 
-    question = squest.question_set.create(pk=3)
+    question = squest.question_set.create()
     question.setQuestion("test")
     question.save()
-    c = question.choice_set.create(pk=6)
+    c = question.choice_set.create()
     c.setChoice("Right")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=7)
+    c = question.choice_set.create()
     c.setChoice("Wrong")
     c.save()
     squest.save()
     newCourse.save()
 
-    C = Course.objects.create(pk=2)
+    C = currStudentC.course_set.create()
     C.setName("Course 2")
     C.setMaxXP(10)
 
-    Q = C.quest_set.create(pk=3)
+    Q = C.quest_set.create()
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
     Q.setLives(3)
     Q.setAvailable(True)
     Q.setType(1)
 
-    question = Q.question_set.create(pk=4)
+    question = Q.question_set.create()
     question.setQuestion("What is 10 + 1?")
 
-    c = question.choice_set.create(pk=8)
+    c = question.choice_set.create()
     c.setChoice("10")
     c.save()
-    c = question.choice_set.create(pk=9)
+    c = question.choice_set.create()
     c.setChoice("11")
     c.setCorrect(True)
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=5)
+    question = Q.question_set.create()
     question.setQuestion("What is 8 - 2?")
 
-    c = question.choice_set.create(pk=10)
+    c = question.choice_set.create()
     c.setChoice("6")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=11)
+    c = question.choice_set.create()
     c.setChoice("12")
     c.save()
     question.save()
