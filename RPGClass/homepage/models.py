@@ -21,7 +21,7 @@ class Course_General(models.Model):
     def setCourseID(self, ID):
         self._course_id = ID
 
-    def hash_ID(self, size, keyVal):
+    def hashKey(self, size, keyVal):
         a = 21
         b = 15
         p = 6151
@@ -128,7 +128,7 @@ class Course(models.Model):
         return "Level updated"
 
     # This function will take the course_id, and will then Hash it to find where it will be in CourseGeneral
-    def hash_ID(self, size, keyVal):
+    def hashKey(self, size, keyVal):
         a = 21
         b = 15
         p = 6151

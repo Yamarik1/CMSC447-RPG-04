@@ -14,6 +14,7 @@ urlpatterns = [
     path('course/<int:pk>/mainquest/', views.mainquest.as_view(), name='mainquest'),
     path('course/vTest', views.visualTest, name='test'),
     path('course/aTest', views.accountTest, name='aTest'),
+    path('course/cTest', views.courseIni, name='cTest'),
     path('course/<int:course_id>/mainquest/<int:pk>/', views.mainquestView.as_view(), name='mQuestView'),
     path('course/<int:course_id>/mainquest/<int:pk>/quest/', views.mQuestSpecific.as_view(), name="mQuest"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/answer/', views.answer, name="answer"),
@@ -42,7 +43,7 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     # path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
 
-
+    path('course/<int:course_id>/leaderboard', views.leaderboard.as_view(), name='leaderboard'),
     
 
 ]

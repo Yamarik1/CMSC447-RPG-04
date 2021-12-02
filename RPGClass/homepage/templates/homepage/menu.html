@@ -23,6 +23,13 @@
 
 </form>
 
+<form action="{% url 'homepage:cTest' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Course">
+
+</form>
+
 <form action="{% url 'homepage:test' %}" method="post">
     {% csrf_token %}
 

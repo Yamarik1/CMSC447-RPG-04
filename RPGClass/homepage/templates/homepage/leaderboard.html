@@ -1,0 +1,10 @@
+{% if student_list.exist %}
+
+    {% for student in student_list %}
+        <p>{{ student.getXP }}</p><br>
+    {% endfor %}
+
+{% else %}
+    <p>There are no valid Users in this class</p>
+
+{% endif %}

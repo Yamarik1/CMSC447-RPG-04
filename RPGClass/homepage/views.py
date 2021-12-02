@@ -6,8 +6,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 
-from .models import Course, Quest, SideQuest, Boss, Recs, Student_course
+from .models import Course, Quest, SideQuest, Boss, Recs, Student_course, Course_General
 from accounts.models import Student
+
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
 
@@ -50,6 +51,7 @@ class mainquestView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
+
 
 class bossView(generic.DetailView):
     model = Boss
@@ -189,10 +191,52 @@ def sAccept(request, course_id, sidequest_id):
 def profile(request):
     return render(request, 'homepage/profile.html')
 
+
+class leaderboard(generic.ListView):
+    template_name = 'homepage/leaderboard.html'
+    context_object_name = 'student_list'
+
+
+    def get_queryset(self):
+        currUser = self.request.user
+        currStudent = Student.objects.get(user=currUser)
+        currStudentC = Student_course.objects.get(student=currStudent)
+
+        currCourse = Course.objects.get(pk=self.kwargs['course_id'])
+        ID = currCourse.getCourseID()
+        count = 1
+        for course in Course_General.objects.all():
+            if course.getCourseID() == ID:
+                list = course.student_course_set.all()
+                return list.order_by('-_curr_XP')
+
+
+# def leaderboard(request, course_id):
+#    currUser = request.user
+#    currStudent = Student.objects.get(user=currUser)
+#    currStudentC = Student_course.objects.get(student=currStudent)
+
+#    currCourse = Course.objects.get(pk=course_id)
+#    ID = currCourse.getCourseID()
+
+#    for course in Course_General.objects.all():
+#        if course.getCourseID() == ID:
+
+
 def accountTest(request):
     # Delete anything in the database
-    for userd in User.objects.all():
-        userd.delete()
+    # for userd in User.objects.all():
+    # userd.delete()
+
+    user = request.user
+    student = Student(pk=1, user=user)
+    student.setStudentName('test')
+    student.save()
+
+    courseStu = Student_course(student=student)
+    courseStu.setXP(72)
+
+    courseStu.save()
 
     user1 = User.objects.create_user(username='MasterChief', password='12test12')
     user1.save()
@@ -202,6 +246,7 @@ def accountTest(request):
     student.save()
 
     courseStu = Student_course(student=student)
+    courseStu.setXP(14)
 
     courseStu.save()
 
@@ -213,17 +258,33 @@ def accountTest(request):
     student.save()
 
     courseStu = Student_course(student=student)
+    courseStu.setXP(45)
     courseStu.save()
 
     return HttpResponseRedirect(reverse('homepage:menu'))
 
+
+def courseIni(request):
+    courseS = Course_General.objects.create()
+    courseS.setCourseID(100001)
+    courseS.setName("Fus Ro Dah")
+    courseS.save()
+
+    courseS = Course_General.objects.create()
+    courseS.setCourseID(100002)
+    courseS.setName("Course 2")
+    courseS.save()
+
+    return HttpResponseRedirect(reverse('homepage:menu'))
+
+
 # For the purposes of creating objects in the database easier
 def visualTest(request):
-
     currUser = request.user
     currStudent = Student.objects.get(user=currUser)
     currStudentC = Student_course.objects.get(student=currStudent)
 
+    currStudentC.course_general.add(Course_General.objects.get(pk=1))
 
     for newCourse in currStudentC.course_set.all():
         newCourse.delete()
@@ -232,6 +293,7 @@ def visualTest(request):
     newCourse.setName("Fus Ro Dah")
     newCourse.setSection(1)
     newCourse.setMaxXP(5)
+    newCourse.setCourseID(100001)
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
@@ -336,7 +398,6 @@ def visualTest(request):
 
     newCourse.save()
     # Set up the recommended topics visual test
-
 
     # Create custom recommendation with some test values
     # Test recs 1 named recommended topics:
@@ -452,6 +513,7 @@ def bossSummary(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
     return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
+
 
 def bAccept(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
