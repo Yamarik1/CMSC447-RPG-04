@@ -40,6 +40,12 @@ class Student_course(models.Model):
     course_general = models.ManyToManyField(Course_General)
     student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE)
 
+    def getName(self):
+        return self._student_name
+
+    def setName(self, name):
+        self._student_name = name
+
     def setXP(self, xp):
         self._curr_XP = xp
 
@@ -55,6 +61,7 @@ class Student_course(models.Model):
     def getCoins(self):
         return self._coins
 
+    _student_name = models.CharField(max_length=200)
     _curr_XP = models.IntegerField(default=0)
     _coins = models.IntegerField(default=0)
 

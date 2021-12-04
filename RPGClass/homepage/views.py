@@ -214,18 +214,6 @@ class leaderboard(generic.ListView):
                 return list.order_by('-_curr_XP')
 
 
-# def leaderboard(request, course_id):
-#    currUser = request.user
-#    currStudent = Student.objects.get(user=currUser)
-#    currStudentC = Student_course.objects.get(student=currStudent)
-
-#    currCourse = Course.objects.get(pk=course_id)
-#    ID = currCourse.getCourseID()
-
-#    for course in Course_General.objects.all():
-#        if course.getCourseID() == ID:
-
-
 def accountTest(request):
     # Delete anything in the database
     # for userd in User.objects.all():
@@ -238,6 +226,7 @@ def accountTest(request):
 
     courseStu = Student_course(student=student)
     courseStu.setXP(72)
+    courseStu.setName('test')
 
     courseStu.save()
 
@@ -250,6 +239,7 @@ def accountTest(request):
 
     courseStu = Student_course(student=student)
     courseStu.setXP(14)
+    courseStu.setName('MasterChief')
 
     courseStu.save()
 
@@ -262,6 +252,7 @@ def accountTest(request):
 
     courseStu = Student_course(student=student)
     courseStu.setXP(45)
+    courseStu.setName('TacoCat')
     courseStu.save()
 
     return HttpResponseRedirect(reverse('homepage:menu'))
