@@ -196,18 +196,21 @@ class leaderboard(generic.ListView):
     template_name = 'homepage/leaderboard.html'
     context_object_name = 'student_list'
 
-
     def get_queryset(self):
         currUser = self.request.user
         currStudent = Student.objects.get(user=currUser)
         currStudentC = Student_course.objects.get(student=currStudent)
 
         currCourse = Course.objects.get(pk=self.kwargs['course_id'])
+
         ID = currCourse.getCourseID()
-        count = 1
+
         for course in Course_General.objects.all():
             if course.getCourseID() == ID:
+                print("here")
                 list = course.student_course_set.all()
+                print(list.get(pk=1).getXP())
+                print(list.get(pk=2).getXP())
                 return list.order_by('-_curr_XP')
 
 
@@ -265,12 +268,12 @@ def accountTest(request):
 
 
 def courseIni(request):
-    courseS = Course_General.objects.create()
+    courseS = Course_General.objects.create(pk=1)
     courseS.setCourseID(100001)
     courseS.setName("Fus Ro Dah")
     courseS.save()
 
-    courseS = Course_General.objects.create()
+    courseS = Course_General.objects.create(pk=2)
     courseS.setCourseID(100002)
     courseS.setName("Course 2")
     courseS.save()
