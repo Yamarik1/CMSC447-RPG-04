@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, SideQuest, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
+from .models import Course, Question, Quest, SideQuest, Choice, Boss, Recs, Topic
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -262,42 +262,42 @@ def visualTest(request):
     Q.setType(1)
 
     # Creates Questions, choices and answers for the bosses
-    bossquestion = Q.bossquestion_set.create(pk=1)
-    bossquestion.setQuestion("What is 1 + 1")
+    question = Q.question_set.create(pk=6)
+    question.setQuestion("What is 1 + 1")
 
-    c = bossquestion.bosschoice_set.create(pk=1)
+    c = question.choice_set.create(pk=12)
     c.setChoice("2")
     c.setCorrect(True)
     c.save()
-    c = bossquestion.bosschoice_set.create(pk=2)
+    c = question.choice_set.create(pk=13)
     c.setChoice("13")
     c.save()
 
-    bossquestion.save()
-    bossquestion = Q.bossquestion_set.create(pk=2)
-    bossquestion.setQuestion("What is 10 - 2?")
+    question.save()
+    question = Q.question_set.create(pk=7)
+    question.setQuestion("What is 10 - 2?")
 
-    c = bossquestion.bosschoice_set.create(pk=3)
+    c = question.choice_set.create(pk=14)
     c.setChoice("8")
     c.setCorrect(True)
     c.save()
-    c = bossquestion.bosschoice_set.create(pk=4)
+    c = question.choice_set.create(pk=15)
     c.setChoice("12")
     c.save()
 
-    bossquestion.save()
+    question.save()
 
-    bossquestion = Q.bossquestion_set.create(pk=3)
-    bossquestion.setQuestion("What is the spelling for the word wrong?")
+    question = Q.question_set.create(pk=8)
+    question.setQuestion("What is the spelling for the word wrong?")
 
-    c = bossquestion.bosschoice_set.create(pk=5)
+    c = question.choice_set.create(pk=16)
     c.setChoice("wrong")
     c.setCorrect(True)
     c.save()
-    c = bossquestion.bosschoice_set.create(pk=6)
+    c = question.choice_set.create(pk=17)
     c.setChoice("right")
     c.save()
-    bossquestion.save()
+    question.save()
 
     Q.save()
 
@@ -397,12 +397,12 @@ def bossAnswer(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     boss.setXP(0)
     boss.save()
-    questionSet = boss.bossquestion_set.all()
+    questionSet = boss.question_set.all()
 
     # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
     for question in questionSet:
 
-        selected_choice = question.bosschoice_set.get(pk=request.POST[question.getQuestion()])
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
 
         if selected_choice.getCorrect():
             boss.rightAnsChosen()
@@ -416,6 +416,18 @@ def bossAnswer(request, course_id, boss_id):
 
 
 def bossSummary(request, course_id, boss_id):
-    boss = get_object_or_404(SideQuest, pk=boss_id)
+    boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
     return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
+
+def bAccept(request, course_id, boss_id):
+    boss = get_object_or_404(Boss, pk=boss_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = boss.getXP()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))

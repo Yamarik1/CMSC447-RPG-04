@@ -262,7 +262,7 @@ class Boss(models.Model):
         return self._Correct_answers
 
     def rightAnsChosen(self):
-        self._Correct_answers += 2
+        self._Correct_answers += 1
 
     def setXP(self, numRight):
         self._Correct_answers = numRight
@@ -355,6 +355,7 @@ class Question(models.Model):
     # A question can belong to either a main quest of a side quest, so there are two possible ForeignKeys in this model
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE, blank=True, null=True)
     sidequest = models.ForeignKey(SideQuest, on_delete=models.CASCADE, blank=True, null=True)
+    boss = models.ForeignKey(Boss, on_delete=models.CASCADE, blank=True, null=True)
 
     # Public members
     def getQuestion(self):
@@ -371,25 +372,6 @@ class Question(models.Model):
         msg = str(self.pk) + " " + str(self.getQuestion())
         return msg
 
-# If an admin wishes, they may create bosses directly in the app. This is opposed to it being on some other software,
-# like BlackBoard
-class bossQuestion(models.Model):
-    boss = models.ForeignKey(Boss, on_delete=models.CASCADE)
-
-    # Public members
-    def getQuestion(self):
-        return self._bossQuestion_text
-
-    def setQuestion(self, text):
-        self._bossQuestion_text = text
-        return "Question changed"
-
-    # Private members
-    _bossQuestion_text = models.CharField(max_length=200, default="N/A")
-
-    def __str__(self):
-        msg = str(self.pk) + " " + str(self.getQuestion())
-        return msg
 
 class Choice(models.Model):
     # Public members
@@ -417,28 +399,3 @@ class Choice(models.Model):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
         return msg
 
-class bossChoice(models.Model):
-    # Public members
-    bossQuestion = models.ForeignKey(bossQuestion, on_delete=models.CASCADE)
-
-    def getChoice(self):
-        return self._bossChoice_text
-
-    def setChoice(self, text):
-        self._bossChoice_text = text
-        return "Changed successfully"
-
-    def getCorrect(self):
-        return self._isCorrectChoice
-
-    def setCorrect(self, isAnswer):
-        self._isCorrectChoice = isAnswer
-        return "Correct answer chosen"
-
-    # Private members
-    _bossChoice_text = models.CharField(max_length=200, default="N/A")
-    _isCorrectChoice = models.BooleanField(default=False)
-
-    def __str__(self):
-        msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
-        return msg

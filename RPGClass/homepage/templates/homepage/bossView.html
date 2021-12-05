@@ -6,6 +6,10 @@
 {% if boss.getAvailable == False %}
     <p>This boss is not yet available</p>
 
+{% elif boss.getLives == 0 %}
+    <p>You have no lives remaining for this quest.</p>
+    <a href = "{% url 'homepage:courseS' course_id %}"> Click here to return to the course page</a>
+
 {% else %}
 
     <!-- When a boss has been taken already -->
@@ -19,6 +23,7 @@
     {% elif boss.getType == 1 %}
         <h1>{{ boss.getName }}</h1>
         <p>Welcome to the Boss!</p><br>
+        <p>Number of lives remaining: {{ boss.getLives }} </p>
         <p>Click here to Start the boss!</p>
 
         <a href="{% url 'homepage:bosses' course_id boss.id %}">Start Boss</a>

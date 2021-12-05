@@ -28,6 +28,7 @@ urlpatterns = [
     path('course/<int:course_id>/bosses/<int:pk>/boss/', views.bossSpecific.as_view(), name="bosses"),
     path('course/<int:course_id>/bosses/<int:boss_id>/bossAnswer/', views.bossAnswer, name="bossAnswer"),
     path('course/<int:course_id>/bosses/<int:boss_id>/bossSummary/', views.bossSummary, name="bossSummary"),
+    path('course/<int:course_id>/bosses/<int:boss_id>/accept/', views.bAccept, name='bAccept'),
    
    
     path('course/<int:pk>/sidequest/', views.sidequest.as_view(), name='sidequest'),
