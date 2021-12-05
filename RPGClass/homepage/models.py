@@ -250,6 +250,22 @@ class Student_course(models.Model):
     def getCoins(self):
         return self._coins
 
-    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE)
+    def getLevel(self):
+        return self._level
+
+    def addLevel(self, level):
+        self._level += level
+
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
     _curr_XP = models.IntegerField(default=0)
     _coins = models.IntegerField(default=0)
+    _course_id = models.IntegerField(default=0)
+    _level = models.IntegerField(default=1)
+    skills = {
+        'gainHearts': 0,
+        'gainExtraTime': 0,
+        'gainXP': 0,
+        'bombChoice': 0,
+        'extraShot': 0,
+        'correctAnswer': 0
+    }

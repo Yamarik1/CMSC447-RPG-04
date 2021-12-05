@@ -6,7 +6,13 @@
 
 <title> MarketPlace </title>
 
-<h1>skills/items</h1>
+<h1> MarketPlace </h1>
+
+<h1>Your skills/items</h1>
+
+{% for key, value in user.student.student_course.skills.items %}
+<h2> {{key}} {{value}}  </h2>
+{% endfor %}
 
 {% for skill in course.skill_set.all %}
 

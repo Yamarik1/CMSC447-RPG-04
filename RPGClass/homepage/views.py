@@ -13,6 +13,8 @@ from .models import Course, Question, Quest, Choice, Skill, Student_course
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
+
+
 @login_required(login_url="/accounts/login/")
 def homepage(request):
     return render(request, 'homepage/menu.html')
@@ -67,7 +69,7 @@ def visualTest(request):
     Q = newCourse.quest_set.create(pk=1)
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
-    Q.setLives(3)
+    Q.setLives(1)
     Q.setAvailable(True)
     Q.setType(1)
 
@@ -202,7 +204,7 @@ def accept(request, course_id, quest_id):
     gainedXP = quest.getXP()
     request.user.student.addXP(gainedXP)
     request.user.student.save()
-    request.user.student.student_course.addXP(gainedXP)
+    #request.user.student.student_course.addXP(gainedXP)
     request.user.student.save()
 
     course.updateXP(gainedXP)
@@ -232,12 +234,12 @@ class marketplace(generic.DetailView):
 
 def create_course_student(request, course_id):
     user = get_object_or_404(User, pk=request.user.id)
-    print(not user.student.student_course.DoesNotExist)
-    if (user.student.student_course.DoesNotExist):
-        user.student.student_course.delete()
 
-    Student_course.objects.create(student=request.user.student)
-    request.user.student.student_course.save()
+    for student_course in user.student.student_course_set.all():
+        if (student_course._course_id == course_id):
+            student_course.delete()
+
+    user.student.student_course_set.create(student=request.user.student, _course_id=course_id)
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 def skillscreate(request, course_id):
@@ -266,12 +268,6 @@ def skillscreate(request, course_id):
     S.setName("Gain XP")
     S.setDesc("Boost XP")
     S.setCost(500)
-    S.save()
-
-    S = course.skill_set.create(pk=4)
-    S.setName("XP boost")
-    S.setDesc("gain extra xp on a certain amount of quests")
-    S.setCost(1000)
     S.save()
 
     S = course.skill_set.create(pk=5)
