@@ -38,7 +38,7 @@ class Course_General(models.Model):
 
 class Student_course(models.Model):
     course_general = models.ManyToManyField(Course_General)
-    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE)
+    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE, blank=True ,null=True)
 
     def getName(self):
         return self._student_name

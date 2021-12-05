@@ -6,7 +6,7 @@
 {% if student_list.exists %}
 
     {% for student in student_list %}
-        <p>{{student.getName}} : {{ student.getXP }}</p><br>
+        <p>{{student.getName}} : {{ student.getXP }}</p>
     {% endfor %}
 
 {% else %}
