@@ -199,7 +199,17 @@ def sAccept(request, course_id, sidequest_id):
 
 
 def profile(request):
-    return render(request, 'homepage/profile.html')
+    user = request.user
+    print(user.username)
+    stu = Student.objects.get(user=user)
+    print(stu.getStudentName())
+    student = Student_course.objects.get(student=stu)
+    print(student.getXP())
+    return render(request, 'homepage/profile.html', {'currstudent': student})
+
+class profileSpecific(generic.DetailView):
+    model = Course
+    template_name='homepage/profileS.html'
 
 
 class leaderboard(generic.ListView):

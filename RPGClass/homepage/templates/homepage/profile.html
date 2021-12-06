@@ -134,12 +134,13 @@ focus on the actual development of features
                         <h2 id="username" style="text-align: center;">username: {{ user.student.getNickname }}</h2>
                         <br>
                         <h3>Enrolled Classes</h3>
-                        {% if Course.objects.exists == False %}
+
+                        {% if currstudent.course_set.exists == False %}
                             <h2>You arent enrolled in any courses!</h2>
                         {% else %}
-                              
-                            {% for course in course_list %}
-                            <button><a href=" {% url 'homepage:profileS' course.id %}"> {{course.getName}}</a></button>
+
+                            {% for course in currstudent.course_set.all %}
+                            <button><a href=" {% url 'homepage:profileS' course.id %}">{{course.getName}}</a></button>
                             {% endfor %}
 
                         {% endif %}
@@ -168,11 +169,11 @@ focus on the actual development of features
 
                 <!--Bottom Section-->
                 <div class="row justify-content-lg-center" style="height: 300px">
-                    {% if Course.objects.exists == False %}
+                    {% if currstudent.course_set.exists == False %}
                         <h2>You arent enrolled in any courses!</h2>
                     {% else %}
                       
-                        {% for course in course_list %}
+                        {% for course in currstudent.course_set.all %}
                             
                             <div class = "row justify-content-lg-center profile-inner">
                             <h2> {{course.getName}} </h2>

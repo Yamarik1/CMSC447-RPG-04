@@ -41,7 +41,7 @@ urlpatterns = [
     path('course/<int:course_id>/sidequest/<int:sidequest_id>/accept/', views.sAccept, name='sAccept'),
 
     path('profile/', views.profile, name='profile'),
-    # path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
+    path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
 
     path('course/<int:course_id>/leaderboard', views.leaderboard.as_view(), name='leaderboard'),
     
