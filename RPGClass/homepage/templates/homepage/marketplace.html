@@ -5,19 +5,38 @@
 <!--<link rel="stylesheet" type="text/css" href="{% static 'homepage/mQuestView.css' %}">-->
 
 <title> MarketPlace </title>
+<h1>Course name: {{course.getName}}!</h1>
+<ul>
+    <li><a class = "nav" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
+    <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:sidequest' %}">Side Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:bosses'  %}">Bosses</a> </li>
+    <li><a class = "nav active" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
+
+</ul>
 
 <h1> MarketPlace </h1>
 
+
+<h2>your Money: {{student.getCoins}}</h2>
+
+
 <h1>Your skills/items</h1>
 
-{% for key, value in user.student.student_course.skills.items %}
+
+{% for key, value in student.skills.items %}
 <h2> {{key}} {{value}}  </h2>
 {% endfor %}
 
-{% for skill in course.skill_set.all %}
 
-<h1>skill name: {{ skill.getName }}</h1>
-<h2>skill description: {{ skill.getDesc }}</h2>
-<h2>cost: {{ skill.getCost }}</h2>
+{% for skill in course.skill_set.all %}
+<form action="{% url 'homepage:marketplace' course.id %} " method="post">
+    {% csrf_token %}
+    <h1>skill name: {{ skill.getName }}</h1>
+    <h2>skill description: {{ skill.getDesc }}</h2>
+    <h2>cost: {{ skill.getCost }}</h2>
+    <button type="submit" name="{{skill.getId}}" value="{{skill.getId}}">Buy</button>
+</form>
 
 {% endfor %}

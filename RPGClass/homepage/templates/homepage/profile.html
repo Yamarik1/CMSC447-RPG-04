@@ -157,6 +157,9 @@
     </div>
 
 <h3>Profile total XP: {{ user.student.getXP }}</h3>
+{% for course in user.student.student_course_set.all %}
+<h2>course: {{course.getCourseName}}  XP: {{course.getXP}}  </h2>
+{% endfor %}
 </body>
 
 <!--These are the same links as above, restated with a desciption of each one -->

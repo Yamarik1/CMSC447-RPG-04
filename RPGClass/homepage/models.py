@@ -81,13 +81,51 @@ class Course(models.Model):
     # _max_XP  is the xP needed to gain a level
     _max_XP = models.IntegerField(default=0)
 
+class Student_course(models.Model):
+
+    def setXP(self, xp):
+        self._curr_XP = xp
+
+    def getXP(self):
+        return self._curr_XP
+
+    def addXP(self, xp):
+        self._curr_XP += xp
+
+    def setCoins(self, coins):
+        self._coins = coins
+
+    def getCoins(self):
+        return self._coins
+
+    def getLevel(self):
+        return self._level
+
+    def addLevel(self, level):
+        self._level += level
+
+    def getCourseName(self):
+         return self._course_name
+
+    def setCourseName(self, name):
+        self._course_name = name
+
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+    _curr_XP = models.IntegerField(default=0)
+    _coins = models.IntegerField(default=0)
+    _course_id = models.IntegerField(default=0)
+    _course_name = models.CharField(max_length=200, default="N/A")
+    _level = models.IntegerField(default=1)
+    skills = {}
+
 
 # Quest model: Defines the general information for a quest. This includes name, description, lives, etc.
 # Quests can be create directly on the app, and can also be carried over from other software, and can also
 # be individually created and updated for any avenues this app doesn't support.
 class Quest(models.Model):
     # Public Members
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    student = models.ForeignKey(Student_course, on_delete=models.CASCADE, blank=True, null=True)
 
     # Getters and setters
     def getName(self):
@@ -117,6 +155,9 @@ class Quest(models.Model):
     def getXP(self):
         return self._Correct_answers
 
+    def getCorr(self):
+        return self._Correct_answers
+
     def rightAnsChosen(self):
         self._Correct_answers += 1
 
@@ -130,6 +171,13 @@ class Quest(models.Model):
     def setAvailable(self, available):
         self._Is_available = available
         return "Availability has been changed"
+
+    def getCompleted(self):
+        return self._Is_completed
+
+    def setCompleted(self, complete):
+        self._Is_completed = complete
+        return "Completion has been changed"
 
     # The quest type will determine how a quest will be handled by the app. The values are as follows:
     # 0: Quest type of zero means the app does nothing special. It takes the Quest name, XP gained, level progress,
@@ -151,6 +199,7 @@ class Quest(models.Model):
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Is_completed = models.BooleanField(default=False)
     _Quest_type = models.IntegerField(default=0)
 
     def __str__(self):
@@ -161,7 +210,7 @@ class Quest(models.Model):
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
-    quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE, blank=True, null=True)
 
     # Public members
     def getQuestion(self):
@@ -229,43 +278,14 @@ class Skill(models.Model):
         self._cost = cost
         return True
 
+    def getId(self):
+        return self._id
+
+    def setId(self, id):
+        self._id = id
+        return "Changed successfully"
+
     _name = models.CharField(max_length=200, default="N/A")
     _description = models.CharField(max_length=200, default="N/A")
     _cost = models.IntegerField(default=0)
-
-class Student_course(models.Model):
-
-    def setXP(self, xp):
-        self._curr_XP = xp
-
-    def getXP(self):
-        return self._curr_XP
-
-    def addXP(self, xp):
-        self._curr_XP += xp
-
-    def setCoins(self, coins):
-        self._coins = coins
-
-    def getCoins(self):
-        return self._coins
-
-    def getLevel(self):
-        return self._level
-
-    def addLevel(self, level):
-        self._level += level
-
-    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
-    _curr_XP = models.IntegerField(default=0)
-    _coins = models.IntegerField(default=0)
-    _course_id = models.IntegerField(default=0)
-    _level = models.IntegerField(default=1)
-    skills = {
-        'gainHearts': 0,
-        'gainExtraTime': 0,
-        'gainXP': 0,
-        'bombChoice': 0,
-        'extraShot': 0,
-        'correctAnswer': 0
-    }
+    _id = models.CharField(max_length=200, default="N/A")

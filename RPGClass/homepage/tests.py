@@ -8,7 +8,8 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Course, Quest, Question, Choice
+from .models import Course, Quest, Question, Choice, Skill
+
 
 # Create your tests here.
 
@@ -305,9 +306,9 @@ class QuestionsViewTest(TestCase):
         self.assertContains(response, "This Question does not have any choices")
 
 
-#testing number of lives
-class hearts(TestCase):
-    #test if number displays correctly
+# testing number of lives
+class HeartsTest(TestCase):
+    # test if number displays correctly
     def test_correct_lives(self):
         C = Course.objects.create()
         quest = C.quest_set.create()
@@ -319,14 +320,14 @@ class hearts(TestCase):
 
         url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
-        #makes sure we are at the right page
+        # makes sure we are at the right page
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        #since we set lives to 3, should output 3
+        # since we set lives to 3, should output 3
         self.assertContains(response, "number of lives: 3")
 
-    #tests if having no hearts leads to the right page
+    # tests if having no hearts leads to the right page
     def test_no_hearts(self):
         C = Course.objects.create()
         quest = C.quest_set.create()
@@ -341,11 +342,11 @@ class hearts(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        #the page should be different and tells you you cannot do quest
+        # the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
 
 
-class courseTests(TestCase):
+class CourseTests(TestCase):
 
     # function to make a test course
     def makeClass(self):
@@ -445,4 +446,57 @@ class courseTests(TestCase):
         self.assertContains(response, "Current Level: 3")
         self.assertContains(response, "Total XP earned: 29")
         self.assertContains(response, "Xp to next level: 1")
+
+
+class SkillTest(TestCase):
+
+    def makeClass(self):
+        C = Course.objects.create()
+        C.save()
+        C.setName("Course1")
+        return C
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        C = self.makeClass()
+        self.client.post(reverse('homepage:skill_in', args=(C.id,)))
+        self.client.post(reverse('homepage:course_student', args=(C.id,)))
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
+
+    def test_creating_skills_for_players(self):
+        student = self.user.student.student_course_set.first()
+        self.assertEqual(self.user.student.student_course_set.count(), 1)
+        self.assertEqual(len(student.skills), 6)
+
+    def test_marketplace(self):
+        url = reverse('homepage:marketplace', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "gainHearts 0")
+        self.assertContains(response, "your Money: 1000")
+
+        #bassically what view is doing when posting (aka buying a skill). couldn't figure out posting with data
+        skill = Skill.objects.filter(_id='gainHearts').first()
+        student = self.user.student.student_course_set.first()
+        student.setCoins(student.getCoins() - skill.getCost())
+        student.skills[skill.getId()] += 1
+        student.save()
+
+        response = self.client.get(url)
+        self.assertContains(response, "your Money: 800")
+        self.assertContains(response, "gainHearts 1")
+
+    def test_course_profile(self):
+        url = reverse('homepage:course_profile', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Quests")
+        self.assertContains(response, "gainHearts 0")
+        self.assertContains(response, "Course Info")
 

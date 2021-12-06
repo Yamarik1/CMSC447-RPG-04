@@ -11,14 +11,13 @@
     <li><a class = "nav" href="{% url 'homepage:sidequest' %}">Side Quests</a> </li>
     <li><a class = "nav" href="{% url 'homepage:bosses'  %}">Bosses</a> </li>
     <li><a class = "nav" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
-
-
+    <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
 </ul>
 
 <br>
 <br>
 
-<p>initializes skills to view in marketplace</p>
+<p>initializes skills to view in marketplace (do this first before creating course specific student)</p>
 <form action="{% url 'homepage:skill_in' course.id %}" method="post">
     {% csrf_token %}
 
@@ -47,5 +46,4 @@
 <h2>Course Info</h2>
 <h3>Current Level: {{course.getCourseLevel}}</h3>
 <h3>Total XP earned: {{course.getTotalXP}}</h3>
-<h3>Profile XP: {{ user.student.student_course.getXP }}</h3>
 <h3>Xp to next level: {{course.getNextLevel}}</h3>
