@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, Choice, Skill, Student_course
+from .models import Course, Question, Quest, SideQuest, Choice, Boss, Recs, Topic,  Skill, Student_course
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -38,8 +38,9 @@ class mainquest(generic.DetailView):
     template_name = 'homepage/mainQuest.html'
 
 
-# def mainquest(request, course_id):
-# return render(request, "homepage/mainQuest.html")
+class bosses(generic.DetailView):
+    model = Course
+    template_name = 'homepage/bosses.html'
 
 
 class mainquestView(generic.DetailView):
@@ -50,6 +51,144 @@ class mainquestView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
+
+class bossView(generic.DetailView):
+    model = Boss
+    template_name = 'homepage/bossView.html'
+
+    # Pass the course_id in the url to the html file so that the urls can stay consistent
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+
+class mQuestSpecific(generic.DetailView):
+    queryset = Quest.objects.all()
+    template_name = "homepage/question.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+
+def answer(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    quest.setXP(0)
+    quest.save()
+    questionSet = quest.question_set.all()
+
+    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            quest.rightAnsChosen()
+            quest.save()
+            selected_choice.save()
+    # When the quest is finished, the number of lives is decreased by one
+    quest.subHeart()
+    quest.save()
+
+    return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
+
+
+def summary(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
+
+
+# Function added to allow the user to accept the result of the quest
+def accept(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = quest.getXP()
+    # XP for the course will get updated after the accept button is chosen.
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+
+# Implementation of side quests is the same of main quests, just with a different table in the database
+class sidequest(generic.DetailView):
+    model = Course
+    template_name = 'homepage/sideQuest.html'
+
+
+class sidequestView(generic.DetailView):
+    model = SideQuest
+    template_name = 'homepage/sQuestView.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+
+class sQuestSpecific(generic.DetailView):
+    queryset = SideQuest.objects.all()
+    template_name = "homepage/sQuestQuestion.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['course_id'] = self.kwargs['course_id']
+        return context
+
+
+class recsView(generic.DetailView):
+    model = Recs
+    template_name = 'homepage/recs.html'
+
+
+def sAnswer(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    sidequest.setXP(0)
+    sidequest.save()
+    questionSet = sidequest.question_set.all()
+
+    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            sidequest.rightAnsChosen()
+            sidequest.save()
+            selected_choice.save()
+
+    sidequest.subHeart()
+    sidequest.save()
+
+    return HttpResponseRedirect(reverse('homepage:sQuestSummary', args=(course_id, sidequest.id,)))
+
+
+def sQuestSummary(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    course = get_object_or_404(Course, pk=course_id)
+    return render(request, 'homepage/sQuestSummary.html', {'sidequest': sidequest, 'course': course})
+
+
+def sAccept(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = sidequest.getXP()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+
+def profile(request):
+    return render(request, 'homepage/profile.html')
 
 
 # For the purposes of creating objects in the database easier
@@ -76,14 +215,14 @@ def visualTest(request):
     question = Q.question_set.create(pk=1)
     question.setQuestion("What is the answer to life, the universe, and everything")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=1)
     c.setChoice("Food")
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=2)
     c.setChoice("42")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=3)
     c.setChoice("...what?")
     c.save()
 
@@ -91,11 +230,11 @@ def visualTest(request):
     question = Q.question_set.create(pk=2)
     question.setQuestion("Pineapple on Pizza?")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=4)
     c.setChoice("No")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=5)
     c.setChoice("Yes")
     c.save()
 
@@ -113,6 +252,97 @@ def visualTest(request):
     Q.setAvailable(True)
     Q.save()
 
+    # Set up the bosses database table
+
+    # Create custom boss with some test values
+    # Test Boss 1: using type 1 to give the user questions to answer
+
+    Q = newCourse.boss_set.create(pk=1)
+    Q.setName("Boss 1")
+    Q.setDesc("This is the first test Boss")
+    Q.setLives(3)
+    Q.setAvailable(True)
+    Q.setType(1)
+
+    # Creates Questions, choices and answers for the bosses
+    question = Q.question_set.create(pk=6)
+    question.setQuestion("What is 1 + 1")
+
+    c = question.choice_set.create(pk=12)
+    c.setChoice("2")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create(pk=13)
+    c.setChoice("13")
+    c.save()
+
+    question.save()
+    question = Q.question_set.create(pk=7)
+    question.setQuestion("What is 10 - 2?")
+
+    c = question.choice_set.create(pk=14)
+    c.setChoice("8")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create(pk=15)
+    c.setChoice("12")
+    c.save()
+
+    question.save()
+
+    question = Q.question_set.create(pk=8)
+    question.setQuestion("What is the spelling for the word wrong?")
+
+    c = question.choice_set.create(pk=16)
+    c.setChoice("wrong")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create(pk=17)
+    c.setChoice("right")
+    c.save()
+    question.save()
+
+    Q.save()
+
+    newCourse.save()
+    # Set up the recommended topics visual test
+
+
+    # Create custom recommendation with some test values
+    # Test recs 1 named recommended topics:
+    Q = newCourse.recs_set.create(pk=1)
+    Q.setName("Recommended Topics")
+
+    # Creates topics
+    topic = Q.topic_set.create(pk=1)
+    topic.setTopic("Scoreboards")
+    topic.save()
+
+    topic = Q.topic_set.create(pk=2)
+    topic.setTopic("Circuts")
+    topic.save()
+
+    Q.save()
+
+    newCourse.save()
+
+    squest = newCourse.sidequest_set.create(pk=1)
+    squest.setName("Side Quest 1")
+    squest.setType(1)
+    squest.setLives(5)
+    squest.setAvailable(True)
+
+    question = squest.question_set.create(pk=3)
+    question.setQuestion("test")
+    question.save()
+    c = question.choice_set.create(pk=6)
+    c.setChoice("Right")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create(pk=7)
+    c.setChoice("Wrong")
+    c.save()
+    squest.save()
     newCourse.save()
 
     C = Course.objects.create(pk=2)
@@ -126,29 +356,28 @@ def visualTest(request):
     Q.setAvailable(True)
     Q.setType(1)
 
-    question = Q.question_set.create(pk=3)
+    question = Q.question_set.create(pk=4)
     question.setQuestion("What is 10 + 1?")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=8)
     c.setChoice("10")
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=9)
     c.setChoice("11")
     c.setCorrect(True)
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=4)
+    question = Q.question_set.create(pk=5)
     question.setQuestion("What is 8 - 2?")
 
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=10)
     c.setChoice("6")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create()
+    c = question.choice_set.create(pk=11)
     c.setChoice("12")
     c.save()
-
     question.save()
     Q.save()
 
@@ -157,22 +386,22 @@ def visualTest(request):
     return HttpResponseRedirect(reverse('homepage:menu'))
 
 
-class mQuestSpecific(generic.DetailView):
-    queryset = Quest.objects.all()
-    template_name = "homepage/question.html"
+class bossSpecific(generic.DetailView):
+    queryset = Boss.objects.all()
+    template_name = "homepage/bossQuestion.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
 
+
 def answer(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     quest.setXP(0)
     quest.save()
     questionSet = quest.question_set.all()
-
-    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
+    
     for question in questionSet:
 
         selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
@@ -181,23 +410,42 @@ def answer(request, course_id, quest_id):
             quest.rightAnsChosen()
             quest.save()
             selected_choice.save()
-
-
+    
     quest.subHeart()
     quest.setCompleted(True)
     quest.save()
 
     return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
 
+def bossAnswer(request, course_id, boss_id):
+    boss = get_object_or_404(Boss, pk=boss_id)
+    boss.setXP(0)
+    boss.save()
+    questionSet = boss.question_set.all()
+
+    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            boss.rightAnsChosen()
+            boss.save()
+            selected_choice.save()
+
+    boss.subHeart()
+    boss.save()
+
+    return HttpResponseRedirect(reverse('homepage:bossSummary', args=(course_id, boss_id,)))
 
 
-def summary(request, course_id, quest_id):
-    quest = get_object_or_404(Quest, pk=quest_id)
+
+def bossSummary(request, course_id, boss_id):
+    boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
-    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
-
-
-def accept(request, course_id, quest_id):
+    return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
+  
+  def accept(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
@@ -206,6 +454,18 @@ def accept(request, course_id, quest_id):
     request.user.student.save()
     #request.user.student.student_course.addXP(gainedXP)
     request.user.student.save()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+def bAccept(request, course_id, boss_id):
+    boss = get_object_or_404(Boss, pk=boss_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = boss.getXP()
 
     course.updateXP(gainedXP)
 

@@ -101,19 +101,8 @@ focus on the actual development of features
     <!--This defines the list of links used in the navigation bar, which can be applied to the other pages as needed -->
     <ul>
         <li><a class = "nav" href="/homepage/">Homepage</a></li>
-        <li><a class = "nav" href="/homepage/mainquest/">Main Quests</a> </li>
-        <li><a class = "nav" href="/homepage/sidequest/">Side Quests</a> </li>
-        <li><a class = "nav" href="/homepage/bosses/">Bosses</a> </li>
-        <li><a class = "nav active" href="/homepage/profile/">Profile</a> </li>
-         <form class="pofile_nickname" action="{% url 'accounts:update' %}" method="get" id="menu">
-            {%csrf_token%}
-            <button type="submit">Update Profile</button>
-        </form>
-
     </ul>
 </head>
-
-
 
 <br>
 <br>
@@ -131,26 +120,23 @@ focus on the actual development of features
                         </span>
                     </div>
                     <div class="col-sm-7 profile-inner" style="justify-content: center; flex-direction: column; display: inline;">
-                        <h2 id="username" style="text-align: center;">Nickname: {{ user.student.getNickname }}</h2>
+                        <h2 id="username" style="text-align: center;">Username Placeholder</h2>
                         <br>
-                        <h3>Enrolled Classes</h3>
-                        {% if Course.objects.exists == False %}
-                            <h2>You arent enrolled in any courses!</h2>
-                        {% else %}
-                              
-                            {% for course in course_list %}
-                            <button><a href=" {% url 'homepage:profileS' course.id %}"> {{course.getName}}</a></button>
-                            {% endfor %}
 
-                        {% endif %}
-
+                        <button><a href="/homepage/profile/">Choose different class</a></button>
 
                     </div>
                 </div>
                 <!--Bottom Section-->
                 <div class ="profile-inner">
-                    <h3> Im not sure what to put here currently!</h3>
-                    <h3> Perhaps a quick grade for all your classes? idk?</h3> 
+                    <h3 id="userlevel" style="text-align: center;">Current Level for {{course.getName}}</h3>
+                    <h3 id="userlevel" style="text-align: center; color:aqua">{{course.getCurrXP}}</h3>
+ 
+                    <h3>Skills for {{course.getName}}</h3>
+                    <p>We still dont have quests categorized by their skill :(</p>
+                    <p>Something somethin- (% for skill xp in skill_list %) display (% course.skillXP %) idk</p>
+
+                    <ul class="test-style" id="skill-list"></ul>
                 </div>
             </div>
 
@@ -162,42 +148,43 @@ focus on the actual development of features
                 <!--Top Section-->
                 <div class="row justify-content-lg-center">
                     <div class="container" style="display:inline">
-                        <h2 style="display: inline-block; Margin: 50px">All Active Quests</h2>
+                        <h2 style="display: inline-block; Margin: 50px">Available Quests</h2>
+                        <h2 style="display: inline-block; Margin: 10px">TODO- Filter:</h2>
+                        <p>Would filter by skill type, same issues as skills block rn</p>
+                        <select id="skill-drop"></select>
                     </div> 
                 </div>
 
                 <!--Bottom Section-->
-                <div class="row justify-content-lg-center" style="height: 300px">
-                    {% if Course.objects.exists == False %}
-                        <h2>You arent enrolled in any courses!</h2>
-                    {% else %}
-                      
-                        {% for course in course_list %}
-                            
-                            <div class = "row justify-content-lg-center profile-inner">
-                            <h2> {{course.getName}} </h2>
-
-                            {% for quest in course.quest_set.all %}
-                                <div class = "profile-questBlock">
-                                    <h4>{{quest.getName}}</h4>
-                                    <p>{{quest.getDesc}}</p>
+                <div class="row justify-content-lg-center profile-inner">
+                    {% if course.quest_set.exists %}
+                        {% for quest in course.quest_set.all %}
+                            <div class = "profile-questBlock col-lg-8">
+                            <!--<a href="{% url 'homepage:mainquest' course.id %}" class = "button">-->
+                                <div>
+                                    <div class="col-md-4" style="border-style: inset;"><h4>{{quest.getName}}</h4></div>
+                                    <div class="col-md-4"></div><p>{{quest.getDesc}}</p>
                                 </div>
-                            {% endfor %}
+                                <div>
+                                    <div class="col-sm-4" style="border-style: inset;"><h4>Lives:</h4></div>
+                                    <div class="col-sm-4" style="float: right;"><h4>{{quest.getLives}}</h4></div>
+                                </div>
+                                <div>
+                                    <div class="col-sm-4" style="border-style: inset;"><h4>XP:</h4></div>
+                                    <div class="col-sm-4" style="float: right;"><h4>{{quest.getXP}}</h4></div>
+                                </div>
+                            <!--</a>-->
                             </div>
-
                         {% endfor %}
-
+                
+                    {% else %}
+                        <p>There are no quests available.</p>
                     {% endif %}
                 </div>
 
             </div>
         </div>
     </div>
-
-<h3>Profile total XP: {{ user.student.getXP }}</h3>
-{% for course in user.student.student_course_set.all %}
-<h2>course: {{course.getCourseName}}  XP: {{course.getXP}}  </h2>
-{% endfor %}
 </body>
 
 

@@ -1,3 +1,18 @@
+var courseSelect;
+
+window.onload = function() {
+    courseSelect = document.getElementByID('dropdown');
+    console.log(courseSelect);
+}
+
+function changeSelectedCourse(objDropDown){
+    console.log(objDropDown);
+    var objHidden = document.getElementById("classSelector");
+    objHidden.value = objDropDown.value;
+    var a = objHidden.value;
+    courseDisplay.innerHTML = a || "";
+}
+
 function addSkill(){
     var ul = document.getElementById("skill-list");
     var candidate = document.getElementById("skill-candidate");
@@ -29,3 +44,4 @@ function removeSkill(){
     option.text = li.textContent;
     droplist.remove(option);
 }
+

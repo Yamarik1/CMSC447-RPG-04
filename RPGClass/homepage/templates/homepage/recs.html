@@ -1,0 +1,18 @@
+
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/questView.css' %}">
+<h1>{{ recs.getName }}</h1>
+
+<!-- Goes through all topics and displays them -->
+{% for topic in recs.topic_set.all %}
+
+        {% csrf_token %}
+        <fieldset class="topic">
+
+            <h2 class="topic"> {{topic.id}}: {{ topic.getTopic }} </h2> <br>
+
+            </fieldset>
+        <br>
+
+{% endfor %}
