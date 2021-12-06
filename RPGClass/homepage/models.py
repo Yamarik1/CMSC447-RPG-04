@@ -36,7 +36,7 @@ class Course_General(models.Model):
     _course_id = models.IntegerField(default=0)
 
 
-class Student_course(models.Model):
+class Student_courseList(models.Model):
     course_general = models.ManyToManyField(Course_General)
     student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE, blank=True, null=True)
 
@@ -73,7 +73,7 @@ class Student_course(models.Model):
 # Note for classes, any member prefaced by '_' will be private.
 class Course(models.Model):
 
-    specific_student = models.ForeignKey(Student_course, on_delete=models.CASCADE)
+    specific_student = models.ForeignKey(Student_courseList, on_delete=models.CASCADE)
     # Public members
     def getName(self):
         return self._course_name

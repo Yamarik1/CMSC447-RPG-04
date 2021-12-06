@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import generic
 
-from .models import Course, Quest, SideQuest, Boss, Recs, Student_course, Course_General
+from .models import Course, Quest, SideQuest, Boss, Recs, Student_courseList, Course_General
 from accounts.models import Student
 
 
@@ -24,7 +24,7 @@ class course(generic.ListView):
     def get_queryset(self):
         currUser = self.request.user
         currStudent = Student.objects.get(user=currUser)
-        currStudentC = Student_course.objects.get(student=currStudent)
+        currStudentC = Student_courseList.objects.get(student=currStudent)
         return currStudentC.course_set.all()
 
 
@@ -106,7 +106,7 @@ def summary(request, course_id, quest_id):
 def accept(request, course_id, quest_id):
     user = request.user
     student = Student.objects.get(user=user)
-    stuC = Student_course.objects.get(student=student)
+    stuC = Student_courseList.objects.get(student=student)
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
@@ -183,7 +183,7 @@ def sQuestSummary(request, course_id, sidequest_id):
 def sAccept(request, course_id, sidequest_id):
     user = request.user
     student = Student.objects.get(user=user)
-    stuC = Student_course.objects.get(student=student)
+    stuC = Student_courseList.objects.get(student=student)
     sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
     course = get_object_or_404(Course, pk=course_id)
 
@@ -203,7 +203,7 @@ def profile(request):
     print(user.username)
     stu = Student.objects.get(user=user)
     print(stu.getStudentName())
-    student = Student_course.objects.get(student=stu)
+    student = Student_courseList.objects.get(student=stu)
     print(student.getXP())
     return render(request, 'homepage/profile.html', {'currstudent': student})
 
@@ -219,7 +219,7 @@ class leaderboard(generic.ListView):
     def get_queryset(self):
         currUser = self.request.user
         currStudent = Student.objects.get(user=currUser)
-        currStudentC = Student_course.objects.get(student=currStudent)
+        currStudentC = Student_courseList.objects.get(student=currStudent)
 
         currCourse = Course.objects.get(pk=self.kwargs['course_id'])
 
@@ -230,7 +230,7 @@ class leaderboard(generic.ListView):
 
             if course.getCourseID() == ID:
 
-                list = course.student_course_set.all()
+                list = course.student_courselist_set.all()
 
                 return list.order_by('-_curr_XP')
 
@@ -245,7 +245,7 @@ def accountTest(request):
     student.setStudentName('test')
     student.save()
 
-    courseStu = Student_course(student=student)
+    courseStu = Student_courseList(student=student)
     courseStu.setXP(0)
     courseStu.setName('test')
 
@@ -258,7 +258,7 @@ def accountTest(request):
     student.setStudentName('MasterChief')
     student.save()
 
-    courseStu = Student_course(student=student)
+    courseStu = Student_courseList(student=student)
     courseStu.setXP(14)
     courseStu.setName('MasterChief')
 
@@ -271,7 +271,7 @@ def accountTest(request):
     student.setStudentName('TacoCat')
     student.save()
 
-    courseStu = Student_course(student=student)
+    courseStu = Student_courseList(student=student)
     courseStu.setXP(45)
     courseStu.setName('TacoCat')
     courseStu.save()
@@ -297,7 +297,7 @@ def courseIni(request):
 def visualTest(request):
     currUser = User.objects.get(pk=1)
     currStudent = Student.objects.get(user=currUser)
-    currStudentC = Student_course.objects.get(student=currStudent)
+    currStudentC = Student_courseList.objects.get(student=currStudent)
 
     currStudentC.course_general.add(Course_General.objects.get(pk=1))
     currStudentC.course_general.add(Course_General.objects.get(pk=2))
@@ -496,7 +496,7 @@ def visualTest(request):
 
     currUser = User.objects.get(pk=2)
     currStudent = Student.objects.get(user=currUser)
-    currStudentC = Student_course.objects.get(student=currStudent)
+    currStudentC = Student_courseList.objects.get(student=currStudent)
 
     currStudentC.course_general.add(Course_General.objects.get(pk=1))
 
@@ -652,7 +652,7 @@ def visualTest(request):
 
     currUser = User.objects.get(pk=3)
     currStudent = Student.objects.get(user=currUser)
-    currStudentC = Student_course.objects.get(student=currStudent)
+    currStudentC = Student_courseList.objects.get(student=currStudent)
 
     currStudentC.course_general.add(Course_General.objects.get(pk=2))
 
@@ -726,7 +726,7 @@ def bossSummary(request, course_id, boss_id):
 def bAccept(request, course_id, boss_id):
     user = request.user
     student = Student.objects.get(user=user)
-    stuC = Student_course.objects.get(student=student)
+    stuC = Student_courseList.objects.get(student=student)
     boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
 
