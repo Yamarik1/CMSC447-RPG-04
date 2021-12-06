@@ -104,14 +104,19 @@ def summary(request, course_id, quest_id):
 
 # Function added to allow the user to accept the result of the quest
 def accept(request, course_id, quest_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_course.objects.get(student=student)
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = quest.getXP()
     # XP for the course will get updated after the accept button is chosen.
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
@@ -176,14 +181,19 @@ def sQuestSummary(request, course_id, sidequest_id):
 
 
 def sAccept(request, course_id, sidequest_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_course.objects.get(student=student)
     sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = sidequest.getXP()
 
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
@@ -226,7 +236,7 @@ def accountTest(request):
     student.save()
 
     courseStu = Student_course(student=student)
-    courseStu.setXP(72)
+    courseStu.setXP(0)
     courseStu.setName('test')
 
     courseStu.save()
@@ -704,13 +714,18 @@ def bossSummary(request, course_id, boss_id):
 
 
 def bAccept(request, course_id, boss_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_course.objects.get(student=student)
     boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = boss.getXP()
 
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))

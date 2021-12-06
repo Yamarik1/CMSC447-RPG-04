@@ -38,7 +38,7 @@ class Course_General(models.Model):
 
 class Student_course(models.Model):
     course_general = models.ManyToManyField(Course_General)
-    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE, blank=True ,null=True)
+    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE, blank=True, null=True)
 
     def getName(self):
         return self._student_name
@@ -48,6 +48,9 @@ class Student_course(models.Model):
 
     def setXP(self, xp):
         self._curr_XP = xp
+
+    def updateXP(self, xp):
+        self._curr_XP = self._curr_XP + xp
 
     def getXP(self):
         return self._curr_XP
