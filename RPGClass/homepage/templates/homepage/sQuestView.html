@@ -8,6 +8,16 @@
 {% elif sidequest.getLives == 0 %}
     <p>you are out of lives</p>
     <a href = "{% url 'homepage:summary' course_id sidequest.id %}">Click here to see the results!</a>
+    {% if gainHearts.getNum != 0 %}
+        <p>gainHearts.getNum</p>
+        <p>you can use "gainHearts" if you want</p>
+        <form action="{% url 'homepage:sideGainHearts' course_id sidequest.id%} " method="post">
+            {% csrf_token %}
+            <button type="submit" name="gainHearts" value="gainHearts">Gain Hearts</button>
+        </form>
+    {% else %}
+        <p>you have no skill related to hearts, buy some at the marketplace</p>
+    {% endif %}
 {% else %}
     {% if sidequest.getType == 0 %}
         <h1>{{ sidequest.getName }}</h1>

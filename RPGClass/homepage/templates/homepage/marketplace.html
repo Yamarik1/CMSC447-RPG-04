@@ -3,7 +3,6 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
 <!--<link rel="stylesheet" type="text/css" href="{% static 'homepage/mQuestView.css' %}">-->
-
 <style>
     body {
         background-image: url("{% static 'profile/xp_background.jpg' %}");
@@ -14,6 +13,7 @@
         background-color: rgb(221, 227, 238);
     }
 </style>
+
 
 <head>
     <title> MarketPlace </title>
@@ -37,13 +37,16 @@
     <h2>your Money: {{student.getCoins}}</h2>
 
 
+
+{% for skill in student.skill_set.all %}
+<h2> {{skill.getId}} {{skill.getNum}}  </h2>
+{% endfor %}
+
     <h1>Your skills/items</h1>
 
-
-    {% for key, value in student.skills.items %}
-    <h2> {{key}} {{value}}  </h2>
+    {% for skill in student.skill_set.all %}
+     <h2> {{skill.getId}} {{skill.getNum}}  </h2>
     {% endfor %}
-
 
     {% for skill in course.skill_set.all %}
     <form action="{% url 'homepage:marketplace' course.id %} " method="post">

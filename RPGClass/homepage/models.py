@@ -199,7 +199,6 @@ class Student_course(models.Model):
     _course_id = models.IntegerField(default=0)
     _course_name = models.CharField(max_length=200, default="N/A")
     _level = models.IntegerField(default=1)
-    skills = {}
 
 
 # Quest model: Defines the general information for a quest. This includes name, description, lives, etc.
@@ -236,9 +235,6 @@ class Quest(models.Model):
 
     # Keeps track of the right answers for a quest
     def getXP(self):
-        return self._Correct_answers
-
-    def getCorr(self):
         return self._Correct_answers
 
     def rightAnsChosen(self):
@@ -339,6 +335,13 @@ class SideQuest(models.Model):
         self._Is_available = available
         return "Availability has been changed"
 
+    def getCompleted(self):
+        return self._Is_completed
+
+    def setCompleted(self, complete):
+        self._Is_completed = complete
+        return "Completion has been changed"
+
     # The quest type will determine how a quest will be handled by the app. The values are as follows:
     # 0: Quest type of zero means the app does nothing special. It takes the Quest name, XP gained, level progress,
     #    etc. Used when the quest is manually defined and updated by the admin.
@@ -359,6 +362,7 @@ class SideQuest(models.Model):
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Is_completed = models.BooleanField(default=False)
     _Quest_type = models.IntegerField(default=0)
 
     def __str__(self):
@@ -416,6 +420,13 @@ class Boss(models.Model):
         self._Is_available = available
         return "Availability has been changed"
 
+    def getCompleted(self):
+        return self._Is_completed
+
+    def setCompleted(self, complete):
+        self._Is_completed = complete
+        return "Completion has been changed"
+
     # The boss type will determine how a boss will be handled by the app. The values are as follows:
     # 0: Boss type of zero means the app does nothing special. It takes the Boss name, XP gained, level progress,
     #    etc. Used when the boss is manually defined and updated by the admin.
@@ -436,6 +447,7 @@ class Boss(models.Model):
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Is_completed = models.BooleanField(default=False)
     _Boss_type = models.IntegerField(default=0)
 
     def __str__(self):
@@ -556,8 +568,24 @@ class Question(models.Model):
         self._Question_text = text
         return "Question changed"
 
+    def getGiveQ(self):
+        return self._give_answer
+
+    def setGiveQ(self, bool):
+        self._give_answer = bool
+        return "Question changed"
+
+    def getBombed(self):
+        return self._num_bombed
+
+    def setBombed(self, bomb):
+        self._num_bombed = bomb
+        return "Question changed"
+
     # Private members
     _Question_text = models.CharField(max_length=200, default="N/A")
+    _give_answer = models.BooleanField(default=False)
+    _num_bombed = models.IntegerField(default=0)
 
     def __str__(self):
         msg = str(self.pk) + " " + str(self.getQuestion())
@@ -601,9 +629,17 @@ class Choice(models.Model):
         self._isCorrectChoice = isAnswer
         return "Correct answer chosen"
 
+    def getBombed(self):
+        return self._isBombed
+
+    def setBombed(self, bomb):
+        self._isBombed = bomb
+        return "Question changed"
+
     # Private members
     _choice_text = models.CharField(max_length=200, default="N/A")
     _isCorrectChoice = models.BooleanField(default=False)
+    _isBombed = models.BooleanField(default=False)
 
     def __str__(self):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
@@ -611,7 +647,8 @@ class Choice(models.Model):
 
 
 class Skill(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    student = models.ForeignKey(Student_course, on_delete=models.CASCADE, blank=True, null=True)
 
     def getName(self):
         return self._name
@@ -641,10 +678,19 @@ class Skill(models.Model):
         self._id = id
         return "Changed successfully"
 
+    def getNum(self):
+        return self._number
+
+    def setNum(self, number):
+        self._number = number
+        return "Changed successfully"
+
     _name = models.CharField(max_length=200, default="N/A")
     _description = models.CharField(max_length=200, default="N/A")
     _cost = models.IntegerField(default=0)
     _id = models.CharField(max_length=200, default="N/A")
+    #this is for students and nor for marketplace
+    _number = models.IntegerField(default=0)
 
 
 

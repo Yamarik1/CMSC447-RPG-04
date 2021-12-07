@@ -53,10 +53,53 @@ var x = setInterval(function() {
     document.getElementById("time").innerHTML = "Time's up!";
   }
 }, 1000);
-
-{% endfor %}
+ {% endfor %}
 
 </script>
+
+{% if correctAnswer.getNum != 0 %}
+<p>you have the correct answer skill. you can use this for this specific question</p>
+<form action="{% url 'homepage:mAA' course_id quest.id%} " method="post">
+    {% csrf_token %}
+    {% for question in quest.question_set.all %}
+        {% if question.getGiveQ == False %}
+        <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ question.id}}">
+        <label for="choice{{ forloop.counter }}">{{ question.getQuestion }}</label><br>
+        {% endif %}
+    {% endfor %}
+<button type="submit" name="gainHearts" value="gainHearts">Get Correct Answer</button>
+</form>
+{% endif %}
+
+{% if bombChoice.getNum != 0 %}
+<p>you have the bomb choice skill. you can use this for this specific question</p>
+<form action="{% url 'homepage:mBC' course_id quest.id%} " method="post">
+    {% csrf_token %}
+    {% for question in quest.question_set.all %}
+    {% if question.choice_set.count|subtract:question.getBombed != 1 %}
+        <input type="radio" name="answer" id="bomb{{ forloop.counter }}" value="{{ question.id}}">
+        <label for="choice{{ forloop.counter }}">{{ question.getQuestion }}</label><br>
+    {% endif %}
+    {% endfor %}
+<button type="submit" name="bombChoice" value="bombChoice">bomb an answer</button>
+</form>
+{% endif %}
+
+
+{% for question in quest.question_set.all %}
+<!-- Display the countdown timer in an element -->
+<p id="time"></p>
+
+<style>
+     body {
+        background-image: url("{% static 'profile/cave_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }   
+</style>
 
 
 <body>
@@ -70,6 +113,26 @@ var x = setInterval(function() {
 
                 <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
 
+                {% if question.getGiveQ == True %}
+
+                    {% for choice in question.choice_set.all %}
+                        {% if choice.getCorrect == True %}
+                            <p>correct answer: {{choice.getChoice}}</p>
+                        {% endif %}
+                    {% endfor %}
+
+                {% endif %}
+                {% if question.getBombed > 0 %}
+
+                    {% for choice in question.choice_set.all %}
+                        {% if choice.getBombed == True %}
+                            <p>it is not: {{choice.getChoice}}</p>
+                        {% endif %}
+                    {% endfor %}
+
+                {% endif %}
+
+            {% endif %}
                 <!-- checks to see if there are any questions in the quest -->
                 {% if question.choice_set.exists == False %}
 
@@ -95,7 +158,5 @@ var x = setInterval(function() {
     </form>
 
 </body>
-
-
 
 

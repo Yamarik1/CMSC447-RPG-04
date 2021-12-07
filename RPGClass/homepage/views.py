@@ -15,7 +15,7 @@ from accounts.models import Student
 
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-
+from django.template.defaulttags import register
 from django.http import HttpResponse
 
 
@@ -60,8 +60,10 @@ class mainquestView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['gainHearts'] = context['student'].skill_set.filter(_id='gainHearts').first()
         return context
-
 
 class bossView(generic.DetailView):
     model = Boss
@@ -84,6 +86,10 @@ class mQuestSpecific(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['correctAnswer'] = context['student'].skill_set.filter(_id='correctAnswer').first()
+        context['bombChoice'] = context['student'].skill_set.filter(_id='bombChoice').first()
         return context
 
 
@@ -123,11 +129,19 @@ def answer(request, course_id, quest_id):
 
     return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
 
-
 def summary(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
-    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course})
+    student = request.user.student.student_course_set.filter(_course_id=course_id)
+    student = student.first()
+    skill = student.skill_set.filter(_id='gainXP').first()
+
+    #if coming from the question set, then add teh accept button to add xp. if it's just to check summary, no need to add extra xp
+    fromquest = False
+    url = 'http://127.0.0.1:8000/homepage/course/%s/mainquest/%s/quest/' % (course_id, quest_id)
+    if(request.META.get('HTTP_REFERER') == url):
+        fromquest = True
+    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course, 'boostxp': skill, 'fromquest': fromquest})
 
 
 # Function added to allow the user to accept the result of the quest
@@ -162,6 +176,9 @@ class sidequestView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['gainHearts'] = context['student'].skill_set.filter(_id='gainHearts').first()
         return context
 
 
@@ -172,6 +189,10 @@ class sQuestSpecific(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['correctAnswer'] = context['student'].skill_set.filter(_id='correctAnswer').first()
+        context['bombChoice'] = context['student'].skill_set.filter(_id='bombChoice').first()
         return context
 
 
@@ -196,6 +217,14 @@ def sAnswer(request, course_id, sidequest_id):
             sidequest.save()
             selected_choice.save()
 
+        if (question.getBombed() > 0):
+            for choice in question.choice_set.all():
+                if (choice.getBombed() == True):
+                    choice.setBombed(False)
+                    choice.save()
+            question.setBombed(0)
+        question.save()
+
     sidequest.subHeart()
     sidequest.save()
 
@@ -205,7 +234,16 @@ def sAnswer(request, course_id, sidequest_id):
 def sQuestSummary(request, course_id, sidequest_id):
     sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
     course = get_object_or_404(Course, pk=course_id)
-    return render(request, 'homepage/sQuestSummary.html', {'sidequest': sidequest, 'course': course})
+    student = request.user.student.student_course_set.filter(_course_id=course_id)
+    student = student.first()
+    skill = student.skill_set.filter(_id='gainXP').first()
+
+    #if coming from the question set, then add teh accept button to add xp. if it's just to check summary, no need to add extra xp
+    fromquest = False
+    url = 'http://127.0.0.1:8000/homepage/course/%s/sidequest/%s/squest/' % (course_id, sidequest_id)
+    if(request.META.get('HTTP_REFERER') == url):
+        fromquest = True
+    return render(request, 'homepage/sQuestSummary.html', {'sidequest': sidequest, 'course': course, 'boostxp': skill, 'fromquest': fromquest})
 
 
 def sAccept(request, course_id, sidequest_id):
@@ -743,12 +781,23 @@ def answer(request, course_id, quest_id):
     
     for question in questionSet:
 
+        if(question.getGiveQ() == True):
+            question.setGiveQ(False)
+
         selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
 
         if selected_choice.getCorrect():
             quest.rightAnsChosen()
             quest.save()
             selected_choice.save()
+
+        if(question.getBombed() > 0):
+            for choice in question.choice_set.all():
+                if(choice.getBombed() == True):
+                    choice.setBombed(False)
+                    choice.save()
+            question.setBombed(0)
+        question.save()
     
     quest.subHeart()
     quest.setCompleted(True)
@@ -773,6 +822,7 @@ def bossAnswer(request, course_id, boss_id):
             selected_choice.save()
 
     boss.subHeart()
+    boss.setCompleted(True)
     boss.save()
 
     return HttpResponseRedirect(reverse('homepage:bossSummary', args=(course_id, boss_id,)))
@@ -831,7 +881,9 @@ def marketplace(request, course_id):
                 student = request.user.student.student_course_set.get(_course_id=course_id)
                 if(student.getCoins() - skill.getCost() >= 0):
                     student.setCoins(student.getCoins() - skill.getCost())
-                    student.skills[skill.getId()] += 1
+                    student_skill = student.skill_set.filter(_id=skill.getId()).first()
+                    student_skill.setNum(student_skill.getNum() + 1)
+                    student_skill.save()
                     student.save()
                     return HttpResponseRedirect(reverse('homepage:marketplace', args=(course_id,)))
         return HttpResponseRedirect(reverse('homepage:marketplace', args=(course_id,)))
@@ -839,6 +891,7 @@ def marketplace(request, course_id):
     else:
         course = get_object_or_404(Course, pk=course_id)
         student = request.user.student.student_course_set.filter(_course_id=course_id)
+        pstudent = student.first()
         return render(request, 'homepage/marketplace.html', {'course': course, 'student': student.first()})
 
 def course_profile(request, course_id):
@@ -851,18 +904,16 @@ def create_course_student(request, course_id):
 
     for student_course in user.student.student_course_set.all():
         if (student_course._course_id == course_id):
-            student_course.skills.clear()
             student_course.delete()
 
     course = get_object_or_404(Course, pk=course_id)
 
     student = user.student.student_course_set.create(student=request.user.student, _course_id=course_id, _course_name=course.getName())
-    for cskills in course.skill_set.all():
-        student.skills[cskills.getId()] = 0
+    student.skill_set.set(course.skill_set.all())
     student.quest_set.set(course.quest_set.all())
     student.save()
 
-    student.setCoins(1000)
+    student.setCoins(2000)
     student.save()
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
@@ -898,7 +949,7 @@ def skillscreate(request, course_id):
     S = course.skill_set.create()
     S.setName("bomb choice")
     S.setDesc("during a multiple choice question, able to eliminate a random choice")
-    S.setCost(800)
+    S.setCost(200)
     S.setId('bombChoice')
     S.save()
 
@@ -918,3 +969,140 @@ def skillscreate(request, course_id):
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
+def mainGainHearts(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    quest.setLives(1)
+    quest.save()
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='gainHearts').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+
+    return HttpResponseRedirect(reverse('homepage:mQuestView', args=(course_id, quest_id)))
+
+def sideGainHearts(request, course_id, sidequest_id):
+    quest = get_object_or_404(SideQuest, pk=sidequest_id)
+    quest.setLives(1)
+    quest.save()
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='gainHearts').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+
+    return HttpResponseRedirect(reverse('homepage:sQuestView', args=(course_id, sidequest_id)))
+
+def mainAutomaticAnswer(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    questionSet = quest.question_set.all()
+
+    selected_choice = questionSet.filter(pk=request.POST.get('answer')).first()
+    if(selected_choice == None):
+        return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, quest_id)))
+    selected_choice.setGiveQ(True)
+    selected_choice.save()
+
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='correctAnswer').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+    quest.save()
+
+    return HttpResponseRedirect(reverse('homepage:mQuest', args=(course_id, quest_id)))
+
+def sideAutomaticAnswer(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    questionSet = sidequest.question_set.all()
+
+    selected_choice = questionSet.filter(pk=request.POST.get('answer')).first()
+    if(selected_choice == None):
+        return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, sidequest_id)))
+    selected_choice.setGiveQ(True)
+    selected_choice.save()
+
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='correctAnswer').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+    sidequest.save()
+
+    return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, sidequest_id)))
+
+def mainBombChoice(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    questionSet = quest.question_set.all()
+
+    selected_choice = questionSet.filter(pk=request.POST.get('answer')).first()
+
+    if(selected_choice == None):
+        return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, quest_id)))
+
+    for choice in selected_choice.choice_set.all():
+
+        if (choice.getBombed() == False and choice.getCorrect() == False):
+            choice.setBombed(True)
+            selected_choice.setBombed(selected_choice.getBombed() + 1)
+            choice.save()
+            selected_choice.save()
+
+            student = request.user.student.student_course_set.get(_course_id=course_id)
+            skill = student.skill_set.filter(_id='bombChoice').first()
+            skill.setNum(skill.getNum() - 1)
+            skill.save()
+            quest.save()
+
+            return HttpResponseRedirect(reverse('homepage:mQuest', args=(course_id, quest_id)))
+
+def sideBombChoice(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    questionSet = sidequest.question_set.all()
+
+    selected_choice = questionSet.filter(pk=request.POST.get('answer')).first()
+
+    if(selected_choice == None):
+        return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, sidequest_id)))
+
+    for choice in selected_choice.choice_set.all():
+
+        if (choice.getBombed() == False and choice.getCorrect() == False):
+            choice.setBombed(True)
+            selected_choice.setBombed(selected_choice.getBombed() + 1)
+            choice.save()
+            selected_choice.save()
+
+            student = request.user.student.student_course_set.get(_course_id=course_id)
+            skill = student.skill_set.filter(_id='bombChoice').first()
+            skill.setNum(skill.getNum() - 1)
+            skill.save()
+            sidequest.save()
+
+            return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, sidequest_id)))
+
+def mXPBoost(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+    student = request.user.student.student_course_set.filter(_course_id=course_id)
+    student = student.first()
+    skill = student.skill_set.filter(_id='gainXP').first()
+
+    quest.setXP(quest.getXP() * 2)
+    quest.save()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+    return render(request, 'homepage/summary.html', {'quest': quest, 'course': course, 'boostxp': skill, 'fromquest': True})
+
+def sXPBoost(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    course = get_object_or_404(Course, pk=course_id)
+    student = request.user.student.student_course_set.filter(_course_id=course_id)
+    student = student.first()
+    skill = student.skill_set.filter(_id='gainXP').first()
+
+    sidequest.setXP(sidequest.getXP() * 2)
+    sidequest.save()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+    return render(request, 'homepage/sQuestSummary.html', {'sidequest': sidequest, 'course': course, 'boostxp': skill, 'fromquest': True})
+
+@register.filter
+def subtract(value, arg):
+    return value - arg
