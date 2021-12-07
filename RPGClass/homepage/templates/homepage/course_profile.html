@@ -1,0 +1,41 @@
+{% load static %}
+
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+<!--<link rel="stylesheet" type="text/css" href="{% static 'homepage/mQuestView.css' %}">-->
+
+<title> Course Profile </title>
+<h1>Course name: {{course.getName}}!</h1>
+<ul>
+    <li><a class = "nav" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
+    <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:sidequest' %}">Side Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:bosses'  %}">Bosses</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
+    <li><a class = "nav active" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
+</ul>
+
+<h1>Quests</h1>
+
+{% for quest in student.quest_set.all %}
+{% if quest.getCompleted %}
+    <h2> {{quest}} : {{quest.getAvailable}} -> {{quest.getCorr}} / {{quest.question_set.count}} </h2>
+{% else %}
+    <h2> {{quest}} : {{quest.getAvailable}} </h2>
+{% endif %}
+{% endfor %}
+
+<h1>Skills/Items</h1>
+
+{% for key, value in student.skills.items %}
+<h2> {{key}} {{value}}  </h2>
+{% endfor %}
+
+<h1> course info </h1>
+
+<h2>Course Info</h2>
+<h3>Current Level: {{course.getCourseLevel}}</h3>
+<h3>Total XP earned: {{course.getTotalXP}}</h3>
+<h3>Xp to next level: {{course.getNextLevel}}</h3>
+
+

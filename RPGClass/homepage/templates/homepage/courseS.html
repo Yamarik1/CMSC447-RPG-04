@@ -10,6 +10,9 @@
     <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
     <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
     <li><a class = "nav" href="{% url 'homepage:bosses' course.id %}">Bosses</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
+
 
 
 </ul>
@@ -17,6 +20,22 @@
 <br>
 <br>
 
+<p>initializes skills to view in marketplace (do this first before creating course specific student)</p>
+<form action="{% url 'homepage:skill_in' course.id %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Initialize">
+
+
+</form>
+<p>creates a student specific to this course</p>
+<form action="{% url 'homepage:course_student' course.id %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Initialize">
+
+
+</form>
 
 <!--These are the same links as above, restated with a desciption of each one -->
 <h2><a href="{% url 'homepage:mainquest' course.id %}">Main Quests</a> </h2>
