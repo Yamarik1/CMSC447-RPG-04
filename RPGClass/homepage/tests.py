@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 
 
-from .models import Course_General, Student_courseList, Course, Quest, Question, Choice, Boss, Recs, Topic, Skill, bossDate, Date, Improve, ImproveTopic
+from .models import Course_General, Student_courseList, Course, Quest, Question, Choice, Boss, Recs, Topic, Skill, bossDate, Date, Improve, ImproveTopic, Student_course
 from accounts.models import Student
 
 
@@ -45,6 +45,9 @@ def create_user():
     student = Student(pk=1, user=user)
     student.setStudentName("test")
     student.save()
+
+    studentC = Student_course(pk=1, student=student)
+    studentC.save()
 
     courseStu = Student_courseList(pk=1, student=student)
     courseStu.save()
@@ -174,10 +177,33 @@ class TestQuest(TestCase):
 # Test views
 class QuestViewTest(TestCase):
 
+    def makeClass(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        C.save()
+        C.setName("Course1")
+        return C
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        C = self.makeClass()
+        self.client.post(reverse('homepage:skill_in', args=(C.id,)))
+        self.client.post(reverse('homepage:course_student', args=(C.id,)))
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
+
     # Test that if the quest is specified, it will not be available to the user
     def test_no_quest(self):
         user = Student_courseList.objects.create()
-        C = user.course_set.create()
+        student = Student_course.objects.create()
+        student.save()
+        C = student.course_set.create()
+        C.save
+
         quest = C.quest_set.create()
         quest.setAvailable(False)
 
@@ -265,6 +291,25 @@ def create_QuestionView_Quest(question="N/A", choice="N/A"):
 
 
 class QuestionsViewTest(TestCase):
+
+    def makeClass(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        C.save()
+        C.setName("Course1")
+        return C
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        C = self.makeClass()
+        self.client.post(reverse('homepage:skill_in', args=(C.id,)))
+        self.client.post(reverse('homepage:course_student', args=(C.id,)))
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
 
     # Test to make sure a question with no choices presents the proper message on the page
     def test_question_with_no_choices(self):
@@ -511,8 +556,30 @@ def improveTest(topics="yes"):
 #testing number of lives
 class hearts(TestCase):
     #test if number displays correctly
+    def makeClass(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        C.save()
+        C.setName("Course1")
+        return C
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        C = self.makeClass()
+        self.client.post(reverse('homepage:skill_in', args=(C.id,)))
+        self.client.post(reverse('homepage:course_student', args=(C.id,)))
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
+
 
     def test_correct_lives(self):
+        #curruser = Student(user=self.user)
+        #s = Student_course(student=curruser)
+
         user = Student_courseList.objects.create()
         C = user.course_set.create()
         quest = C.quest_set.create()
@@ -552,7 +619,14 @@ class hearts(TestCase):
 
     def test_sidequest_lives(self):
         user = Student_courseList.objects.create()
+        studentC = Student_course.objects.create()
+
+
+
+
         C = user.course_set.create()
+        #D = studentC.course_set.create()
+
         quest = C.sidequest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
@@ -734,6 +808,25 @@ class SkillTest(TestCase):
 
 # Add additional tests for the side quests
 class sideQuest(TestCase):
+
+    def makeClass(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        C.save()
+        C.setName("Course1")
+        return C
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        C = self.makeClass()
+        self.client.post(reverse('homepage:skill_in', args=(C.id,)))
+        self.client.post(reverse('homepage:course_student', args=(C.id,)))
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
 
     # Makes sure the side quest page exists
     def test_sidequest_page(self):

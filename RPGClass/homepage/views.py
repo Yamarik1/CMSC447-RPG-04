@@ -144,25 +144,6 @@ def summary(request, course_id, quest_id):
     return render(request, 'homepage/summary.html', {'quest': quest, 'course': course, 'boostxp': skill, 'fromquest': fromquest})
 
 
-# Function added to allow the user to accept the result of the quest
-def accept(request, course_id, quest_id):
-    user = request.user
-    student = Student.objects.get(user=user)
-    stuC = Student_courseList.objects.get(student=student)
-    quest = get_object_or_404(Quest, pk=quest_id)
-    course = get_object_or_404(Course, pk=course_id)
-
-    gainedXP = quest.getXP()
-    # XP for the course will get updated after the accept button is chosen.
-    course.updateXP(gainedXP)
-    stuC.updateXP(gainedXP)
-
-    course.save()
-    stuC.save()
-
-    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
-
-
 # Implementation of side quests is the same of main quests, just with a different table in the database
 class sidequest(generic.DetailView):
     model = Course
@@ -266,11 +247,11 @@ def sAccept(request, course_id, sidequest_id):
 
 def profile(request):
     user = request.user
-    print(user.username)
+
     stu = Student.objects.get(user=user)
-    print(stu.getStudentName())
+
     student = Student_courseList.objects.get(student=stu)
-    print(student.getXP())
+
     return render(request, 'homepage/profile.html', {'currstudent': student})
 
 class profileSpecific(generic.DetailView):
@@ -835,6 +816,9 @@ def bossSummary(request, course_id, boss_id):
     return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
   
 def accept(request, course_id, quest_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_courseList.objects.get(student=student)
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
@@ -845,8 +829,10 @@ def accept(request, course_id, quest_id):
     request.user.student.save()
 
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 

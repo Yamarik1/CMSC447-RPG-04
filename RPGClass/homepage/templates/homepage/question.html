@@ -86,7 +86,7 @@ var x = setInterval(function() {
 {% endif %}
 
 
-{% for question in quest.question_set.all %}
+
 <!-- Display the countdown timer in an element -->
 <p id="time"></p>
 
@@ -132,7 +132,7 @@ var x = setInterval(function() {
 
                 {% endif %}
 
-            {% endif %}
+
                 <!-- checks to see if there are any questions in the quest -->
                 {% if question.choice_set.exists == False %}
 
