@@ -8,11 +8,15 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Course, Quest, Question, Choice
+
+from .models import Course_General, Student_courseList, Course, Quest, Question, Choice, Boss, Recs, Topic, Skill, bossDate, Date, Improve, ImproveTopic
+from accounts.models import Student
+
 
 # Create your tests here.
 
-geck_path: str ='/Users/matt/PycharmProjects/CMSC447-RPG-04/RPGClass/homepage/Gecko/geckodriver.exe'
+geck_path: str = '/Users/matt/PycharmProjects/CMSC447-RPG-04/RPGClass/homepage/Gecko/geckodriver.exe'
+
 
 # Test for the skeleton homepage
 class TestHomepage(TestCase):
@@ -33,11 +37,27 @@ class TestHomepage(TestCase):
         self.assertContains(response, "Welcome to RPG Class!")
 
 
+def create_user():
+    C = Client()
+    user = get_user_model().objects.create_user(username='test', password='12test12')
+    C.force_login(user)
+
+    student = Student(pk=1, user=user)
+    student.setStudentName("test")
+    student.save()
+
+    courseStu = Student_courseList(pk=1, student=student)
+    courseStu.save()
+    return courseStu
+
+
 # Function to make a Quest with a number of questions, each with a number of Choices. The correct answer is decided
 # by a list of integers, this expects the length of the list to be the number of questions, and the integer values need
 # to be within 0 and numChoices. Used for larger tests.
 def CreateQuest(name, numQuestions, numChoices, rightList=[], testChoice=[]):
-    C = Course.objects.create()
+    user = create_user()
+
+    C = user.course_set.create()
 
     testQuest = C.quest_set.create()
     testQuest.setName(name)
@@ -96,7 +116,8 @@ class TestQuestList(TestCase):
 
     # Test that if no quests exist in a course, the proper message is given
     def test_no_quests(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
 
         url = reverse('homepage:mainquest', args=(C.id,))
         response = self.client.get(url)
@@ -105,7 +126,8 @@ class TestQuestList(TestCase):
 
     # Test with 2 quests to test that they will both be listed
     def test_with_quests(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         Q = C.quest_set.create()
 
         Q.setName("Quest 1")
@@ -154,7 +176,8 @@ class QuestViewTest(TestCase):
 
     # Test that if the quest is specified, it will not be available to the user
     def test_no_quest(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         quest = C.quest_set.create()
         quest.setAvailable(False)
 
@@ -166,7 +189,8 @@ class QuestViewTest(TestCase):
     # Test that if a quest should be available, it will be shown on the page
     def test_quest_available(self):
         # Make a quest with basic parameters
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         quest = C.quest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
@@ -177,11 +201,12 @@ class QuestViewTest(TestCase):
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Click here to Start of the quest!")
+        self.assertContains(response, "Click here to Start the quest!")
 
     # Checks to see if a quest with type zero will give the right pages
     def test_type_quest_0(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         quest = C.quest_set.create()
         quest.setAvailable(True)
         quest.setType(0)
@@ -205,10 +230,12 @@ class QuestViewTest(TestCase):
 
     # With the summary page being updated, this test makes sure the summary page appears with the new info
     def test_summary_page(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         quest = C.quest_set.create()
         quest.setAvailable(True)
         quest.setType(0)
+        quest.setLives(1)
         quest.setXP(10)
         quest.save()
 
@@ -220,7 +247,8 @@ class QuestViewTest(TestCase):
 
 # Create a basic question for some unit tests.
 def create_QuestionView_Quest(question="N/A", choice="N/A"):
-    C = Course.objects.create()
+    user = Student_courseList.objects.create()
+    C = user.course_set.create()
     quest = C.quest_set.create()
     quest.setType(1)
     quest.setAvailable(True)
@@ -307,97 +335,186 @@ class QuestionsViewTest(TestCase):
         self.assertContains(response, "This Question does not have any choices")
 
 
-#hearts test but with a server
-class hearts_server(LiveServerTestCase):
+# Function to test the creation of a boss with certain number of questions, choices and answers
+def CreateBoss(name, numQuestions, numChoices, rightList=[], testChoice=[]):
+    user = Student_courseList.objects.create()
+    C = user.course_set.create()
+    testBoss = C.boss_set.create()
+    testBoss.setName(name)
+    testBoss.setType(1)
 
-    def setUp(self):
-        self.user = get_user_model().objects.create_user(username='test', password='12test12')
-        self.user.save()
+    for i in range(numQuestions):
+        q = testBoss.question_set.create()
 
-        #need geckodriver.exe to run firefox. haven't tested it on other browsers
-        self.browser = webdriver.Firefox(executable_path=geck_path)
+        for j in range(numChoices):
+            c = q.choice_set.create()
+            if rightList[i] == j:
+                c.setCorrect(True)
+                c.setChoice(testChoice[j])
+                c.save()
 
-        self.browser.implicitly_wait(3)
+            else:
+                c.setCorrect(False)
+                c.setChoice(testChoice[j])
+                c.save()
 
-    def tearDown(self):
-        self.browser.quit()
-        self.user.delete()
+        q.save()
+    testBoss.save()
+    C.save()
+    return C
 
-    #test if you can actually navigate the server
-    def test_server(self):
-        #basically "127.0.0.1:8000/accounts/login/" but when using tests, server is not the same
-        self.browser.get("%s%s" % (self.live_server_url, reverse('accounts:login')))
-        #making sure we are at the right url with the title tab
-        assert 'Title' in self.browser.title
 
-    def test_hearts(self):
-        #testList = [0]
-        #testChoice = ["1", "2", "3"]
-        #quest = CreateQuest("Test1", 1, 3, testList, testChoice)
-        #quest.setLives(3)
+# Tests the boss methods
+class TestBossMethods(TestCase):
 
-        #hardcoded this from views since the create quest function couldn't reduce lives by 1
-        for newCourse in Course.objects.all():
-            newCourse.delete()
+    # Test getters and setters
+    def test_boss_getters_and_setters(self):
 
-        newCourse = Course.objects.create(pk=1)
-        newCourse.setName("Kaer Morhen")
-        newCourse.setSection(1)
-        newCourse.setMaxXP(5)
+        # Create a test question using some basic values
 
-        # Create custom quests with some test values
-        # Test Quest 1: using type 1 to give the user questions to answer
-        Q = newCourse.quest_set.create(pk=1)
-        Q.setName("Quest 1")
-        Q.setDesc("This is the first test quest")
-        Q.setLives(3)
-        Q.setAvailable(True)
-        Q.setType(1)
+        newcourse = CreateBoss("Test", 1, 1, [1], [1])
+        isWorking = True
 
-        question = Q.question_set.create(pk=1)
-        question.setQuestion("What is the meaning of life")
+        # Question name
+        boss = newcourse.boss_set.get(pk=1)
+        boss.setName("Question 1")
+        if boss.getName() != "Question 1":
+            isWorking = False
 
-        c = question.choice_set.create()
-        c.setChoice("2B")
-        c.save()
-        c = question.choice_set.create()
-        c.setChoice("to Be")
-        c.save()
-        c = question.choice_set.create()
-        c.setChoice("to be dooby doo")
-        c.setCorrect(True)
-        c.save()
+        # Question description
+        boss.setDesc("This is the first Question")
+        if boss.getDesc() != "This is the first Question":
+            isWorking = False
 
-        question.save()
-        Q.save()
+        # Question Lives
+        boss.setLives(3)
+        if boss.getLives() != 3:
+            isWorking = False
 
-        newCourse.save()
+        self.assertIs(isWorking, True)
 
-        #to get past homepage
-        self.client.login(username='test', password='12test12')
 
-        self.browser.get("%s%s" % (self.live_server_url, reverse('homepage:mQuest', args=(newCourse.id, Q.id,))))
-        assert 'quest' in self.browser.title
+# Test boss views
+class BossViewTest(TestCase):
 
-        #finds the button when clicking on a multiple choice answer so we can click it
-        radio_button = self.browser.find_element(By.XPATH, "//input[@id='choice1']")
-        radio_button.click()
-        #get's the submit button so we click it and activate the answer view so that hearts can go down
-        element = self.browser.find_element(By.XPATH, "//input[@type='submit']")
-        element.click()
+    # Test that if the boss is specified, it will not be available to the user
+    def test_no_boss(self):
+        user = Student_courseList.objects.create()
+        newcourse = user.course_set.create()
+        boss = newcourse.boss_set.create()
+        boss.setAvailable(False)
+        boss.save()
+        newcourse.save()
+        url = reverse('homepage:bossView', args=(newcourse.id, boss.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This boss is not yet available")
 
-        #since the quest we saved in this function is local copy, need the copy that we used to save the new amount of lives in
-        quest = get_object_or_404(Quest, pk=Q.id)
+    # Test that if a quest should be available, it will be shown on the page
+    def test_boss_available(self):
+        # Make a quest with basic parameters
+        user = Student_courseList.objects.create()
+        newcourse = user.course_set.create()
+        boss = newcourse.boss_set.create()
+        boss.setName("Test Boss")
+        boss.setAvailable(True)
+        boss.setType(1)
+        boss.setLives(1)
+        boss.save()
+        newcourse.save()
 
-        #originally had 3 lives and should be reduced to 2
-        self.assertEqual(quest.getLives(), 2)
+        url = reverse('homepage:bossView', args=(newcourse.id, boss.id,))
 
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Click here to Start the boss!")
+
+    # Checks to see if a boss with type zero will give the right pages
+    def test_type_quest_0(self):
+        user = Student_courseList.objects.create()
+        newcourse = user.course_set.create()
+        boss = newcourse.boss_set.create()
+        boss.setAvailable(True)
+        boss.setType(0)
+        boss.setLives(1)
+        boss.setXP(10)
+        boss.save()
+        newcourse.save()
+        url = reverse('homepage:bossView', args=(newcourse.id, boss.id,))
+
+        # Test that the proper message is displayed and the specific quest screen
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This boss has already been attacked!")
+
+    # Test to make sure the summary page shows the proper XP value
+    def test_boss_XP(self):
+        user = Student_courseList.objects.create()
+        newcourse = user.course_set.create()
+        boss = newcourse.boss_set.create()
+        boss.setAvailable(True)
+        boss.setType(1)
+        boss.setLives(1)
+        boss.setXP(10)
+        boss.save()
+        newcourse.save()
+        url = reverse('homepage:bossSummary', args=(newcourse.id, boss.id,))
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "XP gained: 10")
+
+
+# Create a basic question for bosses
+def create_QuestionView_Boss(question="N/A", choice="N/A"):
+    boss = Boss.objects.create()
+    boss.setType(1)
+    boss.setAvailable(True)
+    question = boss.question_set.create()
+    question.setQuestion(question)
+
+    if (choice != "N/A"):
+        choice = boss.choice_set.create()
+        choice.setChoice(choice)
+
+    boss.save()
+    return boss
+
+
+# Tests the creation of topics and recommendations
+def recsTest(topics="yes"):
+    # Create custom recommendation with some test values
+    # Test recs 1 named recommended topics:
+    rec = Recs.objects.create()
+    rec.setAvailable(True)
+    topic = rec.topic_set.create()
+    topic.setTopic(topics)
+
+    rec.save()
+
+    return rec
+
+
+# Tests the creation of improve topics
+def improveTest(topics="yes"):
+    # Create custom improve list with some test values
+    # Test improve 1:
+    improv = Improve.objects.create()
+    improv.setAvailable(True)
+    improvetopic = improv.improvetopic_set.create()
+    improvetopic.setTopic(topics)
+
+    improv.save()
+
+    return improv
 
 #testing number of lives
 class hearts(TestCase):
     #test if number displays correctly
+
     def test_correct_lives(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         quest = C.quest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
@@ -407,16 +524,17 @@ class hearts(TestCase):
 
         url = reverse('homepage:mQuestView', args=(C.id, quest.id,))
 
-        #makes sure we are at the right page
+        # makes sure we are at the right page
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        #since we set lives to 3, should output 3
+        # since we set lives to 3, should output 3
         self.assertContains(response, "number of lives: 3")
 
-    #tests if having no hearts leads to the right page
+    # tests if having no hearts leads to the right page
     def test_no_hearts(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         quest = C.quest_set.create()
         quest.setName("Test Quest")
         quest.setAvailable(True)
@@ -429,38 +547,60 @@ class hearts(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
-        #the page should be different and tells you you cannot do quest
+        # the page should be different and tells you you cannot do quest
         self.assertContains(response, "you are out of lives")
 
+    def test_sidequest_lives(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        quest = C.sidequest_set.create()
+        quest.setName("Test Quest")
+        quest.setAvailable(True)
+        quest.setType(1)
+        quest.setLives(3)
+        quest.save()
 
-class courseTests(TestCase):
+        url = reverse('homepage:sQuestView', args=(C.id, quest.id,))
+
+        # makes sure we are at the right page
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        # since we set lives to 3, should output 3
+        self.assertContains(response, "number of lives: 3")
+
+    def test_boss_lives(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        quest = C.boss_set.create()
+        quest.setName("Test Quest")
+        quest.setAvailable(True)
+        quest.setType(1)
+        quest.setLives(3)
+        quest.save()
+
+        url = reverse('homepage:bossView', args=(C.id, quest.id,))
+
+        # makes sure we are at the right page
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        # since we set lives to 3, should output 3
+        self.assertContains(response, "Number of lives remaining: 3")
+
+
+class CourseTests(TestCase):
 
     # function to make a test course
-    def makeClass(self):
-        C = Course.objects.create()
+    def makeClass(self, user):
+        C = user.course_set.create()
         C.save()
         return C
 
-    # Test that multiple quests can be seen on the class page
-    def test_class_list(self):
-        C1 = self.makeClass()
-        C1.setName("Course 1")
-        C1.save()
-
-        C2 = self.makeClass()
-        C2.setName("Course 2")
-        C2.save()
-
-        url = reverse('homepage:course')
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, C1.getName())
-        self.assertContains(response, C2.getName())
-
     # Test that will make sure that levels are being found properly, and that it is being shown to the user correctly
     def test_level_value(self):
-        C = self.makeClass()
+        user = Student_courseList.objects.create()
+        C = self.makeClass(user)
         # Set the value of needed XP to 5, and the current XP had is 7, so the level should increase by 1
         C.setMaxXP(5)
 
@@ -477,7 +617,8 @@ class courseTests(TestCase):
 
     # Test to simulate multiple different quests still allow course to get correct level
     def test_multiple_quests(self):
-        C = self.makeClass()
+        user = Student_courseList.objects.create()
+        C = self.makeClass(user)
 
         C.setMaxXP(5)
 
@@ -504,12 +645,13 @@ class courseTests(TestCase):
 
     # Test the correctness of multiple courses being defined
     def test_multiple_courses(self):
-        C1 = self.makeClass()
+        user = Student_courseList.objects.create()
+        C1 = self.makeClass(user)
         C1.setMaxXP(5)
         C1.updateXP(7)
         C1.save()
 
-        C2 = self.makeClass()
+        C2 = self.makeClass(user)
         C2.setMaxXP(10)
         C2.updateXP(29)
         C2.save()
@@ -533,4 +675,336 @@ class courseTests(TestCase):
         self.assertContains(response, "Current Level: 3")
         self.assertContains(response, "Total XP earned: 29")
         self.assertContains(response, "Xp to next level: 1")
+
+
+
+class SkillTest(TestCase):
+
+    def makeClass(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        C.save()
+        C.setName("Course1")
+        return C
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        C = self.makeClass()
+        self.client.post(reverse('homepage:skill_in', args=(C.id,)))
+        self.client.post(reverse('homepage:course_student', args=(C.id,)))
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
+
+    def test_creating_skills_for_players(self):
+        student = self.user.student.student_course_set.first()
+        self.assertEqual(self.user.student.student_course_set.count(), 1)
+        self.assertEqual(len(student.skills), 6)
+
+    def test_marketplace(self):
+        url = reverse('homepage:marketplace', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "gainHearts 0")
+        self.assertContains(response, "your Money: 1000")
+
+        #bassically what view is doing when posting (aka buying a skill). couldn't figure out posting with data
+        skill = Skill.objects.filter(_id='gainHearts').first()
+        student = self.user.student.student_course_set.first()
+        student.setCoins(student.getCoins() - skill.getCost())
+        student.skills[skill.getId()] += 1
+        student.save()
+
+        response = self.client.get(url)
+        self.assertContains(response, "your Money: 800")
+        self.assertContains(response, "gainHearts 1")
+
+    def test_course_profile(self):
+        url = reverse('homepage:course_profile', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Quests")
+        self.assertContains(response, "gainHearts 0")
+        self.assertContains(response, "Course Info")
+
+
+# Add additional tests for the side quests
+class sideQuest(TestCase):
+
+    # Makes sure the side quest page exists
+    def test_sidequest_page(self):
+        user = Student_courseList.objects.create()
+        course = user.course_set.create()
+        course.save()
+
+        url = reverse('homepage:sidequest', args=(1,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Side Quests")
+
+    # Makes sure the sidequest can appear on the sidequest page
+    def test_sidequest_list(self):
+        user = Student_courseList.objects.create()
+        course = user.course_set.create()
+        course.save()
+
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 1")
+
+        sQuest.save()
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 2")
+
+        url = reverse('homepage:sidequest', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, course.sidequest_set.get(pk=1).getName())
+        self.assertContains(response, course.sidequest_set.get(pk=2).getName())
+
+    # Test the sidequest page to make sure a type 0 sidequest will give the proper message
+    def test_sidequest_specific_type_0(self):
+        user = Student_courseList.objects.create()
+        course = user.course_set.create()
+        course.save()
+
+        sidequest = course.sidequest_set.create()
+        sidequest.setName("sidequest 1")
+        sidequest.setAvailable(True)
+        sidequest.setType(0)
+        sidequest.setLives(1)
+        sidequest.setXP(10)
+        sidequest.save()
+
+        url = reverse('homepage:sQuestView', args=(1, 1))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This quest doesn't have anymore work for you to do!")
+
+    # Test type 1 quest to make sure questions can be printed to the user
+    def test_sidequest_question(self):
+        user = Student_courseList.objects.create()
+        course = user.course_set.create()
+        course.save()
+
+        sQuest = course.sidequest_set.create()
+        sQuest.setName("Side Quest 1")
+        sQuest.setType(1)
+        sQuest.setLives(1)
+
+        question = sQuest.question_set.create()
+        question.setQuestion("question 1")
+
+        choice = question.choice_set.create()
+        choice.setChoice("choice 1")
+
+        choice.save()
+        question.save()
+        sQuest.save()
+        course.save()
+
+        url = reverse('homepage:sQuest', args=(1, 1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "question 1")
+        self.assertContains(response, "choice 1")
+
+    # Tests that the summary page is correctly produced
+    def test_sidequest_summary(self):
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
+        squest = C.sidequest_set.create()
+        squest.setName("sidequest 1")
+        squest.setType(0)
+        squest.setAvailable(True)
+        squest.setXP(10)
+
+        squest.save()
+        C.save()
+        url = reverse('homepage:sQuestSummary', args=(1, 1))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "XP gained: 10")
+
+
+# Tests the leaderboard function
+class Leaderboard(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='test', password='12test12')
+        self.user.save()
+
+    def tearDown(self):
+        self.user.delete()
+
+    # Create a user and course, but dont add the user to the course, so the proper page should appear
+    def test_no_user(self):
+        self.client.login(username='test', password='12test12')
+        self.user = User.objects.get(username='test')
+        stu = Student(pk=1, user=self.user)
+        stu.save()
+        user = Student_courseList(pk=1, student=stu)
+        user.save()
+
+        course = Course_General.objects.create()
+        course.setCourseID(1)
+        course.save()
+
+        user.setName("test")
+        user.setXP(10)
+
+        C = user.course_set.create()
+        C.setCourseID(1)
+        C.save()
+
+        url = reverse('homepage:leaderboard', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "There are no valid Users in this class")
+
+    # Create a user and course, add the user to the course, and then check to see the proper name and XP is being
+    # printed.
+    def test_single_user(self):
+        self.client.login(username='test', password='12test12')
+        self.user = User.objects.get(username='test')
+        stu = Student(pk=1, user=self.user)
+        stu.save()
+        user = Student_courseList(pk=1, student=stu)
+        user.save()
+
+        course = Course_General.objects.create()
+        course.setCourseID(1)
+        course.save()
+
+        user.setName("test")
+        user.setXP(10)
+
+        user.course_general.add(Course_General.objects.get(pk=1))
+        user.save()
+
+        C = user.course_set.create()
+        C.setCourseID(1)
+        C.save()
+
+        url = reverse('homepage:leaderboard', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "test : 10")
+
+    # Will add 2 students to a course, then check the leaderboard to see if it is correct
+    def test_multiple_users(self):
+        self.client.login(username='test', password='12test12')
+        self.user = User.objects.get(username='test')
+
+        user2 = get_user_model().objects.create_user(username='test2', password='12test12')
+        user2.save()
+
+        stu = Student(pk=1, user=self.user)
+        stu.save()
+        user = Student_courseList(pk=1, student=stu)
+        user.save()
+
+        course = Course_General.objects.create()
+        course.setCourseID(1)
+        course.save()
+
+        user.setName("test")
+        user.setXP(10)
+
+        user.course_general.add(Course_General.objects.get(pk=1))
+        user.save()
+
+        C = user.course_set.create()
+        C.setCourseID(1)
+        C.save()
+
+        stu = Student(pk=2, user=user2)
+        stu.save()
+        user = Student_courseList(pk=2, student=stu)
+        user.save()
+
+        course = Course_General.objects.create()
+        course.setCourseID(1)
+        course.save()
+
+        user.setName("test2")
+        user.setXP(15)
+
+        user.course_general.add(Course_General.objects.get(pk=1))
+        user.save()
+
+        C = user.course_set.create()
+        C.setCourseID(1)
+        C.save()
+
+        url = reverse('homepage:leaderboard', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # Tests the exact layout of the page
+        self.assertContains(response, "test2 : 15")
+        self.assertContains(response, "test : 10")
+
+    # Tests two users, each who are added to separate classes, and check each individual leaderboard
+    def test_separate_classes(self):
+        self.client.login(username='test', password='12test12')
+        self.user = User.objects.get(username='test')
+
+        user2 = get_user_model().objects.create_user(username='test2', password='12test12')
+        user2.save()
+
+        stu = Student(pk=1, user=self.user)
+        stu.save()
+        user = Student_courseList(pk=1, student=stu)
+        user.save()
+
+        course = Course_General.objects.create()
+        course.setCourseID(1)
+        course.save()
+
+        user.setName("test")
+        user.setXP(10)
+
+        user.course_general.add(Course_General.objects.get(pk=1))
+        user.save()
+
+        C = user.course_set.create()
+        C.setCourseID(1)
+        C.save()
+
+        course = Course_General.objects.create()
+        course.setCourseID(2)
+        course.save()
+
+        stu = Student(pk=2, user=user2)
+        stu.save()
+
+        user = Student_courseList(pk=2, student=stu)
+        user.save()
+
+        user.setName("test2")
+        user.setXP(15)
+
+        user.course_general.add(Course_General.objects.get(pk=2))
+        user.save()
+
+        C = user.course_set.create()
+        C.setCourseID(2)
+        C.save()
+
+        url = reverse('homepage:leaderboard', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # Tests the first course with the first user
+        self.assertContains(response, "test : 10")
+
+        url = reverse('homepage:leaderboard', args=(2,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # Tests the second course with the second user
+        self.assertContains(response, "test2 : 15")
+
+
 

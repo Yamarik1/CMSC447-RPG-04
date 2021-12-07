@@ -6,39 +6,95 @@
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/questView.css' %}">
 <h1>{{ quest.getName }}</h1>
 
-{% for question in quest.question_set.all %}
+<!-- Display the countdown timer in an element -->
+<p id="time"></p>
 
+<style>
+     body {
+        background-image: url("{% static 'profile/cave_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }   
+</style>
 
-    <form action="{% url 'homepage:answer' course_id quest.id %} " method="post">
-        {% csrf_token %}
-        <fieldset class="question">
+<script>
 
-            <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
+{% for date in quest.date_set.all %}
 
-            <!-- checks to see if there are any questions in the quest -->
-            {% if question.choice_set.exists == False %}
+// Set the date we're counting down to
+var dateString = "{{date.getDate}}";
+var countDownDate = new Date(dateString).getTime();
 
-                <p>This Question does not have any choices</p>
+// Update the count down every 1 second
+var x = setInterval(function() {
 
-            {% else %}
+  // Get today's date and time
+  var now = new Date().getTime();
 
-                {% for choice in question.choice_set.all %}
-                    <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
-                    <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-                    <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
+  // Find the distance between now and the count down date
+  var distance = countDownDate - now;
 
-                {% endfor %}
+  // Time calculations for days, hours, minutes and seconds
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            {% endif %}
+  // Display the result in the element with id="time"
+  document.getElementById("time").innerHTML = days + "d " + hours + "h "
+  + minutes + "m " + seconds + "s ";
 
-            </fieldset>
-        <br>
-
+  // If the count down is finished, write some text
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("time").innerHTML = "Time's up!";
+  }
+}, 1000);
 
 {% endfor %}
-<input type="submit" value="Submit" id="submit">
-</form>
 
+</script>
+
+
+<body>
+
+    {% for question in quest.question_set.all %}
+
+
+        <form action="{% url 'homepage:answer' course_id quest.id %} " method="post">
+            {% csrf_token %}
+            <fieldset class="question" style="background-color: rgba(150, 150, 150, 0.4);">
+
+                <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
+
+                <!-- checks to see if there are any questions in the quest -->
+                {% if question.choice_set.exists == False %}
+
+                    <p>This Question does not have any choices</p>
+
+                {% else %}
+
+                    {% for choice in question.choice_set.all %}
+                        <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
+                        <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                        <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
+
+                    {% endfor %}
+
+                {% endif %}
+
+                </fieldset>
+            <br>
+
+
+    {% endfor %}
+    <input type="submit" value="Submit" id="submit">
+    </form>
+
+</body>
 
 
 

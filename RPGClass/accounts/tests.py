@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
@@ -7,6 +8,9 @@ from selenium import webdriver
 
 # Create your tests here.
 # tests logging in
+from .models import Student
+
+
 class LoginTest(TestCase):
     # creates test user to login with
     def setUp(self):
@@ -136,3 +140,91 @@ class SignupTests(TestCase):
         users = get_user_model().objects.all()
         # should be no users created
         self.assertEqual(users.count(), 0)
+
+class UpdateProfileTest(TestCase):
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(username='test', password='12test12')
+        self.client.login(username='test', password='12test12')
+        self.user.save()
+
+    # deletes user
+    def tearDown(self):
+        self.user.delete()
+
+    def test_update_page_url(self):
+        response = self.client.get('/accounts/update/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, template_name='accounts/profile_update.html')
+
+    # test if you can access by name
+    def test_update_view_name(self):
+        response = self.client.get(reverse('accounts:update'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, template_name='accounts/profile_update.html')
+
+    # test if login with right credentials work
+    def test_correct(self):
+        user = authenticate(username='test', password='12test12')
+        self.assertTrue((user is not None) and user.is_authenticated)
+
+    #test if able to change nickname with right credentials
+    def test_update_form(self):
+        # sends credentials to update nickname
+        response = self.client.post(reverse('accounts:update'), data={
+            'user_name': self.user.username,
+            #hardcoded this because self.user.password wasn't working
+            'password': '12test12',
+            'nickname': 'mark'
+        })
+        #should get new values for students
+        self.user.student.refresh_from_db()
+
+        # should on be found since signing up redirects you to profile page
+        self.assertEqual(response.status_code, 302)
+
+        #makes sure update page has the right nickname
+        response = self.client.get(reverse('accounts:update'))
+        self.assertContains(response, "mark")
+
+        #also makes sure that we actually created nickname
+        self.assertEqual(self.user.student.getNickname(), 'mark')
+
+    #test if wrong credentials lead back to page with error pop up and no change in nickname
+    def test_wrong_update_form(self):
+        # sends in wrong credentials
+        response = self.client.post(reverse('accounts:update'), data={
+            'user_name': self.user.username,
+            'password': '12test',
+            'nickname': 'mark'
+        })
+        # should get new values for students
+        self.user.student.refresh_from_db()
+        # should go back to update page
+        self.assertEqual(response.status_code, 200)
+
+        #set the default value to John Doe when student created, when signup set's nickname to username
+        self.assertContains(response, "John Doe")
+        #makes sure the error pops up
+        self.assertContains(response, "credentials do not match!")
+
+        # also makes sure that we actually created nickname
+        self.assertEqual(self.user.student.getNickname(), 'John Doe')
+
+        response = self.client.post(reverse('accounts:update'), data={
+            'user_name': 'tert',
+            'password': '12test12',
+            'nickname': 'mark'
+        })
+        # should get new values for students
+        self.user.student.refresh_from_db()
+        # should go back to update page
+        self.assertEqual(response.status_code, 200)
+
+        #set the default value to John Doe when student created, when signup set's nickname to username
+        self.assertContains(response, "John Doe")
+        #makes sure the error pops up
+        self.assertContains(response, "credentials do not match!")
+
+        # also makes sure that we actually created nickname
+        self.assertEqual(self.user.student.getNickname(), 'John Doe')

@@ -1,12 +1,8 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
-
-<!--
-Need to transfer my style to a stylesheet but right now its causing some issues, and I need to
-focus on the actual development of features    
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/profileView.css' %}">
--->
+
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 
@@ -23,53 +19,7 @@ focus on the actual development of features
         background-blend-mode: overlay;
         background-color: rgb(221, 227, 238);
     }
-
-    .container{
-		max-width: 1920px;
-		min-width: 600px;
-		margin-right: auto;
-		margin-left: auto;
-	}
-
-    .profile-main{
-        background-color: rgba(150, 150, 150, 0.6);
-
-        margin: 3px;
-        border: 2px solid gray;
-
-        padding-left: 10px;
-        padding-right: 10px;
-
-        min-width: 480px;
-
-        display: flex;
-        flex-direction: column;
-    }
-
-    .profile-quests{
-        background-color: rgba(150, 150, 150, 0.6);
-
-        margin: 3px;
-        border: 2px solid gray;
-
-        padding-left: 10px;
-        padding-right: 10px;
-
-        min-width: 480px;
-
-        display: flex;
-        flex-direction: column;
-    }
-
-    .profile-inner{
-        background-color: rgba(150, 150, 150, 0.6);
-
-        margin: 3px;
-        border: 2px solid gray;
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
+    
     .profile-questBlock{
         background-color: rgba(150, 150, 255, 0.6);
 
@@ -80,21 +30,10 @@ focus on the actual development of features
 
 
     }
-
-    .test-style{
-        background-color: rgba(255, 255, 255, 0.616);
-
-        margin: 5px;
-        border: 3px solid gray;
-        padding-left: 10px;
-        padding-right: 10px;
-
-        font-size: 20px;
-
-        display: block;
-    }
-
 </style>
+
+
+
 
 <head>
     <h1>Welcome to RPG Class!</h1>
@@ -116,18 +55,18 @@ focus on the actual development of features
                 <div class="row justify-content-lg-center">
                     <div class="col-sm-3" style="margin: 25";>
                         <span id="user_icon">
-                            <img src="../../static/profile/icon_default.jpg" alt="its you!" width="150" height="150">
+                            <img src="../../static/profile/icon_default.jpg" alt="its you!" width="100" height="100">
                         </span>
                     </div>
                     <div class="col-sm-7 profile-inner" style="justify-content: center; flex-direction: column; display: inline;">
-                        <h2 id="username" style="text-align: center;">Username Placeholder</h2>
+                        <h2 id="username" style="text-align: center;">Nickname: {{ user.student.getNickname }}</h2>
                         <br>
 
                         <button><a href="/homepage/profile/">Choose different class</a></button>
 
                     </div>
                 </div>
-                <!--Bottom Section-->
+                <!--Bottom Section
                 <div class ="profile-inner">
                     <h3 id="userlevel" style="text-align: center;">Current Level for {{course.getName}}</h3>
                     <h3 id="userlevel" style="text-align: center; color:aqua">{{course.getCurrXP}}</h3>
@@ -136,8 +75,8 @@ focus on the actual development of features
                     <p>We still dont have quests categorized by their skill :(</p>
                     <p>Something somethin- (% for skill xp in skill_list %) display (% course.skillXP %) idk</p>
 
-                    <ul class="test-style" id="skill-list"></ul>
                 </div>
+                -->
             </div>
 
 

@@ -9,7 +9,19 @@
         <h1> signup</h1>
         <form class="site-form" action="/accounts/signup/" method="post">
             {% csrf_token %}
-            {{ form }}
+            <!--{{ form }}-->
+           {% for field in form %}
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small style="color: grey">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p style="color: red">{{ error }}</p>
+                    {% endfor %}
+                </p>
+            {% endfor %}
             <input type="submit" name="" value="Signup">
         </form>
     </div>
