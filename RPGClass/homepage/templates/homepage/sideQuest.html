@@ -3,9 +3,22 @@
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/mQuestView.css' %}">
 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
-<h1>Side Quests</h1>
+<style>
+    body {
+        background-image: url("{% static 'profile/xp_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }
+</style>
+
 
 <!--This defines the list of links used in the navigation bar -->
 <ul>
@@ -16,26 +29,47 @@
     <li><a class = "nav" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
     <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
 </ul>
+
+<head>
+
+    <h1>Side Quests</h1>
+
+    <!--This defines the list of links used in the navigation bar -->
+    <ul>
+    <li><a class = "nav" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
+    <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
+    <li><a class = "nav active" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:bosses' course.id %}">Bosses</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
+    </ul>
+
+</head>
 <h2> Available side quests are listed below: </h2>
 
-<!-- This contains the button and a link to a quest when clicked on -->
-<!-- The layout of the button in located in mQuestView.css -->
+<body>
 
-{% if course.sidequest_set.exists %}
-    {% for sidequest in course.sidequest_set.all %}
-        <div class = "center"> <a href="{% url 'homepage:sQuestView' course.id sidequest.id %}" class = "button"> {{sidequest.getName}}
-        <p><font size = "+1"> {{sidequest.getDesc}} </font></p>
-        </a> </div>
-    {% endfor %}
+    <h2 style="text-align: center;"> Available side quests are listed below: </h2>
 
-{% else %}
-    <p>There are no quests available.</p>
-{% endif %}
+    <!-- This contains the button and a link to a quest when clicked on -->
+    <!-- The layout of the button in located in mQuestView.css -->
 
+    {% if course.sidequest_set.exists %}
+        {% for sidequest in course.sidequest_set.all %}
+            <div class="generic-block"> <a href="{% url 'homepage:sQuestView' course.id sidequest.id %}" class = "button"> {{sidequest.getName}}
+            <p><font size = "+1"> {{sidequest.getDesc}} </font></p>
+            </a> </div>
+        {% endfor %}
+
+    {% else %}
+        <p>There are no quests available.</p>
+    {% endif %}
+
+</body>
+
+<!-- I dont think this sections is needed since the main bar at the top serves the same function
 
 <h2> Return to other sections: </h2>
-
-<!-- This contains links to other pages -->
 
 <h2><a href="{% url  'homepage:courseS' course.id %}">Homepage</a> </h2>
 
@@ -44,3 +78,5 @@
 <h2><a href="/homepage/bosses/">Bosses</a></h2>
 
 <h2><a href="{% url  'homepage:profile' %}">Profile</a> </h2>
+
+-->
