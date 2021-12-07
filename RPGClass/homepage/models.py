@@ -165,6 +165,7 @@ class Course(models.Model):
     _max_XP = models.IntegerField(default=0)
 
 class Student_course(models.Model):
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
 
     def setXP(self, xp):
         self._curr_XP = xp
@@ -193,7 +194,7 @@ class Student_course(models.Model):
     def setCourseName(self, name):
         self._course_name = name
 
-    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+
     _curr_XP = models.IntegerField(default=0)
     _coins = models.IntegerField(default=0)
     _course_id = models.IntegerField(default=0)
