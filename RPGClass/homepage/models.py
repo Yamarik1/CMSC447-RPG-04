@@ -21,6 +21,13 @@ class Course_General(models.Model):
     def setCourseID(self, ID):
         self._course_id = ID
 
+    def hashKey(self, size, keyVal):
+        a = 21
+        b = 15
+        p = 6151
+
+        key = (((keyVal * a) + b) % p) % size
+        return key
 
     # Private members
     _course_name = models.CharField(max_length=200)
@@ -132,6 +139,15 @@ class Course(models.Model):
     def setCourseLevel(self, level):
         self._course_level = level
         return "Level updated"
+
+    # This function will take the course_id, and will then Hash it to find where it will be in CourseGeneral
+    def hashKey(self, size, keyVal):
+        a = 21
+        b = 15
+        p = 6151
+
+        key = (((keyVal * a) + b) % p) % size
+        return key
 
     # Private members
     _course_name = models.CharField(max_length=200)

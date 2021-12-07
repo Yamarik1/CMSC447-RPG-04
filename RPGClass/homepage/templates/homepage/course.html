@@ -1,19 +1,35 @@
 <style>
-   h1 {
-    color: black;
-    text-align: center;
-    border: double 5px black;
+    body {
+        background-image: url("../../static/profile/xp_background.jpg");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }
 
-}
+    h1 {
+        color: black;
+        text-align: center;
+        border: double 5px black;
 
-   li {
-    font-size: 20px
+    }
 
-   }
+    li {
+        font-size: 20px
 
-   body{
-    background: lightblue
-   }
+    }
+
+    .large-button {
+
+        min-width: 150px;
+        min-height: 60px;
+
+        background: rgba(147, 224, 255, 0.747);
+
+        margin: 20px;
+    }
+
 </style>
 
 <h1>Course List</h1>
@@ -21,9 +37,7 @@
 {% if Course.objects.exists == False %}
     <h2>There are no courses that are available to you</h2>
 {% else %}
-    <ul>
     {% for course in course_list %}
-        <li><a href=" {% url 'homepage:courseS' course.id %}"> {{course.getName}}</a></li>
+        <button class="large-button"><a href=" {% url 'homepage:courseS' course.id %}"> {{course.getName}}</a></button>
     {% endfor %}
-    </ul>
 {% endif %}
