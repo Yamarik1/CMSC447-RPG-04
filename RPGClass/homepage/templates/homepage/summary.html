@@ -11,7 +11,16 @@
 
 <p>number of lives: {{ quest.getLives }}</p>
 
-{% if quest.getLives == 0 %}
+{% if boostxp.getNum != 0 and fromquest%}
+        <p>you have an xp boost, would you like to use it?</p>
+        <form action="{% url 'homepage:mXPBoost' course.id quest.id %} " method="post">
+                {% csrf_token %}
+                <input type="submit" value="xpboost">
+        </form>
+
+{% endif %}
+
+{% if not fromquest %}
         <a href = "{% url 'homepage:courseS' course.id %}">Click here to go back to the course page</a>
 {% else %}
         <h2>Click here to accept the quest results:</h2>

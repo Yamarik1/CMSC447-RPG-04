@@ -528,9 +528,17 @@ class Question(models.Model):
         self._give_answer = bool
         return "Question changed"
 
+    def getBombed(self):
+        return self._num_bombed
+
+    def setBombed(self, bomb):
+        self._num_bombed = bomb
+        return "Question changed"
+
     # Private members
     _Question_text = models.CharField(max_length=200, default="N/A")
     _give_answer = models.BooleanField(default=False)
+    _num_bombed = models.IntegerField(default=0)
 
     def __str__(self):
         msg = str(self.pk) + " " + str(self.getQuestion())
@@ -555,9 +563,17 @@ class Choice(models.Model):
         self._isCorrectChoice = isAnswer
         return "Correct answer chosen"
 
+    def getBombed(self):
+        return self._isBombed
+
+    def setBombed(self, bomb):
+        self._isBombed = bomb
+        return "Question changed"
+
     # Private members
     _choice_text = models.CharField(max_length=200, default="N/A")
     _isCorrectChoice = models.BooleanField(default=False)
+    _isBombed = models.BooleanField(default=False)
 
     def __str__(self):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
