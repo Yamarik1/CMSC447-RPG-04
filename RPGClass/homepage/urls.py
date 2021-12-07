@@ -12,12 +12,17 @@ urlpatterns = [
     # Url for main quest
 
     path('course/<int:pk>/mainquest/', views.mainquest.as_view(), name='mainquest'),
+    path('course/<int:course_id>/marketplace/', views.marketplace, name="marketplace"),
+    path('course/<int:course_id>/course_profile/', views.course_profile, name="course_profile"),
     path('course/vTest', views.visualTest, name='test'),
     path('course/<int:course_id>/mainquest/<int:pk>/', views.mainquestView.as_view(), name='mQuestView'),
     path('course/<int:course_id>/mainquest/<int:pk>/quest/', views.mQuestSpecific.as_view(), name="mQuest"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/answer/', views.answer, name="answer"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/summary/', views.summary, name="summary"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/accept/', views.accept, name='accept'),
+    path('course/<int:course_id>/initialize', views.skillscreate, name='skill_in'),
+    path('course/<int:course_id>/Cstudent', views.create_course_student, name='course_student'),
+    path('sidequest/', views.sidequest, name='sidequest'),
 
     # Url for recommendations
     path('course/<int:course_id>/recs/<int:pk>', views.recsView.as_view(), name='recs'),

@@ -131,7 +131,7 @@ focus on the actual development of features
                         </span>
                     </div>
                     <div class="col-sm-7 profile-inner" style="justify-content: center; flex-direction: column; display: inline;">
-                        <h2 id="username" style="text-align: center;">username: {{ user.student.getNickname }}</h2>
+                        <h2 id="username" style="text-align: center;">Nickname: {{ user.student.getNickname }}</h2>
                         <br>
                         <h3>Enrolled Classes</h3>
                         {% if Course.objects.exists == False %}
@@ -193,6 +193,11 @@ focus on the actual development of features
             </div>
         </div>
     </div>
+
+<h3>Profile total XP: {{ user.student.getXP }}</h3>
+{% for course in user.student.student_course_set.all %}
+<h2>course: {{course.getCourseName}}  XP: {{course.getXP}}  </h2>
+{% endfor %}
 </body>
 
 

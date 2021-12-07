@@ -1,5 +1,6 @@
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 
@@ -8,10 +9,12 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, SideQuest, Choice, Boss, Recs, Topic
+from .models import Course, Question, Quest, SideQuest, Choice, Boss, Recs, Topic,  Skill, Student_course
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
+
+
 @login_required(login_url="/accounts/login/")
 def homepage(request):
     return render(request, 'homepage/menu.html')
@@ -205,7 +208,7 @@ def visualTest(request):
     Q = newCourse.quest_set.create(pk=1)
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
-    Q.setLives(3)
+    Q.setLives(1)
     Q.setAvailable(True)
     Q.setType(1)
 
@@ -393,6 +396,27 @@ class bossSpecific(generic.DetailView):
         return context
 
 
+def answer(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    quest.setXP(0)
+    quest.save()
+    questionSet = quest.question_set.all()
+    
+    for question in questionSet:
+
+        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
+
+        if selected_choice.getCorrect():
+            quest.rightAnsChosen()
+            quest.save()
+            selected_choice.save()
+    
+    quest.subHeart()
+    quest.setCompleted(True)
+    quest.save()
+
+    return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
+
 def bossAnswer(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     boss.setXP(0)
@@ -415,10 +439,27 @@ def bossAnswer(request, course_id, boss_id):
     return HttpResponseRedirect(reverse('homepage:bossSummary', args=(course_id, boss_id,)))
 
 
+
 def bossSummary(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
     return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
+  
+  def accept(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    course = get_object_or_404(Course, pk=course_id)
+
+    gainedXP = quest.getXP()
+    request.user.student.addXP(gainedXP)
+    request.user.student.save()
+    #request.user.student.student_course.addXP(gainedXP)
+    request.user.student.save()
+
+    course.updateXP(gainedXP)
+
+    course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 def bAccept(request, course_id, boss_id):
     boss = get_object_or_404(Boss, pk=boss_id)
@@ -429,5 +470,114 @@ def bAccept(request, course_id, boss_id):
     course.updateXP(gainedXP)
 
     course.save()
+
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+
+def sidequest(request):
+    return HttpResponse("Placeholder for the Side Quest page")
+
+
+def bosses(request):
+    return HttpResponse("Placeholder for the Bosses page")
+
+
+def profile(request):
+    return render(request, 'homepage/profile.html')
+
+#def marketplace(request, course_id):
+#    return render(request, 'homepage/marketplace.html')
+
+def marketplace(request, course_id):
+    if request.method == 'POST':
+        for skill in Skill.objects.all():
+            if(request.POST.get(skill.getId(), 0)):
+                student = request.user.student.student_course_set.get(_course_id=course_id)
+                if(student.getCoins() - skill.getCost() >= 0):
+                    student.setCoins(student.getCoins() - skill.getCost())
+                    student.skills[skill.getId()] += 1
+                    student.save()
+                    return HttpResponseRedirect(reverse('homepage:marketplace', args=(course_id,)))
+        return HttpResponseRedirect(reverse('homepage:marketplace', args=(course_id,)))
+
+    else:
+        course = get_object_or_404(Course, pk=course_id)
+        student = request.user.student.student_course_set.filter(_course_id=course_id)
+        return render(request, 'homepage/marketplace.html', {'course': course, 'student': student.first()})
+
+def course_profile(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    student = request.user.student.student_course_set.filter(_course_id=course_id)
+    return render(request, 'homepage/course_profile.html', {'course': course, 'student': student.first()})
+
+def create_course_student(request, course_id):
+    user = get_object_or_404(User, pk=request.user.id)
+
+    for student_course in user.student.student_course_set.all():
+        if (student_course._course_id == course_id):
+            student_course.skills.clear()
+            student_course.delete()
+
+    course = get_object_or_404(Course, pk=course_id)
+
+    student = user.student.student_course_set.create(student=request.user.student, _course_id=course_id, _course_name=course.getName())
+    for cskills in course.skill_set.all():
+        student.skills[cskills.getId()] = 0
+    student.quest_set.set(course.quest_set.all())
+    student.save()
+
+    student.setCoins(1000)
+    student.save()
+    return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+
+def skillscreate(request, course_id):
+    # Delete anything in the database
+
+    course = get_object_or_404(Course, pk=course_id)
+
+    for newSkills in course.skill_set.all():
+        newSkills.delete()
+
+    S = course.skill_set.create()
+    S.setName("Gain Hearts")
+    S.setDesc("You can get one heart")
+    S.setCost(200)
+    S.setId('gainHearts')
+    S.save()
+
+    S = course.skill_set.create()
+    S.setName("Gain Extra time")
+    S.setDesc("Gain extra time on a timed quests")
+    S.setCost(300)
+    S.setId('gainExtraTime')
+    S.save()
+
+    S = course.skill_set.create()
+    S.setName("Gain XP")
+    S.setDesc("Boost XP")
+    S.setCost(500)
+    S.setId('gainXP')
+    S.save()
+
+    S = course.skill_set.create()
+    S.setName("bomb choice")
+    S.setDesc("during a multiple choice question, able to eliminate a random choice")
+    S.setCost(800)
+    S.setId('bombChoice')
+    S.save()
+
+    S = course.skill_set.create()
+    S.setName("extra shot")
+    S.setDesc("if you get a question wrong, get another shot at it")
+    S.setCost(800)
+    S.setId('extraShot')
+    S.save()
+
+    S = course.skill_set.create()
+    S.setName("Automatic correct answer")
+    S.setDesc("gets an automatic correct answer")
+    S.setCost(500)
+    S.setId('correctAnswer')
+    S.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
