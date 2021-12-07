@@ -9,7 +9,7 @@
 <ul>
     <li><a class = "nav" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
     <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
-    <li><a class = "nav" href="{% url 'homepage:sidequest' %}">Side Quests</a> </li>
+    <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
     <li><a class = "nav" href="{% url 'homepage:bosses' course.id %}">Bosses</a> </li>
     <li><a class = "nav active" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
     <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
@@ -25,8 +25,8 @@
 <h1>Your skills/items</h1>
 
 
-{% for key, value in student.skills.items %}
-<h2> {{key}} {{value}}  </h2>
+{% for skill in student.skill_set.all %}
+<h2> {{skill.getId}} {{skill.getNum}}  </h2>
 {% endfor %}
 
 

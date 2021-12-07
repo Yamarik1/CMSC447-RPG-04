@@ -14,7 +14,7 @@ from accounts.models import Student
 
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-
+from django.template.defaulttags import register
 from django.http import HttpResponse
 
 
@@ -62,8 +62,10 @@ class mainquestView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['gainHearts'] = context['student'].skill_set.filter(_id='gainHearts').first()
         return context
-
 
 class bossView(generic.DetailView):
     model = Boss
@@ -83,29 +85,10 @@ class mQuestSpecific(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['correctAnswer'] = context['student'].skill_set.filter(_id='correctAnswer').first()
         return context
-
-
-def answer(request, course_id, quest_id):
-    quest = get_object_or_404(Quest, pk=quest_id)
-    quest.setXP(0)
-    quest.save()
-    questionSet = quest.question_set.all()
-
-    # The choice will be check for each question, and the correct counter will increment if the right answer is chosen.
-    for question in questionSet:
-
-        selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
-
-        if selected_choice.getCorrect():
-            quest.rightAnsChosen()
-            quest.save()
-            selected_choice.save()
-    # When the quest is finished, the number of lives is decreased by one
-    quest.subHeart()
-    quest.save()
-
-    return HttpResponseRedirect(reverse('homepage:summary', args=(course_id, quest.id,)))
 
 
 def summary(request, course_id, quest_id):
@@ -146,6 +129,9 @@ class sidequestView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
+        student = self.request.user.student.student_course_set.filter(_course_id=context['course_id'])
+        context['student'] = student.first()
+        context['gainHearts'] = context['student'].skill_set.filter(_id='gainHearts').first()
         return context
 
 
@@ -715,6 +701,10 @@ def answer(request, course_id, quest_id):
     
     for question in questionSet:
 
+        if(question.getGiveQ() == True):
+            question.setGiveQ(False)
+            question.save()
+
         selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
 
         if selected_choice.getCorrect():
@@ -745,6 +735,7 @@ def bossAnswer(request, course_id, boss_id):
             selected_choice.save()
 
     boss.subHeart()
+    boss.setCompleted(True)
     boss.save()
 
     return HttpResponseRedirect(reverse('homepage:bossSummary', args=(course_id, boss_id,)))
@@ -803,7 +794,9 @@ def marketplace(request, course_id):
                 student = request.user.student.student_course_set.get(_course_id=course_id)
                 if(student.getCoins() - skill.getCost() >= 0):
                     student.setCoins(student.getCoins() - skill.getCost())
-                    student.skills[skill.getId()] += 1
+                    student_skill = student.skill_set.filter(_id=skill.getId()).first()
+                    student_skill.setNum(student_skill.getNum() + 1)
+                    student_skill.save()
                     student.save()
                     return HttpResponseRedirect(reverse('homepage:marketplace', args=(course_id,)))
         return HttpResponseRedirect(reverse('homepage:marketplace', args=(course_id,)))
@@ -811,6 +804,7 @@ def marketplace(request, course_id):
     else:
         course = get_object_or_404(Course, pk=course_id)
         student = request.user.student.student_course_set.filter(_course_id=course_id)
+        pstudent = student.first()
         return render(request, 'homepage/marketplace.html', {'course': course, 'student': student.first()})
 
 def course_profile(request, course_id):
@@ -823,18 +817,16 @@ def create_course_student(request, course_id):
 
     for student_course in user.student.student_course_set.all():
         if (student_course._course_id == course_id):
-            student_course.skills.clear()
             student_course.delete()
 
     course = get_object_or_404(Course, pk=course_id)
 
     student = user.student.student_course_set.create(student=request.user.student, _course_id=course_id, _course_name=course.getName())
-    for cskills in course.skill_set.all():
-        student.skills[cskills.getId()] = 0
+    student.skill_set.set(course.skill_set.all())
     student.quest_set.set(course.quest_set.all())
     student.save()
 
-    student.setCoins(1000)
+    student.setCoins(2000)
     student.save()
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
@@ -890,3 +882,56 @@ def skillscreate(request, course_id):
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
+def mainGainHearts(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    quest.setLives(1)
+    quest.save()
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='gainHearts').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+
+    return HttpResponseRedirect(reverse('homepage:mQuestView', args=(course_id, quest_id)))
+
+def sideGainHearts(request, course_id, sidequest_id):
+    quest = get_object_or_404(SideQuest, pk=sidequest_id)
+    quest.setLives(1)
+    quest.save()
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='gainHearts').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+
+    return HttpResponseRedirect(reverse('homepage:sQuestView', args=(course_id, sidequest_id)))
+
+def mainAutomaticAnswer(request, course_id, quest_id):
+    quest = get_object_or_404(Quest, pk=quest_id)
+    questionSet = quest.question_set.all()
+
+    selected_choice = questionSet.filter(pk=request.POST.get('answer')).first()
+    selected_choice.setGiveQ(True)
+    selected_choice.save()
+
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='correctAnswer').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+    quest.save()
+
+    return HttpResponseRedirect(reverse('homepage:mQuest', args=(course_id, quest_id)))
+
+def sideAutomaticAnswer(request, course_id, sidequest_id):
+    sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
+    questionSet = sidequest.question_set.all()
+
+    selected_choice = questionSet.filter(pk=request.POST.get('answer')).first()
+    selected_choice.setGiveQ(True)
+    selected_choice.save()
+
+    student = request.user.student.student_course_set.get(_course_id=course_id)
+    skill = student.skill_set.filter(_id='correctAnswer').first()
+    skill.setNum(skill.getNum() - 1)
+    skill.save()
+    sidequest.save()
+
+    return HttpResponseRedirect(reverse('homepage:sQuest', args=(course_id, sidequest_id)))

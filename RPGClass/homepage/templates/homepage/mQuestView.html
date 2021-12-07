@@ -8,6 +8,15 @@
 {% elif quest.getLives == 0 %}
     <p>you are out of lives</p>
     <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
+        {% if gainHearts.getNum != 0 %}
+        <p>you can use "gainHearts" if you want</p>
+        <form action="{% url 'homepage:mainGainHearts' course_id quest.id%} " method="post">
+            {% csrf_token %}
+            <button type="submit" name="gainHearts" value="gainHearts">Gain Hearts</button>
+        </form>
+    {% else %}
+        <p>you have no skill related to hearts, buy some at the marketplace</p>
+    {% endif %}
 {% else %}
     {% if quest.getType == 0 %}
         <h1>{{ quest.getName }}</h1>
@@ -18,7 +27,6 @@
         <h1>{{ quest.getName }}</h1>
         <p>Welcome to this Quest!</p><br>
         <p>Click here to Start the quest!</p>
-
 
         <p>number of lives: {{ quest.getLives }}</p>        
 

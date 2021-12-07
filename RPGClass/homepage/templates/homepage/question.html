@@ -29,6 +29,16 @@
 
                 {% endfor %}
 
+                {% if question.getGiveQ == True %}
+
+                    {% for choice in question.choice_set.all %}
+                        {% if choice.getCorrect == True %}
+                            <p>correct answer: {{choice.getChoice}}</p>
+                        {% endif %}
+                    {% endfor %}
+
+                {% endif %}
+
             {% endif %}
 
             </fieldset>
@@ -39,6 +49,19 @@
 <input type="submit" value="Submit" id="submit">
 </form>
 
+{% if correctAnswer.getNum != 0 %}
+<p>you have the correct answer skill. you can use this for this specific question</p>
+<form action="{% url 'homepage:mAA' course_id quest.id%} " method="post">
+    {% csrf_token %}
+    {% for question in quest.question_set.all %}
+    {% if question.getGiveQ == False %}
+        <input type="radio" name="answer" id="question{{ forloop.counter }}" value="{{ question.id}}">
+        <label for="choice{{ forloop.counter }}">{{ question.getQuestion }}</label><br>
+    {% endif %}
+    {% endfor %}
+<button type="submit" name="gainHearts" value="gainHearts">Get Correct Answer</button>
+</form>
+{% endif %}
 
 
 
