@@ -667,7 +667,8 @@ class CourseTests(TestCase):
 class SkillTest(TestCase):
 
     def makeClass(self):
-        C = Course.objects.create()
+        user = Student_courseList.objects.create()
+        C = user.course_set.create()
         C.save()
         C.setName("Course1")
         return C

@@ -756,7 +756,7 @@ def bossSummary(request, course_id, boss_id):
     course = get_object_or_404(Course, pk=course_id)
     return render(request, 'homepage/bossSummary.html', {'boss': boss, 'course': course})
   
-  def accept(request, course_id, quest_id):
+def accept(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
