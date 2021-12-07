@@ -9,6 +9,17 @@
 <!-- Display the countdown timer in an element -->
 <p id="time"></p>
 
+<style>
+     body {
+        background-image: url("{% static 'profile/cave_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }   
+</style>
+
 <script>
 
 {% for date in quest.date_set.all %}
@@ -48,39 +59,42 @@ var x = setInterval(function() {
 </script>
 
 
-{% for question in quest.question_set.all %}
+<body>
+
+    {% for question in quest.question_set.all %}
 
 
-    <form action="{% url 'homepage:answer' course_id quest.id %} " method="post">
-        {% csrf_token %}
-        <fieldset class="question">
+        <form action="{% url 'homepage:answer' course_id quest.id %} " method="post">
+            {% csrf_token %}
+            <fieldset class="question" style="background-color: rgba(150, 150, 150, 0.4);">
 
-            <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
+                <h2 class="question"> {{forloop.counter}}: {{ question.getQuestion }} </h2> <br>
 
-            <!-- checks to see if there are any questions in the quest -->
-            {% if question.choice_set.exists == False %}
+                <!-- checks to see if there are any questions in the quest -->
+                {% if question.choice_set.exists == False %}
 
-                <p>This Question does not have any choices</p>
+                    <p>This Question does not have any choices</p>
 
-            {% else %}
+                {% else %}
 
-                {% for choice in question.choice_set.all %}
-                    <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
-                    <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-                    <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
+                    {% for choice in question.choice_set.all %}
+                        <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
+                        <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                        <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
 
-                {% endfor %}
+                    {% endfor %}
 
-            {% endif %}
+                {% endif %}
 
-            </fieldset>
-        <br>
+                </fieldset>
+            <br>
 
 
-{% endfor %}
-<input type="submit" value="Submit" id="submit">
-</form>
+    {% endfor %}
+    <input type="submit" value="Submit" id="submit">
+    </form>
 
+</body>
 
 
 

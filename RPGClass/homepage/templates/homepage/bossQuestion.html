@@ -55,7 +55,7 @@ var x = setInterval(function() {
 
     <form action="{% url 'homepage:bossAnswer' course_id boss.id %} " method="post">
         {% csrf_token %}
-        <fieldset class="question">
+        <fieldset class="question" style="background-color: rgba(150, 150, 150, 0.4);">
 
             <h2 class="bossquestion"> {{question.id}}: {{ question.getQuestion }} </h2> <br>
 
