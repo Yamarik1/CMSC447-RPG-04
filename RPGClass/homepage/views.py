@@ -228,11 +228,8 @@ def sAccept(request, course_id, sidequest_id):
 
 def profile(request):
     user = request.user
-    print(user.username)
     stu = Student.objects.get(user=user)
-    print(stu.getStudentName())
     student = Student_courseList.objects.get(student=stu)
-    print(student.getXP())
     return render(request, 'homepage/profile.html', {'currstudent': student})
 
 class profileSpecific(generic.DetailView):
@@ -332,6 +329,9 @@ def visualTest(request):
 
     for newCourse in currStudentC.course_set.all():
         newCourse.delete()
+    i = Improve.objects.create()
+    i.save()
+
 
     newCourse = currStudentC.course_set.create()
     newCourse.setName("Fus Ro Dah")
@@ -344,7 +344,7 @@ def visualTest(request):
     Q = newCourse.quest_set.create()
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
-    Q.setLives(1)
+    Q.setLives(3)
     Q.setAvailable(True)
     Q.setType(1)
     
