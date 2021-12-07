@@ -22,6 +22,9 @@ urlpatterns = [
     # Url for recommendations
     path('course/<int:course_id>/recs/<int:pk>', views.recsView.as_view(), name='recs'),
 
+    # Url for topics to improve on
+    path('course/<int:course_id>/improve/<int:pk>', views.improveView.as_view(), name='improve'),
+
     # Urls for Bosses
     path('course/<int:pk>/bosses/', views.bosses.as_view(), name='bosses'),
     path('course/<int:course_id>/bosses/<int:pk>/', views.bossView.as_view(), name='bossView'),

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, SideQuest, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
+from .models import Course, Question, Quest, SideQuest, Choice, Boss, bossQuestion, bossChoice, Recs, Topic,  bossDate, Date, Improve, ImproveTopic
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -59,6 +59,9 @@ class bossView(generic.DetailView):
         context['course_id'] = self.kwargs['course_id']
         return context
 
+class improveView(generic.DetailView):
+    model = Improve
+    template_name = 'homepage/improve.html'
 
 class mQuestSpecific(generic.DetailView):
     queryset = Quest.objects.all()
@@ -73,6 +76,7 @@ class mQuestSpecific(generic.DetailView):
 def answer(request, course_id, quest_id):
     quest = get_object_or_404(Quest, pk=quest_id)
     quest.setXP(0)
+    totalXP = 0
     quest.save()
     questionSet = quest.question_set.all()
 
@@ -81,10 +85,24 @@ def answer(request, course_id, quest_id):
 
         selected_choice = question.choice_set.get(pk=request.POST[question.getQuestion()])
 
+        totalXP = totalXP + 1
+
         if selected_choice.getCorrect():
             quest.rightAnsChosen()
             quest.save()
             selected_choice.save()
+
+    # If the user gets a question wrong then add it to list of topics to improve on
+    if quest.getXP() < totalXP:
+
+        Q = get_object_or_404(Improve, pk=quest_id)
+        Q.setName("Topics to improve on")
+
+        improvetopic = Q.improvetopic_set.create(pk=quest_id)
+        improvetopic.setTopic(quest.getName())
+        improvetopic.save()
+
+        Q.save()
     # When the quest is finished, the number of lives is decreased by one
     quest.subHeart()
     quest.save()
@@ -209,6 +227,10 @@ def visualTest(request):
     Q.setAvailable(True)
     Q.setType(1)
 
+    date = Q.date_set.create(pk=1)
+    date.setDate("Dec 7, 2021 5:22:00")
+    date.save()
+
     question = Q.question_set.create(pk=1)
     question.setQuestion("What is the answer to life, the universe, and everything")
 
@@ -223,6 +245,7 @@ def visualTest(request):
     c.setChoice("...what?")
     c.save()
 
+    #Creates a test date for quest
     question.save()
     question = Q.question_set.create(pk=2)
     question.setQuestion("Pineapple on Pizza?")
@@ -260,6 +283,11 @@ def visualTest(request):
     Q.setLives(3)
     Q.setAvailable(True)
     Q.setType(1)
+
+    #Creates a test date for boss
+    bossdate = Q.bossdate_set.create(pk=1)
+    bossdate.setDate("Dec 9, 2021 5:02:00")
+    bossdate.save()
 
     # Creates Questions, choices and answers for the bosses
     bossquestion = Q.bossquestion_set.create(pk=1)

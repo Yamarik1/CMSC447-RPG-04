@@ -8,7 +8,8 @@ from django.test import Client
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 
-from .models import Course, Quest, Question, Choice, Boss, bossQuestion, bossChoice, Recs, Topic
+from .models import Course, Quest, Question, Choice, Boss, bossQuestion, bossChoice, Recs, Topic,  bossDate, Date, Improve, ImproveTopic
+
 
 
 
@@ -441,6 +442,19 @@ def recsTest(topics="yes"):
     rec.save()
 
     return rec
+
+# Tests the creation of improve topics
+def improveTest(topics="yes"):
+    # Create custom improve list with some test values
+    # Test improve 1:
+    improv = Improve.objects.create()
+    improv.setAvailable(True)
+    improvetopic = improv.improvetopic_set.create()
+    improvetopic.setTopic(topics)
+
+    improv.save()
+
+    return improv
 
 #testing number of lives
 class hearts(TestCase):
