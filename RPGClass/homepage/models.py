@@ -493,6 +493,53 @@ class Topic(models.Model):
         return msg
 
 
+# Improve model: Defines the name of the topics to improve on and if it is available
+class Improve(models.Model):
+    # Public Members
+
+    # Getters and setters
+    def getName(self):
+        return self._Improve_name
+
+    def setName(self, name):
+        self._Improve_name = name
+        return "Name Changed successfully"
+
+    # A recommendation should not be shown to the player if it is defined as such by the admin
+    def getAvailable(self):
+        return self._Is_available
+
+    def setAvailable(self, available):
+        self._Is_available = available
+        return "Availability has been changed"
+
+    # Private members
+    _Improve_name = models.CharField(max_length=200, default="Topics to improve on")
+    _Is_available = models.BooleanField(default=False)
+
+    def __str__(self):
+        msg = "This is Improve number:" + str(self.pk)
+        return msg
+
+# If an admin wishes, they can add their own improve topics
+class ImproveTopic(models.Model):
+    improvetopic = models.ForeignKey(Improve, on_delete=models.CASCADE)
+
+    # Public members
+    def getTopic(self):
+        return self._ImproveTopic_text
+
+    def setTopic(self, text):
+        self._ImproveTopic_text = text
+        return "Question changed"
+
+    # Private members
+    _ImproveTopic_text = models.CharField(max_length=200, default="N/A")
+
+    def __str__(self):
+        msg = str(self.pk) + " " + str(self.getTopic())
+        return msg
+
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
@@ -516,6 +563,25 @@ class Question(models.Model):
         msg = str(self.pk) + " " + str(self.getQuestion())
         return msg
 
+
+# Due dates of a boss
+class bossDate(models.Model):
+    boss = models.ForeignKey(Boss, on_delete=models.CASCADE)
+
+    # Public members
+    def getDate(self):
+        return self._bossDate_text
+
+    def setDate(self, text):
+        self._bossDate_text = text
+        return "Date changed"
+
+    # Private members
+    _bossDate_text = models.CharField(max_length=200, default="N/A")
+
+    def __str__(self):
+        msg = str(self.pk) + " " + str(self.getDate())
+        return msg
 
 class Choice(models.Model):
     # Public members
@@ -580,4 +646,28 @@ class Skill(models.Model):
     _cost = models.IntegerField(default=0)
     _id = models.CharField(max_length=200, default="N/A")
 
+
+
+    def __str__(self):
+        msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
+        return msg
+
+# Due dates of a quest
+class Date(models.Model):
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
+
+    # Public members
+    def getDate(self):
+        return self._Date_text
+
+    def setDate(self, text):
+        self._Date_text = text
+        return "Date changed"
+
+    # Private members
+    _Date_text = models.CharField(max_length=200, default="N/A")
+
+    def __str__(self):
+        msg = str(self.pk) + " " + str(self.getDate())
+        return msg
 

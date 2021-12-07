@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 
 
-from .models import Course_General, Student_courseList, Course, Quest, Question, Choice, Boss, Recs, Topic, Skill
+from .models import Course_General, Student_courseList, Course, Quest, Question, Choice, Boss, Recs, Topic, Skill, bossDate, Date, Improve, ImproveTopic
 from accounts.models import Student
 
 
@@ -495,9 +495,23 @@ def recsTest(topics="yes"):
     return rec
 
 
-# testing number of lives
-class HeartsTest(TestCase):
-    # test if number displays correctly
+# Tests the creation of improve topics
+def improveTest(topics="yes"):
+    # Create custom improve list with some test values
+    # Test improve 1:
+    improv = Improve.objects.create()
+    improv.setAvailable(True)
+    improvetopic = improv.improvetopic_set.create()
+    improvetopic.setTopic(topics)
+
+    improv.save()
+
+    return improv
+
+#testing number of lives
+class hearts(TestCase):
+    #test if number displays correctly
+
     def test_correct_lives(self):
         user = Student_courseList.objects.create()
         C = user.course_set.create()
