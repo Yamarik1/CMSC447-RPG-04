@@ -1,15 +1,24 @@
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 
+
+from .models import Course, Quest, SideQuest, Boss, Recs, Student_courseList, Course_General, Topic,  Skill, Student_course
+from accounts.models import Student
+
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from .models import Course, Question, Quest, SideQuest, Choice, Boss, Recs, Topic,  Skill, Student_course
+
+
 
 
 # prevents people from seeing page until they login in (generic and not assinged to a specific course)
@@ -25,7 +34,10 @@ class course(generic.ListView):
     context_object_name = 'course_list'
 
     def get_queryset(self):
-        return Course.objects.all()
+        currUser = self.request.user
+        currStudent = Student.objects.get(user=currUser)
+        currStudentC = Student_courseList.objects.get(student=currStudent)
+        return currStudentC.course_set.all()
 
 
 class courseSpecific(generic.DetailView):
@@ -51,6 +63,7 @@ class mainquestView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['course_id'] = self.kwargs['course_id']
         return context
+
 
 class bossView(generic.DetailView):
     model = Boss
@@ -103,14 +116,19 @@ def summary(request, course_id, quest_id):
 
 # Function added to allow the user to accept the result of the quest
 def accept(request, course_id, quest_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_courseList.objects.get(student=student)
     quest = get_object_or_404(Quest, pk=quest_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = quest.getXP()
     # XP for the course will get updated after the accept button is chosen.
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
@@ -175,66 +193,168 @@ def sQuestSummary(request, course_id, sidequest_id):
 
 
 def sAccept(request, course_id, sidequest_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_courseList.objects.get(student=student)
     sidequest = get_object_or_404(SideQuest, pk=sidequest_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = sidequest.getXP()
 
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 
 def profile(request):
-    return render(request, 'homepage/profile.html')
+    user = request.user
+    print(user.username)
+    stu = Student.objects.get(user=user)
+    print(stu.getStudentName())
+    student = Student_courseList.objects.get(student=stu)
+    print(student.getXP())
+    return render(request, 'homepage/profile.html', {'currstudent': student})
+
+class profileSpecific(generic.DetailView):
+    model = Course
+    template_name='homepage/profileS.html'
+
+
+class leaderboard(generic.ListView):
+    template_name = 'homepage/leaderboard.html'
+    context_object_name = 'student_list'
+
+    def get_queryset(self):
+        currUser = self.request.user
+        currStudent = Student.objects.get(user=currUser)
+        currStudentC = Student_courseList.objects.get(student=currStudent)
+
+        currCourse = Course.objects.get(pk=self.kwargs['course_id'])
+
+        ID = currCourse.getCourseID()
+
+
+        for course in Course_General.objects.all():
+
+            if course.getCourseID() == ID:
+
+                list = course.student_courselist_set.all()
+
+                return list.order_by('-_curr_XP')
+
+
+def accountTest(request):
+    # Delete anything in the database
+    # for userd in User.objects.all():
+    # userd.delete()
+
+    user = request.user
+    student = Student(pk=1, user=user)
+    student.setStudentName('test')
+    student.save()
+
+    courseStu = Student_courseList(student=student)
+    courseStu.setXP(0)
+    courseStu.setName('test')
+
+    courseStu.save()
+
+    user1 = User.objects.create_user(username='MasterChief', password='12test12')
+    user1.save()
+
+    student = Student(pk=2, user=user1)
+    student.setStudentName('MasterChief')
+    student.save()
+
+    courseStu = Student_courseList(student=student)
+    courseStu.setXP(14)
+    courseStu.setName('MasterChief')
+
+    courseStu.save()
+
+    user2 = User.objects.create_user(username='TacoCat', password='12test12')
+    user2.save()
+
+    student = Student(pk=3, user=user2)
+    student.setStudentName('TacoCat')
+    student.save()
+
+    courseStu = Student_courseList(student=student)
+    courseStu.setXP(45)
+    courseStu.setName('TacoCat')
+    courseStu.save()
+
+    return HttpResponseRedirect(reverse('homepage:menu'))
+
+
+def courseIni(request):
+    courseS = Course_General.objects.create(pk=1)
+    courseS.setCourseID(100001)
+    courseS.setName("Fus Ro Dah")
+    courseS.save()
+
+    courseS = Course_General.objects.create(pk=2)
+    courseS.setCourseID(100002)
+    courseS.setName("Course 2")
+    courseS.save()
+
+    return HttpResponseRedirect(reverse('homepage:menu'))
 
 
 # For the purposes of creating objects in the database easier
 def visualTest(request):
-    # Delete anything in the database
+    currUser = User.objects.get(pk=1)
+    currStudent = Student.objects.get(user=currUser)
+    currStudentC = Student_courseList.objects.get(student=currStudent)
 
-    for newCourse in Course.objects.all():
+    currStudentC.course_general.add(Course_General.objects.get(pk=1))
+    currStudentC.course_general.add(Course_General.objects.get(pk=2))
+
+    for newCourse in currStudentC.course_set.all():
         newCourse.delete()
 
-    newCourse = Course.objects.create(pk=1)
+    newCourse = currStudentC.course_set.create()
     newCourse.setName("Fus Ro Dah")
     newCourse.setSection(1)
     newCourse.setMaxXP(5)
+    newCourse.setCourseID(100001)
 
     # Create custom quests with some test values
     # Test Quest 1: using type 1 to give the user questions to answer
-    Q = newCourse.quest_set.create(pk=1)
+    Q = newCourse.quest_set.create()
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
     Q.setLives(1)
     Q.setAvailable(True)
     Q.setType(1)
 
-    question = Q.question_set.create(pk=1)
+    question = Q.question_set.create()
     question.setQuestion("What is the answer to life, the universe, and everything")
 
-    c = question.choice_set.create(pk=1)
+    c = question.choice_set.create()
     c.setChoice("Food")
     c.save()
-    c = question.choice_set.create(pk=2)
+    c = question.choice_set.create()
     c.setChoice("42")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=3)
+    c = question.choice_set.create()
     c.setChoice("...what?")
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=2)
+    question = Q.question_set.create()
     question.setQuestion("Pineapple on Pizza?")
 
-    c = question.choice_set.create(pk=4)
+    c = question.choice_set.create()
     c.setChoice("No")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=5)
+    c = question.choice_set.create()
     c.setChoice("Yes")
     c.save()
 
@@ -243,7 +363,7 @@ def visualTest(request):
 
     newCourse.save()
     # Test quest 2: A quest manually updated by the admin (Admin functionality not added yet)
-    Q = newCourse.quest_set.create(pk=2)
+    Q = newCourse.quest_set.create()
     Q.setName("Test quest 2")
     Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
               "straight to the summary page")
@@ -257,7 +377,7 @@ def visualTest(request):
     # Create custom boss with some test values
     # Test Boss 1: using type 1 to give the user questions to answer
 
-    Q = newCourse.boss_set.create(pk=1)
+    Q = newCourse.boss_set.create()
     Q.setName("Boss 1")
     Q.setDesc("This is the first test Boss")
     Q.setLives(3)
@@ -265,39 +385,39 @@ def visualTest(request):
     Q.setType(1)
 
     # Creates Questions, choices and answers for the bosses
-    question = Q.question_set.create(pk=6)
+    question = Q.question_set.create()
     question.setQuestion("What is 1 + 1")
 
-    c = question.choice_set.create(pk=12)
+    c = question.choice_set.create()
     c.setChoice("2")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=13)
+    c = question.choice_set.create()
     c.setChoice("13")
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=7)
+    question = Q.question_set.create()
     question.setQuestion("What is 10 - 2?")
 
-    c = question.choice_set.create(pk=14)
+    c = question.choice_set.create()
     c.setChoice("8")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=15)
+    c = question.choice_set.create()
     c.setChoice("12")
     c.save()
 
     question.save()
 
-    question = Q.question_set.create(pk=8)
+    question = Q.question_set.create()
     question.setQuestion("What is the spelling for the word wrong?")
 
-    c = question.choice_set.create(pk=16)
+    c = question.choice_set.create()
     c.setChoice("wrong")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=17)
+    c = question.choice_set.create()
     c.setChoice("right")
     c.save()
     question.save()
@@ -307,18 +427,17 @@ def visualTest(request):
     newCourse.save()
     # Set up the recommended topics visual test
 
-
     # Create custom recommendation with some test values
     # Test recs 1 named recommended topics:
-    Q = newCourse.recs_set.create(pk=1)
+    Q = newCourse.recs_set.create()
     Q.setName("Recommended Topics")
 
     # Creates topics
-    topic = Q.topic_set.create(pk=1)
+    topic = Q.topic_set.create()
     topic.setTopic("Scoreboards")
     topic.save()
 
-    topic = Q.topic_set.create(pk=2)
+    topic = Q.topic_set.create()
     topic.setTopic("Circuts")
     topic.save()
 
@@ -326,62 +445,254 @@ def visualTest(request):
 
     newCourse.save()
 
-    squest = newCourse.sidequest_set.create(pk=1)
+    squest = newCourse.sidequest_set.create()
     squest.setName("Side Quest 1")
     squest.setType(1)
     squest.setLives(5)
     squest.setAvailable(True)
 
-    question = squest.question_set.create(pk=3)
+    question = squest.question_set.create()
     question.setQuestion("test")
     question.save()
-    c = question.choice_set.create(pk=6)
+    c = question.choice_set.create()
     c.setChoice("Right")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=7)
+    c = question.choice_set.create()
     c.setChoice("Wrong")
     c.save()
     squest.save()
     newCourse.save()
 
-    C = Course.objects.create(pk=2)
+    C = currStudentC.course_set.create()
     C.setName("Course 2")
     C.setMaxXP(10)
+    C.setCourseID(100002)
 
-    Q = C.quest_set.create(pk=3)
+    Q = C.quest_set.create()
     Q.setName("Quest 1")
     Q.setDesc("This is the first test quest")
     Q.setLives(3)
     Q.setAvailable(True)
     Q.setType(1)
 
-    question = Q.question_set.create(pk=4)
+    question = Q.question_set.create()
     question.setQuestion("What is 10 + 1?")
 
-    c = question.choice_set.create(pk=8)
+    c = question.choice_set.create()
     c.setChoice("10")
     c.save()
-    c = question.choice_set.create(pk=9)
+    c = question.choice_set.create()
     c.setChoice("11")
     c.setCorrect(True)
     c.save()
 
     question.save()
-    question = Q.question_set.create(pk=5)
+    question = Q.question_set.create()
     question.setQuestion("What is 8 - 2?")
 
-    c = question.choice_set.create(pk=10)
+    c = question.choice_set.create()
     c.setChoice("6")
     c.setCorrect(True)
     c.save()
-    c = question.choice_set.create(pk=11)
+    c = question.choice_set.create()
     c.setChoice("12")
     c.save()
     question.save()
     Q.save()
 
     C.save()
+
+    ##########
+    # Create courses for second user
+
+    currUser = User.objects.get(pk=2)
+    currStudent = Student.objects.get(user=currUser)
+    currStudentC = Student_courseList.objects.get(student=currStudent)
+
+    currStudentC.course_general.add(Course_General.objects.get(pk=1))
+
+    for newCourse in currStudentC.course_set.all():
+        newCourse.delete()
+
+    newCourse = currStudentC.course_set.create()
+    newCourse.setName("Fus Ro Dah")
+    newCourse.setSection(1)
+    newCourse.setMaxXP(5)
+    newCourse.setCourseID(100001)
+
+    # Create custom quests with some test values
+    # Test Quest 1: using type 1 to give the user questions to answer
+    Q = newCourse.quest_set.create()
+    Q.setName("Quest 1")
+    Q.setDesc("This is the first test quest")
+    Q.setLives(3)
+    Q.setAvailable(True)
+    Q.setType(1)
+
+    question = Q.question_set.create()
+    question.setQuestion("What is the answer to life, the universe, and everything")
+
+    c = question.choice_set.create()
+    c.setChoice("Food")
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("42")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("...what?")
+    c.save()
+
+    question.save()
+    question = Q.question_set.create()
+    question.setQuestion("Pineapple on Pizza?")
+
+    c = question.choice_set.create()
+    c.setChoice("No")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("Yes")
+    c.save()
+
+    question.save()
+    Q.save()
+
+    newCourse.save()
+    # Test quest 2: A quest manually updated by the admin (Admin functionality not added yet)
+    Q = newCourse.quest_set.create()
+    Q.setName("Test quest 2")
+    Q.setDesc("This quest simulates a quest that would be manually updated by the admin, so it will just direct"
+              "straight to the summary page")
+    Q.setType(0)
+    Q.setXP(7)
+    Q.setAvailable(True)
+    Q.save()
+
+    # Set up the bosses database table
+
+    # Create custom boss with some test values
+    # Test Boss 1: using type 1 to give the user questions to answer
+
+    Q = newCourse.boss_set.create()
+    Q.setName("Boss 1")
+    Q.setDesc("This is the first test Boss")
+    Q.setLives(3)
+    Q.setAvailable(True)
+    Q.setType(1)
+
+    # Creates Questions, choices and answers for the bosses
+    question = Q.question_set.create()
+    question.setQuestion("What is 1 + 1")
+
+    c = question.choice_set.create()
+    c.setChoice("2")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("13")
+    c.save()
+
+    question.save()
+    question = Q.question_set.create()
+    question.setQuestion("What is 10 - 2?")
+
+    c = question.choice_set.create()
+    c.setChoice("8")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("12")
+    c.save()
+
+    question.save()
+
+    question = Q.question_set.create()
+    question.setQuestion("What is the spelling for the word wrong?")
+
+    c = question.choice_set.create()
+    c.setChoice("wrong")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("right")
+    c.save()
+    question.save()
+
+    Q.save()
+
+    newCourse.save()
+    # Set up the recommended topics visual test
+
+    # Create custom recommendation with some test values
+    # Test recs 1 named recommended topics:
+    Q = newCourse.recs_set.create()
+    Q.setName("Recommended Topics")
+
+    # Creates topics
+    topic = Q.topic_set.create()
+    topic.setTopic("Scoreboards")
+    topic.save()
+
+    topic = Q.topic_set.create()
+    topic.setTopic("Circuts")
+    topic.save()
+
+    Q.save()
+
+    newCourse.save()
+
+    squest = newCourse.sidequest_set.create()
+    squest.setName("Side Quest 1")
+    squest.setType(1)
+    squest.setLives(5)
+    squest.setAvailable(True)
+
+    question = squest.question_set.create()
+    question.setQuestion("test")
+    question.save()
+    c = question.choice_set.create()
+    c.setChoice("Right")
+    c.setCorrect(True)
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("Wrong")
+    c.save()
+    squest.save()
+    newCourse.save()
+
+    currUser = User.objects.get(pk=3)
+    currStudent = Student.objects.get(user=currUser)
+    currStudentC = Student_courseList.objects.get(student=currStudent)
+
+    currStudentC.course_general.add(Course_General.objects.get(pk=2))
+
+    C = currStudentC.course_set.create()
+    C.setName("Course 2")
+    C.setMaxXP(10)
+    C.setCourseID(100002)
+
+    Q = C.quest_set.create()
+    Q.setName("Quest 1")
+    Q.setDesc("This is the first test quest")
+    Q.setLives(3)
+    Q.setAvailable(True)
+    Q.setType(1)
+
+    question = Q.question_set.create()
+    question.setQuestion("What is 10 + 1?")
+
+    c = question.choice_set.create()
+    c.setChoice("10")
+    c.save()
+    c = question.choice_set.create()
+    c.setChoice("11")
+    c.setCorrect(True)
+    c.save()
+    Q.save()
+    C.save()
+    currStudentC.save()
 
     return HttpResponseRedirect(reverse('homepage:menu'))
 
@@ -461,29 +772,26 @@ def bossSummary(request, course_id, boss_id):
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
+
 def bAccept(request, course_id, boss_id):
+    user = request.user
+    student = Student.objects.get(user=user)
+    stuC = Student_courseList.objects.get(student=student)
     boss = get_object_or_404(Boss, pk=boss_id)
     course = get_object_or_404(Course, pk=course_id)
 
     gainedXP = boss.getXP()
 
     course.updateXP(gainedXP)
+    stuC.updateXP(gainedXP)
 
     course.save()
+    stuC.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
 
 
-def sidequest(request):
-    return HttpResponse("Placeholder for the Side Quest page")
 
-
-def bosses(request):
-    return HttpResponse("Placeholder for the Bosses page")
-
-
-def profile(request):
-    return render(request, 'homepage/profile.html')
 
 #def marketplace(request, course_id):
 #    return render(request, 'homepage/marketplace.html')
@@ -581,3 +889,4 @@ def skillscreate(request, course_id):
     S.save()
 
     return HttpResponseRedirect(reverse('homepage:courseS', args=(course_id,)))
+

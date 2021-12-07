@@ -1,11 +1,7 @@
 from django.db import models
 
-# Create your models here.
-# Note for classes, any member prefaced by '_' will be private.
-#from RPGClass.accounts.models import Student
-from django.apps import apps
 
-class Course(models.Model):
+class Course_General(models.Model):
     # Public members
     def getName(self):
         return self._course_name
@@ -18,6 +14,87 @@ class Course(models.Model):
 
     def setSection(self, num):
         self._section_number = num
+
+    def getCourseID(self):
+        return self._course_id
+
+    def setCourseID(self, ID):
+        self._course_id = ID
+
+    def hashKey(self, size, keyVal):
+        a = 21
+        b = 15
+        p = 6151
+
+        key = (((keyVal * a) + b) % p) % size
+        return key
+
+    # Private members
+    _course_name = models.CharField(max_length=200)
+    _section_number = models.IntegerField(default=0)
+    # course_id is a unique 6 digit number used to identify a course
+    _course_id = models.IntegerField(default=0)
+
+
+class Student_courseList(models.Model):
+    course_general = models.ManyToManyField(Course_General)
+    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE, blank=True, null=True)
+
+    def getName(self):
+        return self._student_name
+
+    def setName(self, name):
+        self._student_name = name
+
+    def setXP(self, xp):
+        self._curr_XP = xp
+
+    def updateXP(self, xp):
+        self._curr_XP = self._curr_XP + xp
+
+    def getXP(self):
+        return self._curr_XP
+
+    def addXP(self, xp):
+        self._curr_XP += xp
+
+    def setCoins(self, coins):
+        self._coins = coins
+
+    def getCoins(self):
+        return self._coins
+
+    _student_name = models.CharField(max_length=200)
+    _curr_XP = models.IntegerField(default=0)
+    _coins = models.IntegerField(default=0)
+
+
+# Create your models here.
+# Note for classes, any member prefaced by '_' will be private.
+#from RPGClass.accounts.models import Student
+from django.apps import apps
+
+class Course(models.Model):
+
+    specific_student = models.ForeignKey(Student_courseList, on_delete=models.CASCADE)
+    # Public members
+    def getName(self):
+        return self._course_name
+
+    def setName(self, name):
+        self._course_name = name
+
+    def getSection(self):
+        return self._section_number
+
+    def setSection(self, num):
+        self._section_number = num
+
+    def getCourseID(self):
+        return self._course_id
+
+    def setCourseID(self, ID):
+        self._course_id = ID
 
     # Xp and levels for the current course, which will be separated by course
     def getTotalXP(self):
@@ -63,9 +140,19 @@ class Course(models.Model):
         self._course_level = level
         return "Level updated"
 
+    # This function will take the course_id, and will then Hash it to find where it will be in CourseGeneral
+    def hashKey(self, size, keyVal):
+        a = 21
+        b = 15
+        p = 6151
+
+        key = (((keyVal * a) + b) % p) % size
+        return key
+
     # Private members
     _course_name = models.CharField(max_length=200)
     _section_number = models.IntegerField(default=0)
+    _course_id = models.IntegerField(default=0)
 
     # course_XP and total_XP are two separate values. Total XP is all the Xp gained in the course
     # and course XP is the value of _max_XP - XP needed to get to the next level
@@ -202,6 +289,7 @@ class Quest(models.Model):
         msg = "This is Quest number:" + str(self.pk)
         return msg
 
+
 # Side quest model has the same logic as the main quest model. We wanted to add it as a separate table in the database
 # So we can differentiate between the two. The idea is that while the logic of their implementation may be the same,
 # the actual content added to them will be different, so we wanted to give the admin the ability to more easily
@@ -264,7 +352,7 @@ class SideQuest(models.Model):
     def setType(self, questType):
         self._Quest_type = questType
         return "Type of quest updated"
-      
+
     # Private members
     _Quest_name = models.CharField(max_length=200, default="N/A")
     _Quest_description = models.CharField(max_length=200, default="N/A")
@@ -283,6 +371,7 @@ class SideQuest(models.Model):
 # be individually created and updated for any avenues this app doesn't support.
 class Boss(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+
     # Public Members
 
     # Getters and setters
@@ -341,7 +430,6 @@ class Boss(models.Model):
         self._Boss_type = bossType
         return "Type of quest updated"
 
-
     # Private members of Boss
     _Boss_name = models.CharField(max_length=200, default="N/A")
     _Boss_description = models.CharField(max_length=200, default="N/A")
@@ -354,10 +442,12 @@ class Boss(models.Model):
         msg = "This is the Boss number:" + str(self.pk)
         return msg
 
+
 # Rec model: Defines the name of the recommendation and if it is available
 class Recs(models.Model):
     # Public Members
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
     # Getters and setters
     def getName(self):
         return self._Recs_name
@@ -382,6 +472,7 @@ class Recs(models.Model):
         msg = "This is Recs number:" + str(self.pk)
         return msg
 
+
 # If an admin wishes, they can add their own recommended topics
 class Topic(models.Model):
     topic = models.ForeignKey(Recs, on_delete=models.CASCADE)
@@ -400,6 +491,7 @@ class Topic(models.Model):
     def __str__(self):
         msg = str(self.pk) + " " + str(self.getTopic())
         return msg
+
 
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
@@ -451,6 +543,7 @@ class Choice(models.Model):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
         return msg
 
+
 class Skill(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
@@ -486,4 +579,5 @@ class Skill(models.Model):
     _description = models.CharField(max_length=200, default="N/A")
     _cost = models.IntegerField(default=0)
     _id = models.CharField(max_length=200, default="N/A")
+
 

@@ -15,6 +15,8 @@ urlpatterns = [
     path('course/<int:course_id>/marketplace/', views.marketplace, name="marketplace"),
     path('course/<int:course_id>/course_profile/', views.course_profile, name="course_profile"),
     path('course/vTest', views.visualTest, name='test'),
+    path('course/aTest', views.accountTest, name='aTest'),
+    path('course/cTest', views.courseIni, name='cTest'),
     path('course/<int:course_id>/mainquest/<int:pk>/', views.mainquestView.as_view(), name='mQuestView'),
     path('course/<int:course_id>/mainquest/<int:pk>/quest/', views.mQuestSpecific.as_view(), name="mQuest"),
     path('course/<int:course_id>/mainquest/<int:quest_id>/answer/', views.answer, name="answer"),
@@ -44,9 +46,9 @@ urlpatterns = [
     path('course/<int:course_id>/sidequest/<int:sidequest_id>/accept/', views.sAccept, name='sAccept'),
 
     path('profile/', views.profile, name='profile'),
-    # path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
+    path('profile/<int:pk>', views.profileSpecific.as_view(), name='profileS'),
 
-
+    path('course/<int:course_id>/leaderboard', views.leaderboard.as_view(), name='leaderboard'),
     
 
 ]
