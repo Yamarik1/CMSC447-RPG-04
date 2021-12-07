@@ -15,6 +15,21 @@
 <br>
 
 <p>For ease of production, this button will initialize the database to some test values</p>
+
+<form action="{% url 'homepage:aTest' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Accounts">
+
+</form>
+
+<form action="{% url 'homepage:cTest' %}" method="post">
+    {% csrf_token %}
+
+    <input type="submit" value="Course">
+
+</form>
+
 <form action="{% url 'homepage:test' %}" method="post">
     {% csrf_token %}
 

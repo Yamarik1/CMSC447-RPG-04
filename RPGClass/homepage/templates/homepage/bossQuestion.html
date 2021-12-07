@@ -5,6 +5,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'bosspage/bossButton.css' %}">
 <h1>{{ boss.getName }}</h1>
 
+
 <!-- Display the countdown timer in an element -->
 <p id="time"></p>
 
@@ -47,26 +48,28 @@ var x = setInterval(function() {
 </script>
 
 
-{% for bossquestion in boss.bossquestion_set.all %}
+
+{% for question in boss.question_set.all %}
+
 
 
     <form action="{% url 'homepage:bossAnswer' course_id boss.id %} " method="post">
         {% csrf_token %}
-        <fieldset class="bossquestion">
+        <fieldset class="question">
 
-            <h2 class="bossquestion"> {{bossquestion.id}}: {{ bossquestion.getQuestion }} </h2> <br>
+            <h2 class="bossquestion"> {{question.id}}: {{ question.getQuestion }} </h2> <br>
 
             <!-- checks to see if there are any questions in the boss -->
-            {% if bossquestion.bosschoice_set.exists == False %}
+            {% if question.choice_set.exists == False %}
 
                 <p>This Question does not have any choices</p>
 
             {% else %}
                 <!-- Outputs all questions and choices -->
-                {% for bosschoice in bossquestion.bosschoice_set.all %}
+                {% for choice in question.choice_set.all %}
                     <!-- name is given to a function getQuestion to allow multiple sets of radio buttons.-->
-                    <input type="radio" name="{{bossquestion.getQuestion}}" id="bosschoice{{ forloop.counter }}" value="{{ bosschoice.id }}">
-                    <label for="bosschoice{{ forloop.counter }}">{{ bosschoice.getChoice }}</label><br>
+                    <input type="radio" name="{{question.getQuestion}}" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+                    <label for="choice{{ forloop.counter }}">{{ choice.getChoice }}</label><br>
 
                 {% endfor %}
 

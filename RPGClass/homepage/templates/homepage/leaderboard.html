@@ -1,0 +1,17 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+<h1>Course Leaderboard</h1>
+
+{% if student_list.exists %}
+
+    {% for student in student_list %}
+        <p>{{student.getName}} : {{ student.getXP }}</p>
+    {% endfor %}
+
+{% else %}
+    <p>There are no valid Users in this class</p>
+
+{% endif %}
+
+<p>Click here to leave the page</p>
