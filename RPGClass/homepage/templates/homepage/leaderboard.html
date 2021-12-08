@@ -1,0 +1,35 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+
+<style>
+    body {
+        background-image: url("{% static 'profile/xp_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }
+</style>
+
+<head>
+    <h1>Course Leaderboard</h1>
+</head>
+
+<body>
+    {% if student_list.exists %}
+
+        {% for student in student_list %}
+            <div class="generic-block">
+            <h2 style="text-align: center;">{{student.getName}} : {{ student.getXP }}</h2>
+            </div>
+        {% endfor %}
+
+    {% else %}
+        <p>There are no valid Users in this class</p>
+
+    {% endif %}
+
+
+</body>

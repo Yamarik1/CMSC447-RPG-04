@@ -1,34 +1,105 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'homepage/mQuestView.css' %}">
 
-<h1>Course name: {{course.getName}}!</h1>
-<!--This defines the list of links used in the navigation bar, which can be applied to the other pages as needed -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 
-<ul>
-    <li><a class = "nav active" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
-    <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
-    <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
-    <li><a class = "nav" href="{% url 'homepage:bosses' course.id %}">Bosses</a> </li>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 
 
-</ul>
+<style>
+    body {
+        background-image: url("{% static 'profile/xp_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }
 
+</style>
+
+<head>
+    <h1>Course name: {{course.getName}}!</h1>
+    <!--This defines the list of links used in the navigation bar, which can be applied to the other pages as needed -->
+
+    <ul>
+        <li><a class = "nav active" href="{% url 'homepage:courseS' course.id %}">Homepage</a></li>
+        <li><a class = "nav" href="{% url 'homepage:mainquest'  course.id %}">Main Quests</a> </li>
+        <li><a class = "nav" href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </li>
+        <li><a class = "nav" href="{% url 'homepage:bosses' course.id %}">Bosses</a> </li>
+        <li><a class = "nav" href="{% url 'homepage:marketplace' course.id %}">Marketplace</a> </li>
+        <li><a class = "nav" href="{% url 'homepage:course_profile' course.id %}">Course Profile</a> </li>
+
+
+
+    </ul>
+</head>
 <br>
 <br>
+<body>
+    <p>initializes skills to view in marketplace (do this first before creating course specific student)</p>
+    <form action="{% url 'homepage:skill_in' course.id %}" method="post">
+        {% csrf_token %}
+
+        <input type="submit" value="Initialize">
 
 
-<!--These are the same links as above, restated with a desciption of each one -->
-<h2><a href="{% url 'homepage:mainquest' course.id %}">Main Quests</a> </h2>
-<p>Make sure to prepare for these quests! Make sure to complete some side quests to increase your level! </p>
+    </form>
+    <p>creates a student specific to this course</p>
+    <form action="{% url 'homepage:course_student' course.id %}" method="post">
+        {% csrf_token %}
 
-<h2><a href="{% url 'homepage:sidequest' course.id %}">Side Quests</a> </h2>
-<p>Here you can get some extra practice with quests that will give you XP. Make sure to give these a try before trying the Main Quests and the Bosses!</p>
-<h2><a href="{% url 'homepage:bosses' course.id %}">Bosses</a></h2>
-<p>Here you can take on some of the toughest challenges. Make sure to be prepared!</p>
-<h2><a href="/homepage/">Click here to go back to the main menu</a></h2>
-<br>
-<h2>Course Info</h2>
-<h3>Current Level: {{course.getCourseLevel}}</h3>
-<h3>Total XP earned: {{course.getTotalXP}}</h3>
-<h3>Xp to next level: {{course.getNextLevel}}</h3>
+        <input type="submit" value="Initialize">
+
+
+    </form>
+
+    <div class="container">
+        <h2 style="text-align: center;">Course Info</h2>
+        <div class="row justify-content-lg-center">
+            <h3 style="margin: 15px;">Current Level: {{course.getCourseLevel}}</h3>
+            <h3 style="margin: 15px;">Total XP earned: {{course.getTotalXP}}</h3>
+            <h3 style="margin: 15px;">Xp to next level: {{course.getNextLevel}}</h3>
+        </div>
+    </div>
+
+    <!--These are the same links as above, restated with a desciption of each one -->
+    <div class="container">
+        <div class="row justify-content-lg-center">
+            <div class="col-lg-5 generic-block justify-content-lg-center">
+                <a href="{% url 'homepage:mainquest' course.id %}" class="button">Main Quests</a>
+                <p>Make sure to prepare for these quests! Make sure to complete some side quests to increase your level! </p>
+            </div>
+            <div class="col-lg-5 generic-block justify-content-lg-center">
+                <a href="{% url 'homepage:sidequest' course.id %}" class="button">Side Quests</a>
+                <p>Here you can get some extra practice with quests that will give you XP. Make sure to give these a try before trying the Main Quests and the Bosses!</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-lg-center">
+            <div class="col-lg-5 generic-block justify-content-lg-center">
+                <a href="{% url 'homepage:bosses' course.id %}" class="button">Bosses</a>
+                <p>Here you can take on some of the toughest challenges. Make sure to be prepared!</p>
+            </div>
+            
+            <div class="col-lg-5 generic-block justify-content-lg-center">
+                <a href="{% url 'homepage:leaderboard' course.id %}" class="button">Leaderboard</a>
+                <p>Here you can view the leaderboard for this class</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-lg-center">
+            <div class="col-lg-12 justify-content-lg-center">
+                <h2 style="text-align: center;"><a href="/homepage/" class="button">Click here to go back to the main menu</a></h2>
+            </div>
+        </div>
+        <br>
+         
+    </div>
+
+
+
+</body>

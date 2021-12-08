@@ -2,27 +2,61 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'homepage/style.css' %}">
 
-<!-- Checks to see if the quest is available, as specified by the admin-->
-{% if quest.getAvailable == False %}
-    <p>This quest is not available</p>
-{% elif quest.getLives == 0 %}
-    <p>you are out of lives</p>
-    <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
-{% else %}
-    {% if quest.getType == 0 %}
-        <h1>{{ quest.getName }}</h1>
-        <p>Welcome to this Quest!</p><br>
-        <p>This quest doesn't have anymore work for you to do!</p>
+<style>
+    body {
+        background-image: url("{% static 'profile/cave_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }
+</style>
+
+
+<style>
+    body {
+        background-image: url("{% static 'profile/cave_background.jpg' %}");
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center;
+        background-blend-mode: overlay;
+        background-color: rgb(221, 227, 238);
+    }
+</style>
+
+
+<body>
+    <!-- Checks to see if the quest is available, as specified by the admin-->
+    {% if quest.getAvailable == False %}
+        <p>This quest is not available</p>
+    {% elif quest.getLives == 0 %}
+        <p>you are out of lives</p>
+         {% if gainHearts.getNum != 0 %}
+        <p>you can use "gainHearts" if you want</p>
+        <form action="{% url 'homepage:mainGainHearts' course_id quest.id%} " method="post">
+            {% csrf_token %}
+            <button type="submit" name="gainHearts" value="gainHearts">Gain Hearts</button>
+        </form>
+        {% else %}
+          <p>you have no skill related to hearts, buy some at the marketplace</p>
+        {% endif %}
         <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
-    {% elif quest.getType == 1 %}
-        <h1>{{ quest.getName }}</h1>
-        <p>Welcome to this Quest!</p><br>
-        <p>Click here to Start the quest!</p>
+    {% else %}
+        {% if quest.getType == 0 %}
+            <h1 style="text-align: center;">{{ quest.getName }}</h1>
+            <h2 style="text-align: center;">Welcome to this Quest!</h2><br>
+            <p style="text-align: center;">This quest doesn't have anymore work for you to do!</p>
+            <a href = "{% url 'homepage:summary' course_id quest.id %}">Click here to see the results!</a>
+        {% elif quest.getType == 1 %}
+            <h1 style="text-align: center;">{{ quest.getName }}</h1>
+            <h2 style="text-align: center;">Welcome to this Quest!</h2><br>
+            <h3 class="generic-block" style="text-align: center;">Click here to Start the quest!</p>
 
+        <p style="text-align: center;">number of lives: {{ quest.getLives }}</p>        
 
-        <p>number of lives: {{ quest.getLives }}</p>        
+            <a href="{% url 'homepage:mQuest' course_id quest.id %}">Start Quest</a>
 
-        <a href="{% url 'homepage:mQuest' course_id quest.id %}">Start Quest</a>
-
+        {% endif %}
     {% endif %}
-{% endif %}
+</body>

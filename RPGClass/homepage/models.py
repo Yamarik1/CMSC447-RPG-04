@@ -1,8 +1,7 @@
 from django.db import models
 
-# Create your models here.
-# Note for classes, any member prefaced by '_' will be private.
-class Course(models.Model):
+
+class Course_General(models.Model):
     # Public members
     def getName(self):
         return self._course_name
@@ -15,6 +14,87 @@ class Course(models.Model):
 
     def setSection(self, num):
         self._section_number = num
+
+    def getCourseID(self):
+        return self._course_id
+
+    def setCourseID(self, ID):
+        self._course_id = ID
+
+    def hashKey(self, size, keyVal):
+        a = 21
+        b = 15
+        p = 6151
+
+        key = (((keyVal * a) + b) % p) % size
+        return key
+
+    # Private members
+    _course_name = models.CharField(max_length=200)
+    _section_number = models.IntegerField(default=0)
+    # course_id is a unique 6 digit number used to identify a course
+    _course_id = models.IntegerField(default=0)
+
+
+class Student_courseList(models.Model):
+    course_general = models.ManyToManyField(Course_General)
+    student = models.OneToOneField('accounts.Student', on_delete=models.CASCADE, blank=True, null=True)
+
+    def getName(self):
+        return self._student_name
+
+    def setName(self, name):
+        self._student_name = name
+
+    def setXP(self, xp):
+        self._curr_XP = xp
+
+    def updateXP(self, xp):
+        self._curr_XP = self._curr_XP + xp
+
+    def getXP(self):
+        return self._curr_XP
+
+    def addXP(self, xp):
+        self._curr_XP += xp
+
+    def setCoins(self, coins):
+        self._coins = coins
+
+    def getCoins(self):
+        return self._coins
+
+    _student_name = models.CharField(max_length=200)
+    _curr_XP = models.IntegerField(default=0)
+    _coins = models.IntegerField(default=0)
+
+
+# Create your models here.
+# Note for classes, any member prefaced by '_' will be private.
+#from RPGClass.accounts.models import Student
+from django.apps import apps
+
+class Course(models.Model):
+
+    specific_student = models.ForeignKey(Student_courseList, on_delete=models.CASCADE)
+    # Public members
+    def getName(self):
+        return self._course_name
+
+    def setName(self, name):
+        self._course_name = name
+
+    def getSection(self):
+        return self._section_number
+
+    def setSection(self, num):
+        self._section_number = num
+
+    def getCourseID(self):
+        return self._course_id
+
+    def setCourseID(self, ID):
+        self._course_id = ID
 
     # Xp and levels for the current course, which will be separated by course
     def getTotalXP(self):
@@ -60,9 +140,19 @@ class Course(models.Model):
         self._course_level = level
         return "Level updated"
 
+    # This function will take the course_id, and will then Hash it to find where it will be in CourseGeneral
+    def hashKey(self, size, keyVal):
+        a = 21
+        b = 15
+        p = 6151
+
+        key = (((keyVal * a) + b) % p) % size
+        return key
+
     # Private members
     _course_name = models.CharField(max_length=200)
     _section_number = models.IntegerField(default=0)
+    _course_id = models.IntegerField(default=0)
 
     # course_XP and total_XP are two separate values. Total XP is all the Xp gained in the course
     # and course XP is the value of _max_XP - XP needed to get to the next level
@@ -74,13 +164,51 @@ class Course(models.Model):
     # _max_XP  is the xP needed to gain a level
     _max_XP = models.IntegerField(default=0)
 
+class Student_course(models.Model):
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+
+    def setXP(self, xp):
+        self._curr_XP = xp
+
+    def getXP(self):
+        return self._curr_XP
+
+    def addXP(self, xp):
+        self._curr_XP += xp
+
+    def setCoins(self, coins):
+        self._coins = coins
+
+    def getCoins(self):
+        return self._coins
+
+    def getLevel(self):
+        return self._level
+
+    def addLevel(self, level):
+        self._level += level
+
+    def getCourseName(self):
+         return self._course_name
+
+    def setCourseName(self, name):
+        self._course_name = name
+
+
+    _curr_XP = models.IntegerField(default=0)
+    _coins = models.IntegerField(default=0)
+    _course_id = models.IntegerField(default=0)
+    _course_name = models.CharField(max_length=200, default="N/A")
+    _level = models.IntegerField(default=1)
+
 
 # Quest model: Defines the general information for a quest. This includes name, description, lives, etc.
 # Quests can be create directly on the app, and can also be carried over from other software, and can also
 # be individually created and updated for any avenues this app doesn't support.
 class Quest(models.Model):
     # Public Members
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    student = models.ForeignKey(Student_course, on_delete=models.CASCADE, blank=True, null=True)
 
     # Getters and setters
     def getName(self):
@@ -124,6 +252,13 @@ class Quest(models.Model):
         self._Is_available = available
         return "Availability has been changed"
 
+    def getCompleted(self):
+        return self._Is_completed
+
+    def setCompleted(self, complete):
+        self._Is_completed = complete
+        return "Completion has been changed"
+
     # The quest type will determine how a quest will be handled by the app. The values are as follows:
     # 0: Quest type of zero means the app does nothing special. It takes the Quest name, XP gained, level progress,
     #    etc. Used when the quest is manually defined and updated by the admin.
@@ -144,11 +279,13 @@ class Quest(models.Model):
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Is_completed = models.BooleanField(default=False)
     _Quest_type = models.IntegerField(default=0)
 
     def __str__(self):
         msg = "This is Quest number:" + str(self.pk)
         return msg
+
 
 # Side quest model has the same logic as the main quest model. We wanted to add it as a separate table in the database
 # So we can differentiate between the two. The idea is that while the logic of their implementation may be the same,
@@ -199,6 +336,13 @@ class SideQuest(models.Model):
         self._Is_available = available
         return "Availability has been changed"
 
+    def getCompleted(self):
+        return self._Is_completed
+
+    def setCompleted(self, complete):
+        self._Is_completed = complete
+        return "Completion has been changed"
+
     # The quest type will determine how a quest will be handled by the app. The values are as follows:
     # 0: Quest type of zero means the app does nothing special. It takes the Quest name, XP gained, level progress,
     #    etc. Used when the quest is manually defined and updated by the admin.
@@ -212,13 +356,14 @@ class SideQuest(models.Model):
     def setType(self, questType):
         self._Quest_type = questType
         return "Type of quest updated"
-      
+
     # Private members
     _Quest_name = models.CharField(max_length=200, default="N/A")
     _Quest_description = models.CharField(max_length=200, default="N/A")
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Is_completed = models.BooleanField(default=False)
     _Quest_type = models.IntegerField(default=0)
 
     def __str__(self):
@@ -231,6 +376,7 @@ class SideQuest(models.Model):
 # be individually created and updated for any avenues this app doesn't support.
 class Boss(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+
     # Public Members
 
     # Getters and setters
@@ -262,7 +408,7 @@ class Boss(models.Model):
         return self._Correct_answers
 
     def rightAnsChosen(self):
-        self._Correct_answers += 2
+        self._Correct_answers += 1
 
     def setXP(self, numRight):
         self._Correct_answers = numRight
@@ -274,6 +420,13 @@ class Boss(models.Model):
     def setAvailable(self, available):
         self._Is_available = available
         return "Availability has been changed"
+
+    def getCompleted(self):
+        return self._Is_completed
+
+    def setCompleted(self, complete):
+        self._Is_completed = complete
+        return "Completion has been changed"
 
     # The boss type will determine how a boss will be handled by the app. The values are as follows:
     # 0: Boss type of zero means the app does nothing special. It takes the Boss name, XP gained, level progress,
@@ -289,23 +442,25 @@ class Boss(models.Model):
         self._Boss_type = bossType
         return "Type of quest updated"
 
-
     # Private members of Boss
     _Boss_name = models.CharField(max_length=200, default="N/A")
     _Boss_description = models.CharField(max_length=200, default="N/A")
     _Num_lives = models.IntegerField(default=0)
     _Correct_answers = models.IntegerField(default=0)
     _Is_available = models.BooleanField(default=False)
+    _Is_completed = models.BooleanField(default=False)
     _Boss_type = models.IntegerField(default=0)
 
     def __str__(self):
         msg = "This is the Boss number:" + str(self.pk)
         return msg
 
+
 # Rec model: Defines the name of the recommendation and if it is available
 class Recs(models.Model):
     # Public Members
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
     # Getters and setters
     def getName(self):
         return self._Recs_name
@@ -330,6 +485,7 @@ class Recs(models.Model):
         msg = "This is Recs number:" + str(self.pk)
         return msg
 
+
 # If an admin wishes, they can add their own recommended topics
 class Topic(models.Model):
     topic = models.ForeignKey(Recs, on_delete=models.CASCADE)
@@ -349,12 +505,61 @@ class Topic(models.Model):
         msg = str(self.pk) + " " + str(self.getTopic())
         return msg
 
+
+# Improve model: Defines the name of the topics to improve on and if it is available
+class Improve(models.Model):
+    # Public Members
+
+    # Getters and setters
+    def getName(self):
+        return self._Improve_name
+
+    def setName(self, name):
+        self._Improve_name = name
+        return "Name Changed successfully"
+
+    # A recommendation should not be shown to the player if it is defined as such by the admin
+    def getAvailable(self):
+        return self._Is_available
+
+    def setAvailable(self, available):
+        self._Is_available = available
+        return "Availability has been changed"
+
+    # Private members
+    _Improve_name = models.CharField(max_length=200, default="Topics to improve on")
+    _Is_available = models.BooleanField(default=False)
+
+    def __str__(self):
+        msg = "This is Improve number:" + str(self.pk)
+        return msg
+
+# If an admin wishes, they can add their own improve topics
+class ImproveTopic(models.Model):
+    improvetopic = models.ForeignKey(Improve, on_delete=models.CASCADE)
+
+    # Public members
+    def getTopic(self):
+        return self._ImproveTopic_text
+
+    def setTopic(self, text):
+        self._ImproveTopic_text = text
+        return "Question changed"
+
+    # Private members
+    _ImproveTopic_text = models.CharField(max_length=200, default="N/A")
+
+    def __str__(self):
+        msg = str(self.pk) + " " + str(self.getTopic())
+        return msg
+
 # If an admin wishes, they may create quests directly in the app. This is opposed to it being on some other software,
 # like BlackBoard
 class Question(models.Model):
     # A question can belong to either a main quest of a side quest, so there are two possible ForeignKeys in this model
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE, blank=True, null=True)
     sidequest = models.ForeignKey(SideQuest, on_delete=models.CASCADE, blank=True, null=True)
+    boss = models.ForeignKey(Boss, on_delete=models.CASCADE, blank=True, null=True)
 
     # Public members
     def getQuestion(self):
@@ -364,31 +569,47 @@ class Question(models.Model):
         self._Question_text = text
         return "Question changed"
 
+    def getGiveQ(self):
+        return self._give_answer
+
+    def setGiveQ(self, bool):
+        self._give_answer = bool
+        return "Question changed"
+
+    def getBombed(self):
+        return self._num_bombed
+
+    def setBombed(self, bomb):
+        self._num_bombed = bomb
+        return "Question changed"
+
     # Private members
     _Question_text = models.CharField(max_length=200, default="N/A")
+    _give_answer = models.BooleanField(default=False)
+    _num_bombed = models.IntegerField(default=0)
 
     def __str__(self):
         msg = str(self.pk) + " " + str(self.getQuestion())
         return msg
 
-# If an admin wishes, they may create bosses directly in the app. This is opposed to it being on some other software,
-# like BlackBoard
-class bossQuestion(models.Model):
+
+# Due dates of a boss
+class bossDate(models.Model):
     boss = models.ForeignKey(Boss, on_delete=models.CASCADE)
 
     # Public members
-    def getQuestion(self):
-        return self._bossQuestion_text
+    def getDate(self):
+        return self._bossDate_text
 
-    def setQuestion(self, text):
-        self._bossQuestion_text = text
-        return "Question changed"
+    def setDate(self, text):
+        self._bossDate_text = text
+        return "Date changed"
 
     # Private members
-    _bossQuestion_text = models.CharField(max_length=200, default="N/A")
+    _bossDate_text = models.CharField(max_length=200, default="N/A")
 
     def __str__(self):
-        msg = str(self.pk) + " " + str(self.getQuestion())
+        msg = str(self.pk) + " " + str(self.getDate())
         return msg
 
 class Choice(models.Model):
@@ -409,36 +630,91 @@ class Choice(models.Model):
         self._isCorrectChoice = isAnswer
         return "Correct answer chosen"
 
+    def getBombed(self):
+        return self._isBombed
+
+    def setBombed(self, bomb):
+        self._isBombed = bomb
+        return "Question changed"
+
     # Private members
     _choice_text = models.CharField(max_length=200, default="N/A")
     _isCorrectChoice = models.BooleanField(default=False)
+    _isBombed = models.BooleanField(default=False)
 
     def __str__(self):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
         return msg
 
-class bossChoice(models.Model):
-    # Public members
-    bossQuestion = models.ForeignKey(bossQuestion, on_delete=models.CASCADE)
 
-    def getChoice(self):
-        return self._bossChoice_text
+class Skill(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
+    student = models.ForeignKey(Student_course, on_delete=models.CASCADE, blank=True, null=True)
 
-    def setChoice(self, text):
-        self._bossChoice_text = text
+    def getName(self):
+        return self._name
+
+    def setName(self, name):
+        self._name = name
         return "Changed successfully"
 
-    def getCorrect(self):
-        return self._isCorrectChoice
+    def getDesc(self):
+        return self._description
 
-    def setCorrect(self, isAnswer):
-        self._isCorrectChoice = isAnswer
-        return "Correct answer chosen"
+    def setDesc(self, desc):
+        self._description = desc
+        return True
 
-    # Private members
-    _bossChoice_text = models.CharField(max_length=200, default="N/A")
-    _isCorrectChoice = models.BooleanField(default=False)
+    def getCost(self):
+        return self._cost
+
+    def setCost(self, cost):
+        self._cost = cost
+        return True
+
+    def getId(self):
+        return self._id
+
+    def setId(self, id):
+        self._id = id
+        return "Changed successfully"
+
+    def getNum(self):
+        return self._number
+
+    def setNum(self, number):
+        self._number = number
+        return "Changed successfully"
+
+    _name = models.CharField(max_length=200, default="N/A")
+    _description = models.CharField(max_length=200, default="N/A")
+    _cost = models.IntegerField(default=0)
+    _id = models.CharField(max_length=200, default="N/A")
+    #this is for students and nor for marketplace
+    _number = models.IntegerField(default=0)
+
+
 
     def __str__(self):
         msg = str(self.pk) + ": Is " + str(self.getChoice()) + " the correct answer?  " + str(self.getCorrect())
         return msg
+
+# Due dates of a quest
+class Date(models.Model):
+    quest = models.ForeignKey(Quest, on_delete=models.CASCADE)
+
+    # Public members
+    def getDate(self):
+        return self._Date_text
+
+    def setDate(self, text):
+        self._Date_text = text
+        return "Date changed"
+
+    # Private members
+    _Date_text = models.CharField(max_length=200, default="N/A")
+
+    def __str__(self):
+        msg = str(self.pk) + " " + str(self.getDate())
+        return msg
+
